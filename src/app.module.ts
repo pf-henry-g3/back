@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule} from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
-import { BandModule } from './modules/band/band.module';
+import { GenreModule } from './modules/genre/genre.module';
+import { RoleModule } from './modules/role/role.module';
 import typeorm from './config/typeorm';
 
 @Module({
@@ -19,8 +18,7 @@ import typeorm from './config/typeorm';
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
     UserModule,
-    BandModule,],
-  controllers: [AppController],
-  providers: [AppService],
+    GenreModule,
+    RoleModule,]
 })
 export class AppModule {}

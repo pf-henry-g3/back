@@ -1,4 +1,4 @@
-import { User } from "src/modules/user/entities/user.entity";
+import { Users } from "src/modules/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "Vacancies" })
@@ -38,11 +38,11 @@ export class Vacancy {
     owerType: string
 
     // muchas vacantes {pertenecen} un usuario 
-    @ManyToOne(() => User, (u) => u.vacantes, {
+    @ManyToOne(() => Users, (u) => u.vacancies, {
         nullable: false,          // pertenece SIEMPRE a un usuario
         onDelete: 'CASCADE',      // se borra al borrar el usuer 
         eager: false,
     })
     @JoinColumn({ name: 'owerId' })
-    owerId: User;
+    owerId: Users;
 }
