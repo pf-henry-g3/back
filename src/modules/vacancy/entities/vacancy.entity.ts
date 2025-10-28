@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 
 @Entity({ name: "Vacancies" })
 export class Vacancy {
-        @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id: string
 
     @Column({

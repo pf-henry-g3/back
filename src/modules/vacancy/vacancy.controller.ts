@@ -5,7 +5,7 @@ import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 
 @Controller('vacancy')
 export class VacancyController {
-  constructor(private readonly vacancyService: VacancyService) {}
+  constructor(private readonly vacancyService: VacancyService) { }
 
   @Post()
   create(@Body() createVacancyDto: CreateVacancyDto) {

@@ -8,8 +8,8 @@ export class Band {
     @ManyToOne(() => Artist, artist => artist.bands)
     leaderid: Artist;
 
-    @Column({ type: 'varchar', length: 100 , unique: true})
-    bandName: string;    
+    @Column({ type: 'varchar', length: 100, unique: true })
+    bandName: string;
 
     @Column({ type: 'text' })
     bandDescription: string;

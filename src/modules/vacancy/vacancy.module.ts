@@ -6,4 +6,4 @@ import { VacancyController } from './vacancy.controller';
   controllers: [VacancyController],
   providers: [VacancyService],
 })
-export class VacancyModule {}
+export class VacancyModule { }
