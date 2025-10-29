@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Band } from './entities/band.entity';
 import { CreateBandDto } from './dto/create-band.dto';
 
@@ -29,7 +29,7 @@ export class BandService {
             },
         };
     }
-    
+
      async findOne(id: string) {
         const band = await this.bandRepository.findOne({
             where: { id },
@@ -47,8 +47,6 @@ export class BandService {
 
         const { ...bandData } = band;
         return bandData;
-    }
-    
-
+    }   
 
 }

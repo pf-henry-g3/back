@@ -11,5 +11,6 @@ import { BandMember } from '../band/entities/bandMember.entity';
   imports: [TypeOrmModule.forFeature([User, Genre, Band, BandMember])],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule { }
