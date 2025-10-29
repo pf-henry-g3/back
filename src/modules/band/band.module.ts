@@ -6,4 +6,4 @@ import { BandService } from './band.service';
   controllers: [BandController],
   providers: [BandService]
 })
-export class BandModule {}
+export class BandModule { }

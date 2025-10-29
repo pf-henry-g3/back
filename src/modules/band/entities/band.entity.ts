@@ -1,15 +1,25 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Genre } from "src/modules/genre/entities/genre.entity";
+import { User } from "src/modules/user/entities/user.entity";
+import { Vacancy } from "src/modules/vacancy/entities/vacancy.entity";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BandMember } from "./bandMember.entity";
 
 @Entity('bands')
 export class Band {
     // id
     @PrimaryGeneratedColumn('uuid')
     id: string;
-    @ManyToOne(() => Artist, artist => artist.bands)
-    leaderid: Artist;
 
-    @Column({ type: 'varchar', length: 100 , unique: true})
-    bandName: string;    
+    //Relacion con User (Lider de Banda)
+    @ManyToOne(() => User, (user) => user.leaderOf, {
+        nullable: false,
+        onDelete: 'CASCADE'
+    })
+    @JoinColumn({ name: 'leaderId' })
+    leader: User;
+
+    @Column({ type: 'varchar', length: 100, unique: true })
+    bandName: string;
 
     @Column({ type: 'text' })
     bandDescription: string;
@@ -17,20 +27,25 @@ export class Band {
     @Column({ type: 'date' })
     formationDate: Date;
 
-    @Column({ type: 'varchar', length: 255 })
+    @Column({ type: 'text', default: 'No image' })
     bandImage: string;
 
+    //Relacion con Genre
     @ManyToMany(() => Genre, genre => genre.bands)
-    @JoinTable()
+    @JoinTable({ name: 'bandGenres' })
     bandGenre: Genre[];
 
-    @OneToMany(() => BandMember, bandMember => bandMember.band)
+    //Relacion con User (miembros)
+    @OneToMany(() => BandMember, (member) => member.band, {
+        cascade: true,
+    })
     bandMembers: BandMember[];
 
-    @OneToMany(() => BandEvent, bandEvent => bandEvent.band)
-    bandEvents: BandEvent[];
+    // @OneToMany(() => BandEvent, bandEvent => bandEvent.band)
+    // bandEvents: BandEvents[];
 
-    @OneToMany(() => Vacancy, vacancy => vacancy.band)
+    //Relacion con Vacancy
+    @OneToMany(() => Vacancy, vacancy => vacancy.bandOwnerId)
     bandVacancies: Vacancy[];
 
 }

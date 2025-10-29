@@ -2,9 +2,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
+  
+  app.use(morgan('dev'))
+  
   const swaggerDoc = new DocumentBuilder()
     .setTitle('PI-BACKEND')
     .setDescription('This is an API for an E-commerce')
@@ -18,13 +22,14 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, //El class transformer limpia si llegase info extra
+      whitelist: true,
       transform: true,
     }),
   );
+
   await app.listen(process.env.PORT ?? 3013); 
 
-  //“What is the complete stack of this codebase?” 
+
 }
 
 bootstrap();
