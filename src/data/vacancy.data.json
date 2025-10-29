@@ -1,57 +1,55 @@
-
 [
   {
     "name": "Profesor de Armonía",
     "vacancyDescription": "Buscamos un profesor de armonía y teoría musical para clases online a nivel intermedio.",
     "isOpen": true,
     "vacancyImage": "vacancy_armonia.jpg",
-    "owerType": "User",
-    "ownerEmailSeeder": "classic.guitar@mail.com",
-    "bandNameSeeder": null,
-    "genresNameSeeder": ["Clásica", "Jazz"]
+    "vacancyuserName": "SixStringer",
+    "genresNameSeeder": [
+      "Clásica",
+      "Jazz"
+    ]
   },
-
   {
     "name": "Bajista con Experiencia en Giras",
     "vacancyDescription": "Arctic Chaos busca bajista permanente. Debe tener disponibilidad para giras y equipo propio de alto nivel.",
     "isOpen": true,
     "vacancyImage": "vacancy_bass.jpg",
-    "owerType": "Band",
-    "ownerEmailSeeder": null,
-    "bandNameSeeder": "Arctic Chaos",
-    "genresNameSeeder": ["Rock", "Funk"]
+    "vacancyuserName": "BassGroove",
+    "genresNameSeeder": [
+      "Rock",
+      "Funk"
+    ]
   },
-
   {
     "name": "Vocalista de Hip Hop/R&B",
     "vacancyDescription": "Productor busca vocalista para colaborar en un EP de electrónica con toques de R&B.",
     "isOpen": true,
     "vacancyImage": "vacancy_vocal.jpg",
-    "owerType": "User",
-    "ownerEmailSeeder": "electronic.producer@mail.com",
-    "bandNameSeeder": null,
-    "genresNameSeeder": ["Electronic", "Hip Hop"]
+    "vacancyuserName": "DigitalSound",
+    "genresNameSeeder": [
+      "Electronic",
+      "Hip Hop"
+    ]
   },
-
   {
     "name": "Guitarrista de Metal Rítmico",
     "vacancyDescription": "Cryptic Whispers buscó un guitarrista para reemplazar a un miembro saliente.",
     "isOpen": false,
     "vacancyImage": "vacancy_guitar_closed.jpg",
-    "owerType": "Band",
-    "ownerEmailSeeder": null,
-    "bandNameSeeder": "Cryptic Whispers",
-    "genresNameSeeder": ["Metal"]
+    "vacancyuserName": "MetalScreamer",
+    "genresNameSeeder": [
+      "Metal"
+    ]
   },
-
   {
     "name": "Baterista para Country",
     "vacancyDescription": "Busco baterista con manejo de ritmos de Country/Bluegrass para proyecto en Nashville.",
     "isOpen": true,
     "vacancyImage": "vacancy_drums_country.jpg",
-    "owerType": "User",
-    "ownerEmailSeeder": "country.fiddle@mail.com",
-    "bandNameSeeder": null,
-    "genresNameSeeder": ["Country"]
+    "vacancyuserName": "FiddlePlayer",
+    "genresNameSeeder": [
+      "Country"
+    ]
   }
 ]

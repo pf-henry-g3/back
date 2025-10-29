@@ -8,7 +8,7 @@ import { User } from '../user/entities/user.entity';
 import { Genre } from '../genre/entities/genre.entity';
 
 @Injectable()
-export class BandService { 
+export class BandService {
     constructor(
         @InjectRepository(Band)
         private readonly bandRepository: Repository<Band>,
@@ -39,13 +39,12 @@ export class BandService {
         };
     }
 
-     async findOne(id: string) {
+    async findOne(id: string) {
         const band = await this.bandRepository.findOne({
             where: { id },
             relations: {
                 bandGenre: true,
                 bandMembers: true,
-                bandVacancies: true,
                 // bandDescription: true,
             },
         });
@@ -56,20 +55,20 @@ export class BandService {
 
         const { ...bandData } = band;
         return bandData;
-    }   
+    }
 
 
 
     async seederBandas() {
         console.log('⏳ Precargando bandas...');
-        for (const bandData of bandsData) { 
+        for (const bandData of bandsData) {
             const existingBand = await this.bandRepository.findOne({
                 where: { bandName: bandData.bandName },
             });
             if (existingBand) {
                 console.log(`⚠️ Banda ${bandData.bandName} ya existe, saltando...`);
                 continue;
-                }
+            }
 
             const leader = await this.userRepository.findOne({
                 where: { email: bandData.leaderEmailSeeder },
@@ -78,16 +77,16 @@ export class BandService {
                 console.log(`⚠️ Líder con email ${bandData.leaderEmailSeeder} no encontrado, saltando banda ${bandData.bandName}...`);
                 continue;
             }
-            
+
             const genres = (
                 await Promise.all(
                     bandData.genresNameSeeder.map(async (genreName) => {
-                    return this.genreRepository.findOne({
-                        where: { name: genreName },
-                    });
+                        return this.genreRepository.findOne({
+                            where: { name: genreName },
+                        });
                     }),
                 )
-                ).filter((genre): genre is Genre => genre !== null);
+            ).filter((genre): genre is Genre => genre !== null);
 
             const newBand = this.bandRepository.create({
                 bandName: bandData.bandName,
@@ -96,15 +95,15 @@ export class BandService {
                 formationDate: bandData.formationDate,
                 bandImage: bandData.bandImage,
             });
-            
+
             newBand.bandGenre = genres;
 
             await this.bandRepository.save(newBand);
             console.log(`🎸 Banda "${bandData.bandName}" creada.`);
         }
 
-        console.log('🎉 Precarga de bandas completada.');  
-        
+        console.log('🎉 Precarga de bandas completada.');
+
     }
 
 }

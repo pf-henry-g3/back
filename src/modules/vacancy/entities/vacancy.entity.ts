@@ -31,12 +31,12 @@ export class Vacancy {
     })
     vacancyImage: string
 
-    @Column({
-        type: "varchar",
-        length: 50,
-        nullable: false,
-    })
-    owerType: string
+    // @Column({
+    //     type: "varchar",
+    //     length: 50,
+    //     nullable: false,
+    // })
+    // owerType: string
 
     @ManyToMany(() => Genre, genre => genre.vacancies)
     @JoinTable({ name: 'vacancyGenres' })
@@ -51,11 +51,11 @@ export class Vacancy {
     @JoinColumn({ name: 'ownerId' })
     ownerId: User;
 
-    @ManyToOne(() => Band, (band) => band.bandVacancies, {
-        nullable: false,          // pertenece SIEMPRE a un usuario
-        onDelete: 'CASCADE',      // se borra al borrar la banda 
-        eager: false,
-    })
-    @JoinColumn({ name: 'bandOwnerId' })
-    bandOwnerId: Band[];
+    // @ManyToOne(() => Band, (band) => band.bandVacancies, {
+    //     nullable: false,          // pertenece SIEMPRE a un usuario
+    //     onDelete: 'CASCADE',      // se borra al borrar la banda 
+    //     eager: false,
+    // })
+    // @JoinColumn({ name: 'bandOwnerId' })
+    // bandOwnerId: Band[];
 }
