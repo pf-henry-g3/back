@@ -11,7 +11,7 @@ export class SeederService implements OnModuleInit{
         private readonly genreService: GenreService,
         private readonly roleService: RoleService,
         private readonly userService: UserService,
-        // private readonly bandService: BandService,
+        private readonly bandService: BandService,
         // private readonly vacancyService: VacancyService,
     ) {}
 
@@ -24,7 +24,9 @@ export class SeederService implements OnModuleInit{
         await this.roleService.seederRoles();
         console.log("🎈 Roles precargados correctamente");
         await this.userService.seedUsers();
-        // await this.bandService.seeder();
+        console.log("🎈 Usuarios precargados correctamente");
+        await this.bandService.seederBandas();
+        console.log("🎈 Bandas precargadas correctamente");
         // await this.vacancyService.seeder();
 
         console.log('✅ Seeder finalizado correctamente.');
