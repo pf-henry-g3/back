@@ -6,14 +6,14 @@ import { GenreService } from '../genre/genre.service';
 import { RoleService } from '../role/role.service';
 
 @Injectable()
-export class SeederService implements OnModuleInit{
+export class SeederService implements OnModuleInit {
     constructor(
         private readonly genreService: GenreService,
         private readonly roleService: RoleService,
         private readonly userService: UserService,
         private readonly bandService: BandService,
-        // private readonly vacancyService: VacancyService,
-    ) {}
+        private readonly vacancyService: VacancyService,
+    ) { }
 
     async onModuleInit() {
         console.log(
@@ -27,7 +27,8 @@ export class SeederService implements OnModuleInit{
         console.log("🎈 Usuarios precargados correctamente");
         await this.bandService.seederBandas();
         console.log("🎈 Bandas precargadas correctamente");
-        // await this.vacancyService.seeder();
+        await this.vacancyService.seederVacancies();
+        console.log("🎈 Vacantes precargadas correctamente");
 
         console.log('✅ Seeder finalizado correctamente.');
     }

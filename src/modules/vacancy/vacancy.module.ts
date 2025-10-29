@@ -12,5 +12,6 @@ import { Role } from '../role/entities/role.entity';
   imports: [TypeOrmModule.forFeature([Vacancy, Band, User, Genre, Role])],
   controllers: [VacancyController],
   providers: [VacancyService],
+  exports: [VacancyService],
 })
 export class VacancyModule { }

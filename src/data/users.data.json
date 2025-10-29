@@ -14,8 +14,14 @@
     "latitude": 51.5074,
     "longitude": 0.1278,
     "profilePicture": "alex_profile.jpg",
-    "rolesSeeder": ["Artist", "BandLeader"],
-    "genresSeeder": ["Rock", "Pop"]
+    "rolesSeeder": [
+      "Artist",
+      "BandLeader"
+    ],
+    "genresSeeder": [
+      "Rock",
+      "Pop"
+    ]
   },
   {
     "email": "jazz.drummer@mail.com",
@@ -32,8 +38,13 @@
     "latitude": 40.7128,
     "longitude": 74.0060,
     "profilePicture": "mia_profile.png",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Jazz", "Funk"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Jazz",
+      "Funk"
+    ]
   },
   {
     "email": "classic.guitar@mail.com",
@@ -50,8 +61,12 @@
     "latitude": 37.3891,
     "longitude": 5.9845,
     "profilePicture": "ricardo_profile.jpg",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Clásica"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Clásica"
+    ]
   },
   {
     "email": "pop.bassist@mail.com",
@@ -68,8 +83,13 @@
     "latitude": -34.6037,
     "longitude": -58.3816,
     "profilePicture": "laura_profile.jpeg",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Pop", "Funk"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Pop",
+      "Funk"
+    ]
   },
   {
     "email": "electronic.producer@mail.com",
@@ -86,8 +106,12 @@
     "latitude": 35.6895,
     "longitude": 139.6917,
     "profilePicture": "kenji_profile.png",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Electronic"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Electronic"
+    ]
   },
   {
     "email": "metal.vocal@mail.com",
@@ -104,8 +128,14 @@
     "latitude": 53.3498,
     "longitude": 6.2603,
     "profilePicture": "sarah_profile.jpg",
-    "rolesSeeder": ["Artist", "BandLeader"],
-    "genresSeeder": ["Metal", "Rock"]
+    "rolesSeeder": [
+      "Artist",
+      "BandLeader"
+    ],
+    "genresSeeder": [
+      "Metal",
+      "Rock"
+    ]
   },
   {
     "email": "reggae.keyboard@mail.com",
@@ -122,8 +152,12 @@
     "latitude": 17.9904,
     "longitude": 76.7909,
     "profilePicture": "damian_profile.jpeg",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Reggae"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Reggae"
+    ]
   },
   {
     "email": "country.fiddle@mail.com",
@@ -140,8 +174,12 @@
     "latitude": 36.1627,
     "longitude": 86.7816,
     "profilePicture": "emily_profile.png",
-    "rolesSeeder": ["Artist"],
-    "genresSeeder": ["Country"]
+    "rolesSeeder": [
+      "Artist"
+    ],
+    "genresSeeder": [
+      "Country"
+    ]
   },
   {
     "email": "punk.guitarist@mail.com",
@@ -158,8 +196,13 @@
     "latitude": 52.5200,
     "longitude": 13.4050,
     "profilePicture": "mark_profile.jpg",
-    "rolesSeeder": ["Artist", "BandLeader"],
-    "genresSeeder": ["Rock"]
+    "rolesSeeder": [
+      "Artist",
+      "BandLeader"
+    ],
+    "genresSeeder": [
+      "Rock"
+    ]
   },
   {
     "email": "session.musician@mail.com",

@@ -44,9 +44,9 @@ export class Band {
     // @OneToMany(() => BandEvent, bandEvent => bandEvent.band)
     // bandEvents: BandEvents[];
 
-    //Relacion con Vacancy
-    @OneToMany(() => Vacancy, vacancy => vacancy.bandOwnerId)
-    bandVacancies: Vacancy[];
+    // //Relacion con Vacancy
+    // @OneToMany(() => Vacancy, vacancy => vacancy.bandOwnerId)
+    // bandVacancies: Vacancy[];
 
 }
 
