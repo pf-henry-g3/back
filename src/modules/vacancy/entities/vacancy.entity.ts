@@ -52,7 +52,7 @@ export class Vacancy {
     ownerId: User;
 
     @ManyToOne(() => Band, (band) => band.bandVacancies, {
-        nullable: true,          // pertenece NO SIEMPRE a una banda 
+        nullable: true,          // pertenece SIEMPRE a un usuario
         onDelete: 'CASCADE',      // se borra al borrar la banda 
         eager: false,
     })
