@@ -23,8 +23,6 @@ export class GenreService {
         const newGenre = this.genreRepository.create({ name: genre.name });
         await this.genreRepository.save(newGenre);
         console.log(`🎶 Género "${genre.name}" creado.`);
-      } else {
-        console.log(`⚠️ Género "${genre.name}" ya existe, saltando...`);
       }
     }
   }
