@@ -1,9 +1,11 @@
-import { Users } from "src/modules/user/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Band } from "src/modules/band/entities/band.entity";
+import { Genre } from "src/modules/genre/entities/genre.entity";
+import { User } from "src/modules/user/entities/user.entity";
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({ name: "Vacancies" })
+@Entity({ name: "vacancies" })
 export class Vacancy {
-        @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn("uuid")
     id: string
 
     @Column({
@@ -15,7 +17,6 @@ export class Vacancy {
 
     @Column({
         type: "text",
-        length: 50,
         nullable: false,
     })
     vacancyDescription: string
@@ -31,18 +32,30 @@ export class Vacancy {
     vacancyImage: string
 
     @Column({
-        type: "text",
+        type: "varchar",
         length: 50,
         nullable: false,
     })
     owerType: string
 
+    @ManyToMany(() => Genre, genre => genre.vacancies)
+    @JoinTable({ name: 'vacancyGenres' })
+    vacancyGenres: Genre[];
+
     // muchas vacantes {pertenecen} un usuario 
-    @ManyToOne(() => Users, (u) => u.vacancies, {
+    @ManyToOne(() => User, (user) => user.vacancies, {
         nullable: false,          // pertenece SIEMPRE a un usuario
         onDelete: 'CASCADE',      // se borra al borrar el usuer 
         eager: false,
     })
-    @JoinColumn({ name: 'owerId' })
-    owerId: Users;
+    @JoinColumn({ name: 'ownerId' })
+    ownerId: User;
+
+    @ManyToOne(() => Band, (band) => band.bandVacancies, {
+        nullable: false,          // pertenece SIEMPRE a un usuario
+        onDelete: 'CASCADE',      // se borra al borrar la banda 
+        eager: false,
+    })
+    @JoinColumn({ name: 'bandOwnerId' })
+    bandOwnerId: Band[];
 }

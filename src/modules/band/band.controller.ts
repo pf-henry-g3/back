@@ -1,4 +1,4 @@
 import { Controller } from '@nestjs/common';
 
 @Controller('band')
-export class BandController {}
+export class BandController { }
