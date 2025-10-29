@@ -10,7 +10,7 @@ export class SeederService implements OnModuleInit{
     constructor(
         private readonly genreService: GenreService,
         private readonly roleService: RoleService,
-        // private readonly userService: UserService,
+        private readonly userService: UserService,
         // private readonly bandService: BandService,
         // private readonly vacancyService: VacancyService,
     ) {}
@@ -23,7 +23,7 @@ export class SeederService implements OnModuleInit{
         console.log("🎈 Generos precargados correctamente");
         await this.roleService.seederRoles();
         console.log("🎈 Roles precargados correctamente");
-        // await this.userService.seeder();
+        await this.userService.seedUsers();
         // await this.bandService.seeder();
         // await this.vacancyService.seeder();
 
