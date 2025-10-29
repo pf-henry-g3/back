@@ -6,10 +6,12 @@ import { Genre } from '../genre/entities/genre.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Band } from '../band/entities/band.entity';
 import { BandMember } from '../band/entities/bandMember.entity';
+import { Role } from '../role/entities/role.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Genre, Band, BandMember])],
+  imports: [TypeOrmModule.forFeature([User, Genre, Band, BandMember, Role])],
   controllers: [UserController],
   providers: [UserService],
+  exports: [UserService],
 })
 export class UserModule { }

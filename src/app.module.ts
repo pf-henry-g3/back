@@ -6,6 +6,7 @@ import { GenreModule } from './modules/genre/genre.module';
 import { RoleModule } from './modules/role/role.module';
 import typeorm from './config/typeorm';
 import { VacancyModule } from './modules/vacancy/vacancy.module';
+import { SeederModule } from './modules/seeder/seeder.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VacancyModule } from './modules/vacancy/vacancy.module';
     UserModule,
     VacancyModule,
     GenreModule,
-    RoleModule,]
+    RoleModule,
+    SeederModule,]
 })
 export class AppModule { }
