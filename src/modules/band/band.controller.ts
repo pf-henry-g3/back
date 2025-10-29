@@ -18,5 +18,10 @@ export class BandController {
         }
         return this.bandService.findAll();
       }
+
+      @Get(':id')
+      findOne(@Param('id') id: string) {
+        return this.bandService.findOne(id);
+      }
     
  }

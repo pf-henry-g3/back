@@ -29,6 +29,26 @@ export class BandService {
             },
         };
     }
-
     
+     async findOne(id: string) {
+        const band = await this.bandRepository.findOne({
+            where: { id },
+            relations: {
+                bandGenre: true,
+                bandMembers: true,
+                bandVacancies: true,
+                // bandDescription: true,
+            },
+        });
+
+        if (!band) {
+            throw new NotFoundException('Banda no encontrada');
+        }
+
+        const { ...bandData } = band;
+        return bandData;
+    }
+    
+
+
 }
