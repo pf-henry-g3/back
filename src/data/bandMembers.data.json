@@ -1,0 +1,60 @@
+
+[
+  {
+    "bandNameSeeder": "Arctic Chaos",
+    "userEmailSeeder": "rock.singer@mail.com",
+    "entryDate": "2022-08-10",
+    "departureDate": null
+  },
+  {
+    "bandNameSeeder": "Arctic Chaos",
+    "userEmailSeeder": "pop.bassist@mail.com",
+    "entryDate": "2023-01-15",
+    "departureDate": null
+  },
+  {
+    "bandNameSeeder": "Arctic Chaos",
+    "userEmailSeeder": "electronic.producer@mail.com",
+    "entryDate": "2022-09-01",
+    "departureDate": "2023-01-01"
+  },
+
+  {
+    "bandNameSeeder": "Cryptic Whispers",
+    "userEmailSeeder": "metal.vocal@mail.com",
+    "entryDate": "2018-03-01",
+    "departureDate": null
+  },
+  {
+    "bandNameSeeder": "Cryptic Whispers",
+    "userEmailSeeder": "punk.guitarist@mail.com",
+    "entryDate": "2024-05-01",
+    "departureDate": null
+  },
+
+  {
+    "bandNameSeeder": "The Static Noise",
+    "userEmailSeeder": "punk.guitarist@mail.com",
+    "entryDate": "2023-11-25",
+    "departureDate": null
+  },
+
+  {
+    "bandNameSeeder": "Cosmic Groove Collective",
+    "userEmailSeeder": "jazz.drummer@mail.com",
+    "entryDate": "2020-01-20",
+    "departureDate": null
+  },
+  {
+    "bandNameSeeder": "Cosmic Groove Collective",
+    "userEmailSeeder": "session.musician@mail.com",
+    "entryDate": "2020-02-01",
+    "departureDate": null
+  },
+  {
+    "bandNameSeeder": "Cosmic Groove Collective",
+    "userEmailSeeder": "classic.guitar@mail.com",
+    "entryDate": "2020-03-01",
+    "departureDate": "2020-12-31"
+  }
+]

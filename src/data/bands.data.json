@@ -1,0 +1,43 @@
+
+[
+  {
+    "bandName": "Arctic Chaos",
+    "bandDescription": "Banda de Rock Alternativo con influencias de los 90s. Buscando un sonido fresco y giras internacionales.",
+    "formationDate": "2022-08-10",
+    "bandImage": "band_arctic_chaos.jpg",
+    "leaderEmailSeeder": "rock.singer@mail.com",
+    "genresNameSeeder": ["Rock", "Funk"]
+  },
+  {
+    "bandName": "Cryptic Whispers",
+    "bandDescription": "Death Metal melódico y extremo. Letras oscuras y riffs implacables. Preparando nuevo álbum.",
+    "formationDate": "2018-03-01",
+    "bandImage": "band_cryptic_whispers.png",
+    "leaderEmailSeeder": "metal.vocal@mail.com",
+    "genresNameSeeder": ["Metal"]
+  },
+  {
+    "bandName": "The Static Noise",
+    "bandDescription": "Hardcore Punk de la vieja escuela. Rápido, sucio y sin filtros.",
+    "formationDate": "2023-11-25",
+    "bandImage": "band_static_noise.jpeg",
+    "leaderEmailSeeder": "punk.guitarist@mail.com",
+    "genresNameSeeder": ["Rock"]
+  },
+  {
+    "bandName": "Cosmic Groove Collective",
+    "bandDescription": "Proyecto de Jazz-Fusión y World Music. Experimentación rítmica y armonías complejas.",
+    "formationDate": "2020-01-20",
+    "bandImage": "band_cosmic_groove.jpg",
+    "leaderEmailSeeder": "jazz.drummer@mail.com",
+    "genresNameSeeder": ["Jazz", "Funk"]
+  },
+  {
+    "bandName": "Reggae Roots Revival",
+    "bandDescription": "Banda enfocada en el Reggae roots y el Dub clásico. Mensaje de paz y unidad.",
+    "formationDate": "2015-06-15",
+    "bandImage": "band_reggae_roots.png",
+    "leaderEmailSeeder": "reggae.keyboard@mail.com",
+    "genresNameSeeder": ["Reggae"]
+  }
+]
