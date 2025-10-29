@@ -5,10 +5,10 @@ import { UserModule } from './modules/user/user.module';
 import { GenreModule } from './modules/genre/genre.module';
 import { RoleModule } from './modules/role/role.module';
 import typeorm from './config/typeorm';
+import { VacancyModule } from './modules/vacancy/vacancy.module';
 
 @Module({
   imports: [
-    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeorm],
@@ -18,6 +18,7 @@ import typeorm from './config/typeorm';
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
     UserModule,
+    VacancyModule,
     GenreModule,
     RoleModule,]
 })

@@ -26,7 +26,7 @@ export class UserController {
   }
 
   @Get('/genre')
-  findAllByGenre(@Query('genre') genreName: String, @Query('page') page?: string, @Query('limit') limit?: string) {
+  findAllByGenre(@Query('genre') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {
       return this.userService.findAllByGenre(genreName, +page, +limit);
     }

@@ -1,8 +1,8 @@
-import { Users } from "src/modules/user/entities/user.entity";
+import { User } from "src/modules/user/entities/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "roles" })
-export class Roles {
+export class Role {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -13,6 +13,6 @@ export class Roles {
     })
     name: String
 
-    @ManyToOne(() => Users, (user) => user.roles)
-    users: Users[]
+    @ManyToOne(() => User, (user) => user.roles)
+    users: User[]
 }
