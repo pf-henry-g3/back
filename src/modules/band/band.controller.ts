@@ -23,5 +23,4 @@ export class BandController {
       findOne(@Param('id') id: string) {
         return this.bandService.findOne(id);
       }
-    
  }
