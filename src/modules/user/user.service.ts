@@ -5,16 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
-<<<<<<< HEAD
 import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
-=======
-import bcrypt from 'node_modules/bcryptjs';
+import * as bcrypt from 'bcryptjs';
 import usersData from '../../data/users.data.json';
 import { Role } from '../role/entities/role.entity';
->>>>>>> dev
+import { FileUploadService } from '../file-upload/file-upload.service';
+import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 
 @Injectable()
-export class UserService {
+export class UserService extends AbstractFileUploadService<User> {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -22,13 +21,11 @@ export class UserService {
     @InjectRepository(Genre)
     private readonly genresRepository: Repository<Genre>,
 
-<<<<<<< HEAD
-    private readonly fileUploadManager: { uploadImage: (file: Express.Multer.File, id: string) => Promise<UpdateResultDto> }
-=======
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
->>>>>>> dev
-  ) { }
+
+    fileUploadService: FileUploadService
+  ) { super(fileUploadService, usersRepository); }
 
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -105,7 +102,7 @@ export class UserService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    return this.fileUploadManager.uploadImage(file, userId);
+    return this.uploadImage(file, userId);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -142,7 +139,7 @@ export class UserService {
         address: userData.address,
         latitude: userData.latitude,
         longitude: userData.longitude,
-        profilePicture: userData.profilePicture,
+        urlImage: userData.profilePicture,
       });
 
       const roles = await this.rolesRepository.find({
