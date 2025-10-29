@@ -15,4 +15,20 @@ export class BandService {
         const band = this.bandRepository.create(createBandDto);
         return this.bandRepository.save(band);
     }
+    async findAll(page: number = 1, limit: number = 30) {
+        const [bands, total] = await this.bandRepository.findAndCount({
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        return {
+            data: bands,
+            meta: {
+                total,
+                page,
+                limit,
+            },
+        };
+    }
+
+    
 }
