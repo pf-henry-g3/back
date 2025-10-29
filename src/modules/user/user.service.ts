@@ -2,18 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Users } from './entities/user.entity';
+import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { Genres } from '../genre/entities/genre.entity';
+import { Genre } from '../genre/entities/genre.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
 
-    @InjectRepository(Genres)
-    private readonly genresRepository: Repository<Genres>,
+    @InjectRepository(Genre)
+    private readonly genresRepository: Repository<Genre>,
   ) { }
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -56,23 +56,31 @@ export class UserService {
     return userWithOutPassword;
   }
 
-  async findAllByGenre(genreName: String, page: number = 1, limit: number = 30) {
+  async findAllByGenre(genreName: string, page: number = 1, limit: number = 30) {
     let genre = await this.genresRepository.findOne({
       where: { name: genreName },
-      relations: ['users'],
     });
 
     if (!genre) throw new NotFoundException('Genero no encontrado');
 
-    const start = (page - 1) * limit;
-    const end = page + limit;
+    const [users, total] = await this.usersRepository
+      .createQueryBuilder('user')
+      .innerJoin('user.genres', 'genre')
+      .where('genre.id = :genreId', { genreId: genre.id })
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
 
-    let usersWithOutPassword = genre.users.map((user) => {
-      const { password, ...userWithOutPassword } = user;
-      return userWithOutPassword;
-    })
+    if(!users.length) throw new NotFoundException('No hay usuarios para este genero');
 
-    return usersWithOutPassword = usersWithOutPassword.slice(start, end);
+    const usersWithOutPassword = genre.users.map(({ password, ...rest}) => rest)
+
+    return {
+      total,
+      page,
+      limit,
+      result: usersWithOutPassword
+    }
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

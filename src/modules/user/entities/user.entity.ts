@@ -1,12 +1,14 @@
-import { Genres } from "src/modules/genre/entities/genre.entity";
-import { Roles } from "src/modules/role/entities/role.entity";
+import { Band } from "src/modules/band/entities/band.entity";
+import { BandMember } from "src/modules/band/entities/bandMember.entity";
+import { Genre } from "src/modules/genre/entities/genre.entity";
+import { Role } from "src/modules/role/entities/role.entity";
 import { Vacancy } from "src/modules/vacancy/entities/vacancy.entity";
-import { Column, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'users' })
-export class Users {
+export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: String;
+  id: string;
 
   @Column({
     type: 'varchar',
@@ -14,21 +16,21 @@ export class Users {
     nullable: false,
     unique: true,
   })
-  email: String;
+  email: string;
 
   @Column({
     type: 'varchar',
     length: 100,
     nullable: false,
   })
-  password: String;
+  password: string;
 
   @Column({
     type: 'varchar',
     length: 20,
     nullable: false,
   })
-  userName: String;
+  userName: string;
 
   @Column({
     type: 'date',
@@ -40,17 +42,18 @@ export class Users {
     type: 'varchar',
     length: 100,
   })
-  name: String;
+  name: string;
 
   @Column({
     type: "text",
   })
-  aboutMe: String;
+  aboutMe: string;
 
   @Column({
-    type: 'number',
-    precision: 1,
-    default: 0
+    type: 'decimal',
+    precision: 2,
+    scale: 1,
+    default: 0.0,
   })
   averageRating: number;
 
@@ -58,27 +61,27 @@ export class Users {
     type: 'varchar',
     length: 50
   })
-  city: String;
+  city: string;
 
   @Column({
     type: 'varchar',
     length: 50
   })
-  country: String;
+  country: string;
 
   @Column({
     type: 'text'
   })
-  address: String;
+  address: string;
 
   @Column({
-    type: 'number',
+    type: 'decimal',
     default: null,
   })
   latitude: number;
 
   @Column({
-    type: 'number',
+    type: 'decimal',
     default: null,
   })
   longitude: number;
@@ -87,23 +90,35 @@ export class Users {
     type: 'text',
     default: 'No Image',
   })
-  profilePicture: String;
+  profilePicture: string;
 
-  @ManyToMany(() => Roles, (role) => role.users)
-  @JoinTable({ name: 'user_roles' })
-  roles: Roles[]
+  //Relacion con Role (roles del usuario)
+  @ManyToMany(() => Role, (role) => role.users)
+  @JoinTable({ name: 'userRoles' })
+  roles: Role[]
 
-  @ManyToMany(() => Genres, (genre) => genre.users)
-  @JoinTable({ name: 'user_genres' })
-  genres: Genres[]
+  //Relacion con Genero (Artista)
+  @ManyToMany(() => Genre, (genre) => genre.users)
+  @JoinTable({ name: 'userGenres' })
+  genres: Genre[]
 
-  @OneToMany(() => Vacancy, (v) => v.owerId, {
+  //Relacion con vacante (creo vacantes)
+  @OneToMany(() => Vacancy, (vacancy) => vacancy.ownerId, {
     eager: false,
   })
   vacancies: Vacancy[];
+
+  // Relación con Banda (lidera bandas)
+  @OneToMany(() => Band, (band) => band.leader)
+  leaderOf: Band[];
+
+
+  //Relacion con BandMembers
+  @OneToMany(() => BandMember, (member) => member.user)
+  meberships: BandMember[]
+
   //Relacion con SocialLinks
   //Relacion con ArtistMusicalInstruments
-  //Relacion con BandMembers
   //Relacion con Payment
   //Relacion con Review
   //Relacion con Media
