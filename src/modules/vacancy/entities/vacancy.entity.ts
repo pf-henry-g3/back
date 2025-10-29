@@ -38,7 +38,7 @@ export class Vacancy {
     // })
     // owerType: string
 
-    @ManyToMany(() => Genre, genre => genre.vacancies)
+    @ManyToMany(() => Genre, genre => genre.vacancies,{eager: true})
     @JoinTable({ name: 'vacancyGenres' })
     vacancyGenres: Genre[];
 

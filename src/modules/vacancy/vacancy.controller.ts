@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
@@ -13,13 +13,16 @@ export class VacancyController {
   }
 
   @Get()
-  findAll() {
+ findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    if (page && limit) {
+      return this.vacancyService.findAll(+page, +limit);
+    }
     return this.vacancyService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.vacancyService.findOne(+id);
+    return this.vacancyService.findOne(id);
   }
 
   @Patch(':id')
