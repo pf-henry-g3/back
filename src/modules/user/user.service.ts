@@ -5,7 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
+<<<<<<< HEAD
 import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
+=======
+import bcrypt from 'node_modules/bcryptjs';
+import usersData from '../../data/users.data.json';
+import { Role } from '../role/entities/role.entity';
+>>>>>>> dev
 
 @Injectable()
 export class UserService {
@@ -16,8 +22,14 @@ export class UserService {
     @InjectRepository(Genre)
     private readonly genresRepository: Repository<Genre>,
 
+<<<<<<< HEAD
     private readonly fileUploadManager: { uploadImage: (file: Express.Multer.File, id: string) => Promise<UpdateResultDto> }
+=======
+    @InjectRepository(Role)
+    private readonly rolesRepository: Repository<Role>,
+>>>>>>> dev
   ) { }
+
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
   }
@@ -102,5 +114,52 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async seedUsers() {
+    console.log('⏳ Precargando usuarios...');
+
+    for (const userData of usersData) {
+      const existingUser = await this.usersRepository.findOne({
+        where: { email: userData.email },
+      });
+      if (existingUser) {
+        console.log(`⚠️ Usuario ${userData.email} ya existe, saltando...`);
+        continue;
+      }
+
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      const user = this.usersRepository.create({
+        email: userData.email,
+        password: hashedPassword,
+        userName: userData.userName,
+        birthDate: new Date(userData.birthDate),
+        name: userData.name,
+        aboutMe: userData.aboutMe,
+        averageRating: userData.averageRating,
+        city: userData.city,
+        country: userData.country,
+        address: userData.address,
+        latitude: userData.latitude,
+        longitude: userData.longitude,
+        profilePicture: userData.profilePicture,
+      });
+
+      const roles = await this.rolesRepository.find({
+        where: userData.rolesSeeder.map((roleName: string) => ({ name: roleName })),
+      });
+
+      const genres = await this.genresRepository.find({
+        where: userData.genresSeeder.map((genreName: string) => ({ name: genreName })),
+      });
+
+      user.roles = roles;
+      user.genres = genres;
+
+      await this.usersRepository.save(user);
+      console.log(`✅ Usuario ${user.email} creado con ${roles.length} roles y ${genres.length} géneros.`);
+    }
+
+    console.log('🎉 Precarga de usuarios completada.');
   }
 }

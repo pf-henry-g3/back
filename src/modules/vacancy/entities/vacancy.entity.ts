@@ -51,8 +51,8 @@ export class Vacancy {
     @JoinColumn({ name: 'ownerId' })
     ownerId: User;
 
-    @ManyToOne(() => Band, (band) => band.bandVacancies, {
-        nullable: false,          // pertenece SIEMPRE a un usuario
+     @ManyToOne(() => Band, (band) => band.bandVacancies, {
+        nullable: true,          // pertenece NO SIEMPRE a una banda 
         onDelete: 'CASCADE',      // se borra al borrar la banda 
         eager: false,
     })
