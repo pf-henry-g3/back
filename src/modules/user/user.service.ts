@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
+import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
 
 @Injectable()
 export class UserService {
@@ -14,6 +15,8 @@ export class UserService {
 
     @InjectRepository(Genre)
     private readonly genresRepository: Repository<Genre>,
+
+    private readonly fileUploadManager: { uploadImage: (file: Express.Multer.File, id: string) => Promise<UpdateResultDto> }
   ) { }
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -71,9 +74,9 @@ export class UserService {
       .take(limit)
       .getManyAndCount();
 
-    if(!users.length) throw new NotFoundException('No hay usuarios para este genero');
+    if (!users.length) throw new NotFoundException('No hay usuarios para este genero');
 
-    const usersWithOutPassword = genre.users.map(({ password, ...rest}) => rest)
+    const usersWithOutPassword = genre.users.map(({ password, ...rest }) => rest)
 
     return {
       total,
@@ -81,6 +84,16 @@ export class UserService {
       limit,
       result: usersWithOutPassword
     }
+  }
+
+  async updateProfilePicture(file: Express.Multer.File, userId: string) {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return this.fileUploadManager.uploadImage(file, userId);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

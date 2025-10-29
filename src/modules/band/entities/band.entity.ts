@@ -28,7 +28,7 @@ export class Band {
     formationDate: Date;
 
     @Column({ type: 'text', default: 'No image' })
-    bandImage: string;
+    urlImage: string;
 
     //Relacion con Genre
     @ManyToMany(() => Genre, genre => genre.bands)
