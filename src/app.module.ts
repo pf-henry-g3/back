@@ -7,6 +7,7 @@ import { RoleModule } from './modules/role/role.module';
 import typeorm from './config/typeorm';
 import { VacancyModule } from './modules/vacancy/vacancy.module';
 import { SeederModule } from './modules/seeder/seeder.module';
+import { FileUploadModule } from './modules/file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SeederModule } from './modules/seeder/seeder.module';
     VacancyModule,
     GenreModule,
     RoleModule,
-    SeederModule,]
+    SeederModule,
+    FileUploadModule]
 })
 export class AppModule { }

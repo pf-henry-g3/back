@@ -29,7 +29,7 @@ export class Vacancy {
     @Column({
         default: "NO IMAGE"
     })
-    vacancyImage: string
+    urlImage: string
 
     @Column({
         type: "varchar",

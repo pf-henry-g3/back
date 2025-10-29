@@ -90,7 +90,7 @@ export class User {
     type: 'text',
     default: 'No Image',
   })
-  profilePicture: string;
+  urlImage: string;
 
   //Relacion con Role (roles del usuario)
   @ManyToMany(() => Role, (role) => role.users)
