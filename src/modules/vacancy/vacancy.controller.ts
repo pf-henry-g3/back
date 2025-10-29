@@ -25,10 +25,6 @@ export class VacancyController {
     return this.vacancyService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVacancyDto: UpdateVacancyDto) {
-    return this.vacancyService.update(+id, updateVacancyDto);
-  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
