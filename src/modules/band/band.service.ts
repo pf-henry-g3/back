@@ -93,7 +93,7 @@ export class BandService {
                 leader: leader,
                 bandDescription: bandData.bandDescription,
                 formationDate: bandData.formationDate,
-                bandImage: bandData.bandImage,
+                urlImage: bandData.bandImage,
             });
 
             newBand.bandGenre = genres;

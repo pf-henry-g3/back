@@ -5,12 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
-import bcrypt from 'node_modules/bcryptjs';
+import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
+import * as bcrypt from 'bcryptjs';
 import usersData from '../../data/users.data.json';
 import { Role } from '../role/entities/role.entity';
+import { FileUploadService } from '../file-upload/file-upload.service';
+import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 
 @Injectable()
-export class UserService {
+export class UserService extends AbstractFileUploadService<User> {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -20,7 +23,9 @@ export class UserService {
 
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
-  ) { }
+
+    fileUploadService: FileUploadService
+  ) { super(fileUploadService, usersRepository); }
 
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -78,9 +83,9 @@ export class UserService {
       .take(limit)
       .getManyAndCount();
 
-    if(!users.length) throw new NotFoundException('No hay usuarios para este genero');
+    if (!users.length) throw new NotFoundException('No hay usuarios para este genero');
 
-    const usersWithOutPassword = genre.users.map(({ password, ...rest}) => rest)
+    const usersWithOutPassword = genre.users.map(({ password, ...rest }) => rest)
 
     return {
       total,
@@ -88,6 +93,16 @@ export class UserService {
       limit,
       result: usersWithOutPassword
     }
+  }
+
+  async updateProfilePicture(file: Express.Multer.File, userId: string) {
+    const user = await this.usersRepository.findOneBy({ id: userId });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return this.uploadImage(file, userId);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
@@ -124,7 +139,7 @@ export class UserService {
         address: userData.address,
         latitude: userData.latitude,
         longitude: userData.longitude,
-        profilePicture: userData.profilePicture,
+        urlImage: userData.profilePicture,
       });
 
       const roles = await this.rolesRepository.find({
