@@ -9,6 +9,7 @@ import { Genre } from '../genre/entities/genre.entity';
 import { Pages } from 'src/enums/pages.enum';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
+import { UpdateBandDto } from './dto/update-band.dto';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -57,12 +58,56 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         return this.bandsRepository.save(band);
     }
+
+    async update(id: string, updatebandDto: UpdateBandDto) {
+        const bandExisting = await this.bandsRepository.findOne({
+            where: { id },
+            relations: {
+                bandGenre: true,
+                bandMembers: true
+            }
+        });
+        if (!bandExisting) {
+            throw new NotFoundException(`Banda con id ${id} no fue encontrada`);
+        }
+
+        let genres: Genre[] | undefined;
+        if (updatebandDto.genreIds && updatebandDto.genreIds.length > 0) {
+            const foundGenres = await Promise.all(
+                updatebandDto.genreIds.map(async (genreId) => {
+                    return this.genresRepository.findOne({ where: { id: genreId } });
+                }),
+            );
+
+            genres = foundGenres.filter((g): g is Genre => g !== null);
+        }
+
+        if (updatebandDto.name !== undefined) {
+            bandExisting.bandName = updatebandDto.name;
+        }
+
+        if (updatebandDto.description !== undefined) {
+            bandExisting.bandDescription = updatebandDto.description;
+        }
+
+        if (updatebandDto.formationDate !== undefined) {
+            bandExisting.formationDate = new Date(updatebandDto.formationDate);
+        }
+
+        if (genres !== undefined) {
+            bandExisting.bandGenre = genres;
+        }
+
+        return this.bandsRepository.save(bandExisting);
+    }
+
     async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
         const [bands, total] = await this.bandsRepository.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
             relations: {
                 bandGenre: true,
+                bandMembers: true
             }
         });
 

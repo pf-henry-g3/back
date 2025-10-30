@@ -1,7 +1,8 @@
-import { Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateBandDto } from './dto/update-band.dto';
 
 @Controller('band')
 export class BandController {
@@ -11,6 +12,14 @@ export class BandController {
   create(@Body() createBandDto: CreateBandDto) {
     return this.bandsService.create(createBandDto);
   }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updatebandDto: UpdateBandDto) {
+    return this.bandsService.update(id, updatebandDto);
+  }
+
   @Get()
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {
