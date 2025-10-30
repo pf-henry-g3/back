@@ -1,11 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { ILike, Repository } from 'typeorm';
+import { ILike, IsNull, Not, Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
-import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
 import * as bcrypt from 'bcryptjs';
 import usersData from '../../data/users.data.json';
 import { Role } from '../role/entities/role.entity';
@@ -28,8 +27,26 @@ export class UserService extends AbstractFileUploadService<User> {
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create(createUserDto: CreateUserDto) {
+    const { confirmPassword, ...userData } = createUserDto
+    if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
+
+    const user = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { userName: userData.userName }
+      ],
+    })
+
+    if (user) throw new BadRequestException('Usuario ya registrado');
+
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    if (!hashedPassword) throw new BadRequestException('La contraseña no se pudo hashear')
+
+    const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
+    await this.usersRepository.save(newUser);
+
+    return `Usuario ${userData.userName} creado exitosamente`;
   }
 
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -43,6 +60,64 @@ export class UserService extends AbstractFileUploadService<User> {
     });
 
     if (!users) throw new NotFoundException("Usuarios no encontrados");
+
+    let usersWithOutPassword = users.map((user) => {
+      const { password, ...userWithOutPassword } = user;
+      return userWithOutPassword;
+    })
+
+    return {
+      meta: {
+        total,
+        page,
+        limit,
+      },
+      data: usersWithOutPassword,
+    };
+  }
+
+  async findAllIncludingDeleted(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let [users, total] = await this.usersRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        genres: true,
+        meberships: true,
+      },
+      withDeleted: true,
+    });
+
+    if (!users) throw new NotFoundException("Usuarios no encontrados");
+
+    let usersWithOutPassword = users.map((user) => {
+      const { password, ...userWithOutPassword } = user;
+      return userWithOutPassword;
+    })
+
+    return {
+      meta: {
+        total,
+        page,
+        limit,
+      },
+      data: usersWithOutPassword,
+    };
+  }
+
+  async findAllDeletedUsers(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let [users, total] = await this.usersRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        genres: true,
+        meberships: true,
+      },
+      where: { deleteAt: Not(IsNull()) },
+      withDeleted: true,
+    });
+
+    if (!users) throw new NotFoundException("Usuarios eliminados no encontrados");
+    if (!users.length) throw new NotFoundException("Sin usuarios eliminados");
 
     let usersWithOutPassword = users.map((user) => {
       const { password, ...userWithOutPassword } = user;
@@ -74,6 +149,31 @@ export class UserService extends AbstractFileUploadService<User> {
     });
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const { password, ...userWithOutPassword } = user;
+
+    return userWithOutPassword;
+  }
+
+  async findOneDeletedUser(id: string) {
+    const user = await this.usersRepository.findOne({
+      where: {
+        id,
+        deleteAt: Not(IsNull()),
+      },
+      relations: {
+        genres: true
+        //bandas
+        //reviews
+        //instrumentos
+        //media
+        //pagos
+        //socialLinks
+      },
+      withDeleted: true,
+    });
+
+    if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
 
     const { password, ...userWithOutPassword } = user;
 
@@ -122,12 +222,28 @@ export class UserService extends AbstractFileUploadService<User> {
     return this.uploadImage(file, userId);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    await this.usersRepository.update(id, updateUserDto);
+
+    return `Usuario ${id} actualizado con exito`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async softDelete(id: string) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    await this.usersRepository.softDelete(id);
+
+    return `Usuario ${id} eliminado con exito`;
   }
 
   async seedUsers() {

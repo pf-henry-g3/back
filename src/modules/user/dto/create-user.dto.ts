@@ -1,16 +1,16 @@
 export class CreateUserDto {
-    email: String;
-    password: String;
-    confirmPassword: String;
-    userName: String;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    userName: string;
     birthDate: Date;
-    name?: String;
-    aboutMe?: String;
+    name?: string;
+    aboutMe?: string;
     averageRating?: number;
-    city?: String;
-    country?: String;
-    address?: String;
+    city?: string;
+    country?: string;
+    address?: string;
     latitude?: number;
     longitude?: number;
-    profilePicture?: String;
+    profilePicture?: string;
 }
