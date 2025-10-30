@@ -17,19 +17,29 @@ export class CreateVacancyDto {
     @MaxLength(50)
     vacancyDescription: string
 
+    @ApiProperty({
+        example: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif"
+    })
+    @IsString()
+    urlImage?: string
 
     @ApiProperty({
         example: "Evento"
     })
     @IsString()
-    @IsNotEmpty()
     @MaxLength(50)
-    owerType: string
+    owerType?: string
 
     @ApiProperty({
         example: "UUID"
     })
     @IsString()
+    owerId?: string;
+
+    @ApiProperty({
+        example: ['Rock, Reggae, Jazz']
+    })
+    @IsString({ each: true })
     @IsNotEmpty()
-    owerId: string;
+    genres: string[];
 }

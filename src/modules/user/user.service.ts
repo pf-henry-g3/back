@@ -223,13 +223,53 @@ export class UserService extends AbstractFileUploadService<User> {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.findOneBy({ id });
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        genres: true,
+        roles: true,
+      }
+    });
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    await this.usersRepository.update(id, updateUserDto);
+    if (updateUserDto.newRoles && updateUserDto.newRoles.length > 0) {
+      const foundRoles = await this.rolesRepository.find({
+        where: updateUserDto.newRoles?.map((name) => ({ name }))
+      });
+
+      const existingRoles = new Set(user.roles.map(role => role.id));
+
+      const rolesToMerge = foundRoles.filter(
+        role => !existingRoles.has(role.id)
+      );
+
+      const updatedRoles = [...user.roles, ...rolesToMerge];
+      user.roles = updatedRoles;
+
+    }
+
+    if (updateUserDto.newGenres && updateUserDto.newGenres.length > 0) {
+      const foundGenres = await this.genresRepository.find({
+        where: updateUserDto.newGenres?.map((name) => ({ name }))
+      });
+
+      const existingGenres = new Set(user.genres.map(genre => genre.id));
+
+      const genresToMerge = foundGenres.filter(
+        genre => !existingGenres.has(genre.id)
+      );
+
+      const updatedRoles = [...user.genres, ...genresToMerge];
+      user.genres = updatedRoles;
+
+    }
+
+    Object.assign(user, updateUserDto);
+
+    await this.usersRepository.save(user);
 
     return `Usuario ${id} actualizado con exito`;
   }
