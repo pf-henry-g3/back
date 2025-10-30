@@ -12,11 +12,11 @@ export class CreateBandDto {
     formationDate: Date;
 
     @IsString()
-    image?: string;
-    
+    urlImage?: string;
+
     @IsString({ each: true })
-    genreIds: string[];
+    genres: string[];
 
     @IsString()
-    leaderId: string;
+    leaderId?: string;
 }
