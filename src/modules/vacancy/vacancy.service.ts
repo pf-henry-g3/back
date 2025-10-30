@@ -101,8 +101,8 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     return `This action updates a #${id} vacancy`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vacancy`;
+  async remove(id: number) {
+    return await this.vacancyRepository.softDelete(id)
   }
 
   async seederVacancies(): Promise<void> {
