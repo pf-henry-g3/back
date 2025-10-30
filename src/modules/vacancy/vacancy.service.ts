@@ -1,16 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import vacancysData from '../../data/vacancy.data.json';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Vacancy } from './entities/vacancy.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import e from 'express';
 import { Band } from '../band/entities/band.entity';
+import { Pages } from 'src/enums/pages.enum';
+import { FileUploadService } from '../file-upload/file-upload.service';
+import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 
 @Injectable()
-export class VacancyService {
+export class VacancyService extends AbstractFileUploadService<Vacancy> {
   constructor(
     @InjectRepository(Vacancy)
     private readonly vacancyRepository: Repository<Vacancy>,
@@ -20,30 +23,78 @@ export class VacancyService {
 
     @InjectRepository(Band)
     private readonly bandsRepository: Repository<Band>,
-  ) { }
+
+    fileUploadService: FileUploadService
+  ) { super(fileUploadService, vacancyRepository) }
 
 
   create(createVacancyDto: CreateVacancyDto) {
     return 'This action adds a new vacancy';
   }
 
-   async findAll(page: number = 1, limit: number = 30) {
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
     const [vacancies, total] = await this.vacancyRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
+      relations: {
+        vacancyGenres: true
+      }
     });
+
+    if (!vacancies) throw new NotFoundException("Vacantes no encontrados");
+
     return {
-      data: vacancies,
       meta: {
         total,
         page,
         limit,
       },
+      data: vacancies,
     };
+  }
+
+  async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let genre = await this.vacancyRepository.findOne({
+      where: {
+        name: ILike(`%${genreName}%`)
+      },
+      relations: {
+        vacancyGenres: true,
+      }
+    });
+
+    if (!genre) throw new NotFoundException('Genero no encontrado');
+
+    const [vacancies, total] = await this.usersRepository
+      .createQueryBuilder('vacancy')
+      .innerJoin('vacancy.genres', 'genre')
+      .where('genre.id = :genreId', { genreId: genre.id })
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    if (!vacancies.length) throw new NotFoundException('No hay vacantes para este genero');
+
+    return {
+      total,
+      page,
+      limit,
+      result: vacancies
+    }
   }
 
   async findOne(id: string) {
     return await this.vacancyRepository.findOne({ where: { id: id } })
+  }
+
+  async updateProfilePicture(file: Express.Multer.File, vacancyId: string) {
+    const vacancy = await this.vacancyRepository.findOneBy({ id: vacancyId });
+
+    if (!vacancy) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return this.uploadImage(file, vacancyId);
   }
 
   update(id: number, updateVacancyDto: UpdateVacancyDto) {

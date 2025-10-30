@@ -3,7 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
 import { UpdateResultDto } from '../file-upload/dto/update-result.dto';
 import * as bcrypt from 'bcryptjs';
@@ -11,6 +11,7 @@ import usersData from '../../data/users.data.json';
 import { Role } from '../role/entities/role.entity';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
+import { Pages } from 'src/enums/pages.enum';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> {
@@ -31,20 +32,31 @@ export class UserService extends AbstractFileUploadService<User> {
     return 'This action adds a new user';
   }
 
-  async findAll(page: number = 1, limit: number = 30) {
-    let users = await this.usersRepository.find();
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let [users, total] = await this.usersRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        genres: true,
+        meberships: true,
+      }
+    });
 
     if (!users) throw new NotFoundException("Usuarios no encontrados");
-
-    const start = (page - 1) * limit;
-    const end = page + limit;
 
     let usersWithOutPassword = users.map((user) => {
       const { password, ...userWithOutPassword } = user;
       return userWithOutPassword;
     })
 
-    return usersWithOutPassword = usersWithOutPassword.slice(start, end);
+    return {
+      meta: {
+        total,
+        page,
+        limit,
+      },
+      data: usersWithOutPassword,
+    };
   }
 
   async findOne(id: string) {
@@ -68,9 +80,14 @@ export class UserService extends AbstractFileUploadService<User> {
     return userWithOutPassword;
   }
 
-  async findAllByGenre(genreName: string, page: number = 1, limit: number = 30) {
+  async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
     let genre = await this.genresRepository.findOne({
-      where: { name: genreName },
+      where: {
+        name: ILike(`%${genreName}%`)
+      },
+      relations: {
+        users: true,
+      }
     });
 
     if (!genre) throw new NotFoundException('Genero no encontrado');
@@ -139,7 +156,6 @@ export class UserService extends AbstractFileUploadService<User> {
         address: userData.address,
         latitude: userData.latitude,
         longitude: userData.longitude,
-        urlImage: userData.profilePicture,
       });
 
       const roles = await this.rolesRepository.find({

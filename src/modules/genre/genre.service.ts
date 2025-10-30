@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGenreDto } from './dto/create-genre.dto';
-import { UpdateGenreDto } from './dto/update-genre.dto';
 import genres from '../../data/genre.data.json'
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
 import { Genre } from './entities/genre.entity';
+import { Pages } from 'src/enums/pages.enum';
 
 @Injectable()
 export class GenreService {
@@ -28,23 +28,66 @@ export class GenreService {
   }
 
 
-  create(createGenreDto: CreateGenreDto) {
-    return 'This action adds a new genre';
+  async create(createGenreDto: CreateGenreDto) {
+    const foundRole = await this.genreRepository.findOneBy({ name: createGenreDto.name });
+
+    if (foundRole) throw new BadRequestException('El rol ya existe');
+
+    const newGenre: Genre = this.genreRepository.create({ ...createGenreDto });
+
+    await this.genreRepository.save(newGenre);
+
+    return `Rol ${createGenreDto.name} creado con exito`;
   }
 
-  findAll() {
-    return `This action returns all genre`;
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let [genres, total] = await this.genreRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        //users sin datos sensibles
+        bands: true,
+        vacancies: true,
+      }
+    });
+
+    if (!genres) throw new NotFoundException("Generos no encontrados");
+
+    return {
+      data: genres,
+      meta: {
+        total,
+        page,
+        limit,
+      }
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} genre`;
+  async findRolByName(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
+    const [genres, total] = await this.genreRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      where: {
+        name: ILike(`%${genreName}%`),
+      },
+      relations: {
+        //users sin datos sensibles
+      },
+    })
+
+    if (!genres) throw new NotFoundException("Generos no encontrados");
+
+    return {
+      data: genres,
+      meta: {
+        total,
+        page,
+        limit,
+      }
+    }
   }
 
-  update(id: number, updateGenreDto: UpdateGenreDto) {
-    return `This action updates a #${id} genre`;
-  }
-
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} genre`;
   }
 }

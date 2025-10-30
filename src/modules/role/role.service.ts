@@ -1,17 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
 import roles from '../../data/role.data.json'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
-import { Repository } from 'typeorm';
+import { ILike, Like, Repository } from 'typeorm';
+import { Pages } from 'src/enums/pages.enum';
 
 @Injectable()
 export class RoleService {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-  ) {}
+  ) { }
 
   async seederRoles(): Promise<void> {
     for (const role of roles) {
@@ -23,28 +23,69 @@ export class RoleService {
         const newRole = this.roleRepository.create({ name: role.name });
         await this.roleRepository.save(newRole);
         console.log(`🎭 Rol "${role.name}" creado.`);
-      } 
+      }
     }
   }
 
 
-  create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
+  async create(createRoleDto: CreateRoleDto) {
+    const foundRole = await this.roleRepository.findOneBy({ name: createRoleDto.name });
+
+    if (foundRole) throw new BadRequestException('El rol ya existe');
+
+    const newRole: Role = this.roleRepository.create({ ...createRoleDto });
+
+    await this.roleRepository.save(newRole);
+
+    return `Rol ${createRoleDto.name} creado con exito`;
   }
 
-  findAll() {
-    return `This action returns all role`;
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    let [roles, total] = await this.roleRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        //users sin datos sensibles
+      }
+    });
+
+    if (!roles) throw new NotFoundException("Roles no encontrados");
+
+    return {
+      data: roles,
+      meta: {
+        total,
+        page,
+        limit,
+      }
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findRolByName(rolName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
+    const [roles, total] = await this.roleRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      where: {
+        name: ILike(`%${rolName}%`),
+      },
+      relations: {
+        //users sin datos sensibles
+      },
+    })
+
+    if (!roles) throw new NotFoundException("Roles no encontrados");
+
+    return {
+      data: roles,
+      meta: {
+        total,
+        page,
+        limit,
+      }
+    }
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
-  }
-
-  remove(id: number) {
+  async remove(id: number) {
     return `This action removes a #${id} role`;
   }
 }

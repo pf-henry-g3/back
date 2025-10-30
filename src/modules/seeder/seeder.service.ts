@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import { BandService } from '../band/band.service';
+import { BandsService } from '../band/band.service';
 import { VacancyService } from '../vacancy/vacancy.service';
 import { GenreService } from '../genre/genre.service';
 import { RoleService } from '../role/role.service';
@@ -11,7 +11,7 @@ export class SeederService implements OnModuleInit {
         private readonly genreService: GenreService,
         private readonly roleService: RoleService,
         private readonly userService: UserService,
-        private readonly bandService: BandService,
+        private readonly bandService: BandsService,
         private readonly vacancyService: VacancyService,
     ) { }
 

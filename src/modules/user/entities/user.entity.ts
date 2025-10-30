@@ -29,6 +29,7 @@ export class User {
     type: 'varchar',
     length: 20,
     nullable: false,
+    unique: true,
   })
   userName: string;
 
@@ -88,7 +89,7 @@ export class User {
 
   @Column({
     type: 'text',
-    default: 'No Image',
+    default: 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
   })
   urlImage: string;
 

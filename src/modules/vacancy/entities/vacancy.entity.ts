@@ -27,7 +27,7 @@ export class Vacancy {
     isOpen: boolean
 
     @Column({
-        default: "NO IMAGE"
+        default: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif"
     })
     urlImage: string
 
@@ -38,7 +38,7 @@ export class Vacancy {
     // })
     // owerType: string
 
-    @ManyToMany(() => Genre, genre => genre.vacancies,{eager: true})
+    @ManyToMany(() => Genre, genre => genre.vacancies, { eager: true })
     @JoinTable({ name: 'vacancyGenres' })
     vacancyGenres: Genre[];
 
