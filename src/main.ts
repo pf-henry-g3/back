@@ -6,12 +6,12 @@ import morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
-  
+
   app.use(morgan('dev'))
-  
+
   const swaggerDoc = new DocumentBuilder()
     .setTitle('PI-BACKEND')
-    .setDescription('This is an API for an E-commerce')
+    .setDescription('This is an API for an social network')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build(); //Para que todos estos metodos encadenados construyan el doc inicial
@@ -27,7 +27,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3013); 
+  await app.listen(process.env.PORT ?? 3013);
 
 
 }

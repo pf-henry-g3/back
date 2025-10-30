@@ -21,11 +21,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
-  }
-
   @Get('/genre')
   findAllByGenre(@Query('genre') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {
@@ -33,6 +28,12 @@ export class UserController {
     }
     return this.userService.findAllByGenre(genreName);
   }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(id);
+  }
+
 
   @Patch('photo/:userId')
   @UseInterceptors(FileInterceptor('file'))
@@ -56,13 +57,13 @@ export class UserController {
   }
 
 
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-      return this.userService.update(+id, updateUserDto);
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-      return this.userService.remove(+id);
-    }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(+id, updateUserDto);
   }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(+id);
+  }
+}

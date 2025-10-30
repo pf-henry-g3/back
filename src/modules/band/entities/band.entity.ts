@@ -27,7 +27,7 @@ export class Band {
     @Column({ type: 'date' })
     formationDate: Date;
 
-    @Column({ type: 'text', default: 'No image' })
+    @Column({ type: 'text', default: 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif' })
     urlImage: string;
 
     //Relacion con Genre
