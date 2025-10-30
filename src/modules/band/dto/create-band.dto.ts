@@ -16,7 +16,7 @@ export class CreateBandDto {
     image?: string;
 
     @IsString({ each: true })
-    genres: string[];
+    genresId: string[];
 
     //El leader de la banda es el usuario que cree la banda. Que debería ser el usuario regsitrado y logueado.
     //De donde sacamos esa info para crear el lider?
