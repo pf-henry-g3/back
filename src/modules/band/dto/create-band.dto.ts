@@ -1,4 +1,4 @@
-import { IsDate, IsString } from "class-validator";
+import { IsDate, IsOptional, IsString } from "class-validator";
 
 
 export class CreateBandDto {
@@ -8,15 +8,19 @@ export class CreateBandDto {
     @IsString()
     description: string;
 
-    @IsDate()
-    formationDate: Date;
+    @IsString()
+    formationDate: string;
 
     @IsString()
-    urlImage?: string;
+    @IsOptional()
+    image?: string;
 
     @IsString({ each: true })
     genres: string[];
 
-    @IsString()
-    leaderId?: string;
+    //El leader de la banda es el usuario que cree la banda. Que debería ser el usuario regsitrado y logueado.
+    //De donde sacamos esa info para crear el lider?
+    //Por ahora voy a poner que el leader sea un usuario random dentro de users
+    // @IsString()
+    // leaderId: string;
 }

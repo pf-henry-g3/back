@@ -1,7 +1,8 @@
-import { Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateBandDto } from './dto/update-band.dto';
 
 @Controller('band')
 export class BandController {
@@ -10,8 +11,15 @@ export class BandController {
   @Post()
   create(@Body() createBandDto: CreateBandDto) {
     return this.bandsService.create(createBandDto);
-    // Aca tengo que definir que datos y como me van a llegar para crear una banda
   }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updatebandDto: UpdateBandDto) {
+    return this.bandsService.update(id, updatebandDto);
+  }
+
   @Get()
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {

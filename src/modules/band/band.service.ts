@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Band } from './entities/band.entity';
@@ -9,6 +9,7 @@ import { Genre } from '../genre/entities/genre.entity';
 import { Pages } from 'src/enums/pages.enum';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
+import { UpdateBandDto } from './dto/update-band.dto';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -25,16 +26,88 @@ export class BandsService extends AbstractFileUploadService<Band> {
         fileUploadService: FileUploadService,
     ) { super(fileUploadService, bandsRepository) }
 
-    create(createBandDto: CreateBandDto) {
-        const band = this.bandsRepository.create(createBandDto);
+    async create(createBandDto: CreateBandDto) {
+        const bandExisting = await this.bandsRepository.findOneBy({
+            bandName: createBandDto.name
+        })
+        if (bandExisting) {
+            throw new BadRequestException(`La banda ${createBandDto.name} ya existe.`)
+        }
+        const genres = (
+            await Promise.all(
+                createBandDto.genreIds.map(async (genre) => {
+                    return this.genresRepository.findOne({
+                        where: { id: genre },
+                    });
+                }),
+            )
+        ).filter((genre): genre is Genre => genre !== null);
+
+        const band = this.bandsRepository.create({
+            bandName: createBandDto.name,
+            bandDescription: createBandDto.description,
+            formationDate: new Date(createBandDto.formationDate)
+        });
+
+        //El usuario se genera random de la DB (Solo para agilizar en desarrollo, luego lo hacemos con el usuario logueado)
+        const allUsers = await this.usersRepository.find();
+        const randomLeader = allUsers[Math.floor(Math.random() * allUsers.length)]
+        band.leader = randomLeader
+
+        band.bandGenre = genres;
+
         return this.bandsRepository.save(band);
     }
+
+    async update(id: string, updatebandDto: UpdateBandDto) {
+        const bandExisting = await this.bandsRepository.findOne({
+            where: { id },
+            relations: {
+                bandGenre: true,
+                bandMembers: true
+            }
+        });
+        if (!bandExisting) {
+            throw new NotFoundException(`Banda con id ${id} no fue encontrada`);
+        }
+
+        let genres: Genre[] | undefined;
+        if (updatebandDto.genreIds && updatebandDto.genreIds.length > 0) {
+            const foundGenres = await Promise.all(
+                updatebandDto.genreIds.map(async (genreId) => {
+                    return this.genresRepository.findOne({ where: { id: genreId } });
+                }),
+            );
+
+            genres = foundGenres.filter((g): g is Genre => g !== null);
+        }
+
+        if (updatebandDto.name !== undefined) {
+            bandExisting.bandName = updatebandDto.name;
+        }
+
+        if (updatebandDto.description !== undefined) {
+            bandExisting.bandDescription = updatebandDto.description;
+        }
+
+        if (updatebandDto.formationDate !== undefined) {
+            bandExisting.formationDate = new Date(updatebandDto.formationDate);
+        }
+
+        if (genres !== undefined) {
+            bandExisting.bandGenre = genres;
+        }
+
+        return this.bandsRepository.save(bandExisting);
+    }
+
     async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
         const [bands, total] = await this.bandsRepository.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
             relations: {
                 bandGenre: true,
+                bandMembers: true
             }
         });
 
@@ -141,7 +214,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 bandName: bandData.bandName,
                 leader: leader,
                 bandDescription: bandData.bandDescription,
-                formationDate: bandData.formationDate,
+                formationDate: bandData.formationDate
             });
 
             newBand.bandGenre = genres;
