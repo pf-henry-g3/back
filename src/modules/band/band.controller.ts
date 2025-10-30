@@ -10,7 +10,6 @@ export class BandController {
   @Post()
   create(@Body() createBandDto: CreateBandDto) {
     return this.bandsService.create(createBandDto);
-    // Aca tengo que definir que datos y como me van a llegar para crear una banda
   }
   @Get()
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {

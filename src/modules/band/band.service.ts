@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 import { Band } from './entities/band.entity';
@@ -25,8 +25,36 @@ export class BandsService extends AbstractFileUploadService<Band> {
         fileUploadService: FileUploadService,
     ) { super(fileUploadService, bandsRepository) }
 
-    create(createBandDto: CreateBandDto) {
-        const band = this.bandsRepository.create(createBandDto);
+    async create(createBandDto: CreateBandDto) {
+        const bandExisting = await this.bandsRepository.findOneBy({
+            bandName: createBandDto.name
+        })
+        if (bandExisting) {
+            throw new BadRequestException(`La banda ${createBandDto.name} ya existe.`)
+        }
+        const genres = (
+            await Promise.all(
+                createBandDto.genreIds.map(async (genre) => {
+                    return this.genresRepository.findOne({
+                        where: { id: genre },
+                    });
+                }),
+            )
+        ).filter((genre): genre is Genre => genre !== null);
+
+        const band = this.bandsRepository.create({
+            bandName: createBandDto.name,
+            bandDescription: createBandDto.description,
+            formationDate: new Date(createBandDto.formationDate)
+        });
+
+        //El usuario se genera random de la DB (Solo para agilizar en desarrollo, luego lo hacemos con el usuario logueado)
+        const allUsers = await this.usersRepository.find();
+        const randomLeader = allUsers[Math.floor(Math.random() * allUsers.length)]
+        band.leader = randomLeader
+
+        band.bandGenre = genres;
+
         return this.bandsRepository.save(band);
     }
     async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -141,7 +169,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 bandName: bandData.bandName,
                 leader: leader,
                 bandDescription: bandData.bandDescription,
-                formationDate: bandData.formationDate,
+                formationDate: bandData.formationDate
             });
 
             newBand.bandGenre = genres;
