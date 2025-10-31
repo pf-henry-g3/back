@@ -28,7 +28,7 @@ Backend de una plataforma desarrollada como proyecto final de Soy Henry - Carrer
 ```bash
 # Clonar el repositorio
 git clone https://github.com/pf-henry-g3/back.git
-cd PM3-Project
+cd dir
 
 npm install
 
@@ -41,6 +41,7 @@ npm run start
 ---
 
 ### 📫 Autores
+- 💼 [**Agostina Gaggioli**](https://www.linkedin.com/in/agostina-gaggioli-4495ba234/)
 - 💼 [**Carlos Mogollon**](https://www.linkedin.com/in/carlosmogollon-it/)
 - 💼 [**Santiago Rivero**](https://www.linkedin.com/in/santriv06/)
-- 💼 [**Agostina Gaggioli**](https://www.linkedin.com/in/agostina-gaggioli-4495ba234/)
+
