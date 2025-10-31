@@ -1,13 +1,23 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { IsDate, IsOptional, IsString } from "class-validator";
 
 
 export class CreateBandDto {
+    @ApiProperty({
+        example: "Nombre de ejemplo"
+    })
     @IsString()
     name: string;
 
+    @ApiProperty({
+        example: "Banda de musica tropical con 30 años de trayectoria"
+    })
     @IsString()
     description: string;
 
+    @ApiProperty({
+        example: "2005-01-01"
+    })
     @IsString()
     formationDate: string;
 
@@ -15,6 +25,10 @@ export class CreateBandDto {
     @IsOptional()
     image?: string;
 
+
+    @ApiProperty({
+        example: ["", ""]
+    })
     @IsString({ each: true })
     genreIds: string[];
 

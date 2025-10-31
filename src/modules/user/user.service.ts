@@ -29,6 +29,8 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
   async create(createUserDto: CreateUserDto) {
     const { confirmPassword, ...userData } = createUserDto
+    console.log(createUserDto.aboutMe);
+
     if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
 
     const user = await this.usersRepository.findOne({
