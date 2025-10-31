@@ -10,6 +10,7 @@ import { Pages } from 'src/enums/pages.enum';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 import { UpdateBandDto } from './dto/update-band.dto';
+import { BandMember } from './entities/bandMember.entity';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -22,6 +23,9 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         @InjectRepository(Genre)
         private readonly genresRepository: Repository<Genre>,
+
+        @InjectRepository(BandMember)
+        private readonly memberRepository: Repository<BandMember>,
 
         fileUploadService: FileUploadService,
     ) { super(fileUploadService, bandsRepository) }
@@ -224,4 +228,39 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
     }
 
+    async addOneMember(bandId, addMemberDto) {
+        //Por ahora se agregarán miembors de la banda de a uno con este endpoint
+        const band = await this.bandsRepository.findOne({
+            where: {
+                id: bandId
+            },
+            relations: {
+                bandMembers: true
+            }
+        })
+        if (!band) {
+            throw new NotFoundException(`No se encontró una banda con el id especificado`)
+        }
+
+        const user = await this.usersRepository.findOneBy({ userName: addMemberDto.userName })
+        if (!user) {
+            throw new NotFoundException(`Usuario ${addMemberDto.userName} no encontrado`)
+        }
+
+        const newMember = this.memberRepository.create({
+            band: band,
+            user: user,
+            entryDate: new Date()
+        })
+        const bandMember = await this.memberRepository.save(newMember)
+
+        band.bandMembers.push(bandMember)
+        await this.bandsRepository.save(band);
+
+        return {
+            message: `El artista ${user.name} fue incorporado correctamente en la banda ${band.bandName}`,
+            date: newMember.entryDate,
+            newMember: newMember.user
+        }
+    }
 }
