@@ -23,36 +23,30 @@ export class SearchService {
     //Guardamos el string en la estructura de consulta
     const searchPattern = `%${query}%`;
 
-    //Definir las consultas que se ejecutaran en paralelo
-    const [userQuery, total1] = await this.usersRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      where: { userName: ILike(searchPattern) },
-      select: ['id', 'userName', 'urlImage', 'aboutMe', 'city', 'country'],
-    })
+    const [userResult, bandResult, vacancyResult] = await Promise.all([
+      this.usersRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        where: { userName: ILike(searchPattern) },
+        select: ['id', 'userName', 'urlImage', 'aboutMe', 'city', 'country'],
+      }),
+      this.bandsRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        where: { bandName: ILike(searchPattern) },
+        select: ['id', 'bandName', 'urlImage', 'bandDescription'],
+      }),
+      this.vacacniesRepository.findAndCount({
+        skip: (page - 1) * limit,
+        take: limit,
+        where: { name: ILike(searchPattern) },
+        select: ['id', 'name', 'urlImage', 'vacancyDescription', 'isOpen'],
+      }),
+    ]);
 
-    const [bandQuery, total2] = await this.bandsRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      where: { bandName: ILike(searchPattern) },
-      select: ['id', 'bandName', 'urlImage', 'bandDescription'],
-    })
-
-    const [vacancyQuery, total3] = await this.vacacniesRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      where: { name: ILike(searchPattern) },
-      select: ['id', 'name', 'urlImage', 'vacancyDescription'],
-    })
-
-    //consultas en paralelo
-    const [users, bands, vacancies] = await Promise.all([
-      userQuery,
-      bandQuery,
-      vacancyQuery,
-    ])
-
-    //Mapear y unir consultas
+    const [users, totalUsers] = userResult;
+    const [bands, totalBands] = bandResult;
+    const [vacancies, totalVacancies] = vacancyResult;
 
     const mappedUsers: GlobalSearchResult[] = users.map(user => ({
       id: user.id,
@@ -82,7 +76,7 @@ export class SearchService {
     }))
 
     //Devolver una lista unificada y el total con paginacion y limite
-    const total = total1 + total2 + total3;
+    const total = totalUsers + totalBands + totalVacancies;
 
     return {
       meta: {
