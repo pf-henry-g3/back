@@ -91,7 +91,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     const vacancy = await this.vacancyRepository.findOneBy({ id: vacancyId });
 
     if (!vacancy) {
-      throw new NotFoundException('Usuario no encontrado');
+      throw new NotFoundException('Vacante no encontrado');
     }
 
     return this.uploadImage(file, vacancyId);

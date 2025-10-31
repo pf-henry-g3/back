@@ -13,7 +13,7 @@ import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.s
 import { Pages } from 'src/enums/pages.enum';
 
 @Injectable()
-export class UserService extends AbstractFileUploadService<User> {
+export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -84,7 +84,7 @@ export class UserService extends AbstractFileUploadService<User> {
         genres: true,
         meberships: true,
       },
-      withDeleted: true,
+      withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
     });
 
     if (!users) throw new NotFoundException("Usuarios no encontrados");
@@ -170,7 +170,7 @@ export class UserService extends AbstractFileUploadService<User> {
         //pagos
         //socialLinks
       },
-      withDeleted: true,
+      withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
     });
 
     if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
@@ -183,7 +183,7 @@ export class UserService extends AbstractFileUploadService<User> {
   async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
     let genre = await this.genresRepository.findOne({
       where: {
-        name: ILike(`%${genreName}%`)
+        name: ILike(`%${genreName}%`) //Trae todo lo que contenga texto parecido al enviado
       },
       relations: {
         users: true,
@@ -194,9 +194,9 @@ export class UserService extends AbstractFileUploadService<User> {
 
     const [users, total] = await this.usersRepository
       .createQueryBuilder('user')
-      .innerJoin('user.genres', 'genre')
-      .where('genre.id = :genreId', { genreId: genre.id })
-      .skip((page - 1) * limit)
+      .innerJoin('user.genres', 'genre') //tabla temporal para traer en la respuesta
+      .where('genre.id = :genreId', { genreId: genre.id }) //criterio de unificacion
+      .skip((page - 1) * limit) //paginacion
       .take(limit)
       .getManyAndCount();
 
@@ -219,6 +219,7 @@ export class UserService extends AbstractFileUploadService<User> {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    //Llama al metodo abstracto heredado
     return this.uploadImage(file, userId);
   }
 
@@ -235,22 +236,35 @@ export class UserService extends AbstractFileUploadService<User> {
       throw new NotFoundException('Usuario no encontrado');
     }
 
+    //Si el DTO tiene nuevos roles
     if (updateUserDto.newRoles && updateUserDto.newRoles.length > 0) {
       const foundRoles = await this.rolesRepository.find({
-        where: updateUserDto.newRoles?.map((name) => ({ name }))
+        where: updateUserDto.newRoles?.map((name) => ({ name })) //Buscamos todos los roles recibidos en la tabla roles
       });
 
+      //Manejo de error, si hay la longitud de los roles encontrados y los agregados no coincide hay roles invalidos
+      if (foundRoles.length !== updateUserDto.newRoles?.length) {
+        const foundNames = new Set(foundRoles.map(role => role.name)); //Set de roles validos
+        const notFoundNames = updateUserDto.newRoles.filter(name => !foundNames.has(name)); //Comparacion, devuelve los roles invalidos
+
+        throw new BadRequestException(`Algunos roles agregados no existen. Roles invalidos: ${notFoundNames.join(', ')}`)
+      }
+
+      //Set de roles validos
       const existingRoles = new Set(user.roles.map(role => role.id));
 
+      //Comparacion con los roles actuales, devuelve los roles nuevos
       const rolesToMerge = foundRoles.filter(
         role => !existingRoles.has(role.id)
       );
 
+      //Merge de los roles actuales y nuevos
       const updatedRoles = [...user.roles, ...rolesToMerge];
       user.roles = updatedRoles;
 
     }
 
+    //idem pero para generos nuevos
     if (updateUserDto.newGenres && updateUserDto.newGenres.length > 0) {
       const foundGenres = await this.genresRepository.find({
         where: updateUserDto.newGenres?.map((name) => ({ name }))
@@ -267,8 +281,10 @@ export class UserService extends AbstractFileUploadService<User> {
 
     }
 
+    //Actualizacion de datos simples usando Object de JavaScript
     Object.assign(user, updateUserDto);
 
+    //Guardar cambios en la base de datos
     await this.usersRepository.save(user);
 
     return `Usuario ${id} actualizado con exito`;
@@ -280,7 +296,7 @@ export class UserService extends AbstractFileUploadService<User> {
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
     }
-
+    //previamente el DTO tiene agregado @DeleteDateColumn
     await this.usersRepository.softDelete(id);
 
     return `Usuario ${id} eliminado con exito`;

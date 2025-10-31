@@ -71,32 +71,22 @@ export class BandsService extends AbstractFileUploadService<Band> {
             throw new NotFoundException(`Banda con id ${id} no fue encontrada`);
         }
 
-        let genres: Genre[] | undefined;
-        if (updatebandDto.genreIds && updatebandDto.genreIds.length > 0) {
-            const foundGenres = await Promise.all(
-                updatebandDto.genreIds.map(async (genreId) => {
-                    return this.genresRepository.findOne({ where: { id: genreId } });
-                }),
+        if (updatebandDto.newGenres && updatebandDto.newGenres.length > 0) {
+            const foundGenres = await this.genresRepository.find({
+                where: updatebandDto.newGenres?.map((name) => ({ name }))
+            });
+
+            const existingGenres = new Set(bandExisting.bandGenre.map(genre => genre.id));
+
+            const genresToMerge = foundGenres.filter(
+                genre => !existingGenres.has(genre.id)
             );
 
-            genres = foundGenres.filter((g): g is Genre => g !== null);
+            const updatedGenres = [...bandExisting.bandGenre, ...genresToMerge];
+            bandExisting.bandGenre = updatedGenres;
         }
 
-        if (updatebandDto.name !== undefined) {
-            bandExisting.bandName = updatebandDto.name;
-        }
-
-        if (updatebandDto.description !== undefined) {
-            bandExisting.bandDescription = updatebandDto.description;
-        }
-
-        if (updatebandDto.formationDate !== undefined) {
-            bandExisting.formationDate = new Date(updatebandDto.formationDate);
-        }
-
-        if (genres !== undefined) {
-            bandExisting.bandGenre = genres;
-        }
+        Object.assign(bandExisting, updatebandDto);
 
         return this.bandsRepository.save(bandExisting);
     }
