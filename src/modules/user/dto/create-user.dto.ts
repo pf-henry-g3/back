@@ -3,7 +3,9 @@ import {
     IsDateString,
     IsEmail,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
+    isString,
     IsString,
     IsStrongPassword,
     MaxLength,
@@ -83,6 +85,8 @@ export class CreateUserDto {
     name: string;
 
     //validaciones innecesarias por ahora
+    @IsString()
+    @IsOptional()
     aboutMe?: string;
 
     // @ApiProperty({
@@ -90,12 +94,16 @@ export class CreateUserDto {
     //     description: "Ciudad de residencia",
     //     required: false,
     // })
+    @IsString()
+    @IsOptional()
     city?: string;
 
     // @ApiProperty({
     //     example: "Argentina",
     //     description: "País de residencia"
     // })
+    @IsString()
+    @IsOptional()
     country?: string;
 
     // @ApiProperty({
@@ -103,6 +111,8 @@ export class CreateUserDto {
     //     description: "Calificación promedio del usuario (opcional)",
     //     required: false,
     // })
+    @IsNumber()
+    @IsOptional()
     averageRating?: number;
 
     // @ApiProperty({
@@ -110,6 +120,8 @@ export class CreateUserDto {
     //     description: "Dirección física (opcional)",
     //     required: false,
     // })
+    @IsString()
+    @IsOptional()
     address?: string;
 
     // @ApiProperty({
@@ -117,6 +129,8 @@ export class CreateUserDto {
     //     description: "Latitud geográfica (opcional)",
     //     required: false,
     // })
+    @IsNumber()
+    @IsOptional()
     latitude?: number;
 
     // @ApiProperty({
@@ -124,6 +138,8 @@ export class CreateUserDto {
     //     description: "Longitud geográfica (opcional)",
     //     required: false,
     // })
+    @IsNumber()
+    @IsOptional()
     longitude?: number;
 
     // @ApiProperty({
@@ -131,5 +147,7 @@ export class CreateUserDto {
     //     description: "URL de la foto de perfil (opcional)",
     //     required: false,
     // })
+    @IsString()
+    @IsOptional()
     profilePicture?: string;
 }

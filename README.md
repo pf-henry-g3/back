@@ -1,21 +1,47 @@
-# Pasos para levantar el poryecto
-## 1-
+# Proyecto Final — Soy Henry | Full Stack Dev 
+Back
+
+---
+
+## Descripción  
+Backend de una plataforma desarrollada como proyecto final de Soy Henry - Carrera Full Stack, consiste en un medio para conectar musicos con otros musicos o bandas para realizar trabajos en conjunto.
+
+---
+
+## Tecnologías usadas
+
+- **Backend**: Node.js, Express, TypeScript, PostgreSQL, TypeORM, enrutamiento, middlewares, guards, intefaces, decoradores personalizados, JWT para autenticacion, migraciones de Bases de Datos, almacenamiento en la nube, busquedas filtradas, busquedas globales.
+- **Testing / QA**: API testing.
+- **Otras herramientas**: Git/GitHub, Postman/Insomnia, variables de entorno, OpenApi con Swagger.
+
+<p align="center">
+  <p>Tecnologias</p>
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=git,github,js,nestjs,nodejs,npm,ts,postgres,postman,vscode," />
+  </a>
+</p>
+
+---
+
+## Instalación
+
 ```bash
+# Clonar el repositorio
 git clone https://github.com/pf-henry-g3/back.git
-```
+cd dir
 
-## 2- Dentro del proyecto:
-```bash
 npm install
-```
 
-## 3-Configurar las variables de entorno ver .end.example
+# Variables de entorno
+Configurar las variables de entorno como estan en el archivo .env.example para lograr la conexion a la base de datos y al almacenamiento en la nube
 
-  ### -Crear la DB en local y agregar su nombre, puerto, usuario y clave a las variables de entorno.
-  ### -Agregar las variables de entorno de Cloudinary.
-
-## 4-En la terminal:
-```bash
 npm run start
 ```
+
+---
+
+### 📫 Autores
+- 💼 [**Agostina Gaggioli**](https://www.linkedin.com/in/agostina-gaggioli-4495ba234/)
+- 💼 [**Carlos Mogollon**](https://www.linkedin.com/in/carlosmogollon-it/)
+- 💼 [**Santiago Rivero**](https://www.linkedin.com/in/santriv06/)
 
