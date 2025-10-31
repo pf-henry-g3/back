@@ -49,9 +49,9 @@ export class Vacancy {
         eager: false,
     })
     @JoinColumn({ name: 'ownerId' })
-    ownerId: User;
+    owner: User;
 
-     @DeleteDateColumn({ nullable: true })
+    @DeleteDateColumn({ nullable: true })
     deletedAt?: Date;
 
     // @ManyToOne(() => Band, (band) => band.bandVacancies, {

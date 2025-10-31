@@ -124,7 +124,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       }
 
       const newVacancy = this.vacancyRepository.create(vacancyData);
-      newVacancy.ownerId = user;
+      newVacancy.owner = user;
       await this.vacancyRepository.save(newVacancy);
       console.log(`✅ Vacante ${vacancyData.name} creada.`);
     }

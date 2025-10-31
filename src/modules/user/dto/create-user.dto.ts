@@ -32,8 +32,13 @@ export class CreateUserDto {
     @IsDateString({}, { message: 'Debe ser una cadena de fecha válida (ISO 8601).' })
     birthDate: Date;
 
+    @IsNotEmpty({ message: 'El nombre es obligatorio' })
+    @IsString({ message: 'El nombre debe ser un string' })
+    @MinLength(3, { message: 'El nombre debe tener al menos 3 caracteres' })
+    @MaxLength(80, { message: 'El nombre no puede tener mas de 80 caracteres' })
+    name: string;
+
     //validaciones innecesarias por ahora
-    name?: string;
     aboutMe?: string;
     averageRating?: number;
     city?: string;
