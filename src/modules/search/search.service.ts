@@ -27,13 +27,19 @@ export class SearchService {
       this.usersRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
-        where: { userName: ILike(searchPattern) },
+        where: [
+          { userName: ILike(searchPattern), },
+          { aboutMe: ILike(searchPattern) }
+        ],
         select: ['id', 'userName', 'urlImage', 'aboutMe', 'city', 'country'],
       }),
       this.bandsRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
-        where: { bandName: ILike(searchPattern) },
+        where: [
+          { bandName: ILike(searchPattern), },
+          { bandDescription: ILike(searchPattern) }
+        ],
         select: ['id', 'bandName', 'urlImage', 'bandDescription'],
       }),
       this.vacacniesRepository.findAndCount({
