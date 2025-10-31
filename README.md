@@ -1,8 +1,7 @@
 # Pasos para levantar el poryecto
---
 ## 1-
 ```bash
-git clone -url
+git clone https://github.com/pf-henry-g3/back.git
 ```
 
 ## 2- Dentro del proyecto:
@@ -19,3 +18,4 @@ npm install
 ```bash
 npm run start
 ```
+
