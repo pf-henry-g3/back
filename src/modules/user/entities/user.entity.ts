@@ -124,6 +124,7 @@ export class User {
   //Relacion con Review
   //Relacion con Media
 
+  //Borrado logico
   @DeleteDateColumn({
     nullable: true,
   })
