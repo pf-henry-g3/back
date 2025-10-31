@@ -27,7 +27,8 @@ export class Vacancy {
     isOpen: boolean
 
     @Column({
-        default: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif"
+        default: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif",
+        nullable: false,
     })
     urlImage: string
 
