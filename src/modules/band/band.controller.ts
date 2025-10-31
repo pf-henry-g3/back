@@ -3,6 +3,8 @@ import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UpdateBandDto } from './dto/update-band.dto';
+import { AddMemberDto } from './dto/add-member.dto';
+import { UUID } from 'typeorm/driver/mongodb/bson.typings.js';
 
 @Controller('band')
 export class BandController {
@@ -61,4 +63,13 @@ export class BandController {
   ) {
     return this.bandsService.updateProfilePicture(file, bandId);
   }
+
+  @Post('addMember/:id')
+  addMember(
+    @Param('id', ParseUUIDPipe) bandId: string,
+    @Body() addMemberDto: AddMemberDto) {
+    return this.bandsService.addOneMember(bandId, addMemberDto);
+  }
+
+
 }
