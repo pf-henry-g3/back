@@ -55,7 +55,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       take: limit,
       relations: {
         genres: true,
-        meberships: true,
+        memberships: true,
       }
     });
 
@@ -82,7 +82,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       take: limit,
       relations: {
         genres: true,
-        meberships: true,
+        memberships: true,
       },
       withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
     });
@@ -110,7 +110,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       take: limit,
       relations: {
         genres: true,
-        meberships: true,
+        memberships: true,
       },
       where: { deleteAt: Not(IsNull()) },
       withDeleted: true,
@@ -162,7 +162,8 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
         deleteAt: Not(IsNull()),
       },
       relations: {
-        genres: true
+        genres: true,
+        roles: true
         //bandas
         //reviews
         //instrumentos
@@ -270,6 +271,14 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
         where: updateUserDto.newGenres?.map((name) => ({ name }))
       });
 
+      //Manejo de error, si hay la longitud de los generos encontrados y los agregados no coincide hay roles invalidos
+      if (foundGenres.length !== updateUserDto.newGenres?.length) {
+        const foundNames = new Set(foundGenres.map(role => role.name)); //Set de roles validos
+        const notFoundNames = updateUserDto.newGenres.filter(name => !foundNames.has(name)); //Comparacion, devuelve los roles invalidos
+
+        throw new BadRequestException(`Algunos generos agregados no existen. Generos invalidos: ${notFoundNames.join(', ')}`)
+      }
+
       const existingGenres = new Set(user.genres.map(genre => genre.id));
 
       const genresToMerge = foundGenres.filter(
@@ -285,9 +294,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     Object.assign(user, updateUserDto);
 
     //Guardar cambios en la base de datos
-    await this.usersRepository.save(user);
-
-    return `Usuario ${id} actualizado con exito`;
+    return await this.usersRepository.save(user);
   }
 
   async softDelete(id: string) {

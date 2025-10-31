@@ -76,6 +76,13 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 where: updatebandDto.newGenres?.map((name) => ({ name }))
             });
 
+            if (foundGenres.length !== updatebandDto.newGenres?.length) {
+                const foundNames = new Set(foundGenres.map(role => role.name)); //Set de roles validos
+                const notFoundNames = updatebandDto.newGenres.filter(name => !foundNames.has(name)); //Comparacion, devuelve los roles invalidos
+
+                throw new BadRequestException(`Algunos generos agregados no existen. Generos invalidos: ${notFoundNames.join(', ')}`)
+            }
+
             const existingGenres = new Set(bandExisting.bandGenre.map(genre => genre.id));
 
             const genresToMerge = foundGenres.filter(

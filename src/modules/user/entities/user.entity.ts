@@ -116,7 +116,7 @@ export class User {
 
   //Relacion con BandMembers
   @OneToMany(() => BandMember, (member) => member.user)
-  meberships: BandMember[]
+  memberships: BandMember[]
 
   //Relacion con SocialLinks
   //Relacion con ArtistMusicalInstruments

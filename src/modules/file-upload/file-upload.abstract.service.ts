@@ -16,7 +16,7 @@ export abstract class AbstractFileUploadService<T extends UpdatableEntity> {
         try {
             //Sube el archivo a cloudinary
             const uploadResponse = await this.fileUploadService.uploadImage(file);
-            //Actualiza a la entidad recibida, esto es dinamico T es un dato generico
+            //Actualiza a la entidad recibida, esto es dinamico T es un dato generico por eso sirve para cualquier entidad
             const updatePayload: Partial<T> = {
                 urlImage: uploadResponse.secure_url,
             } as Partial<T>;
@@ -24,6 +24,7 @@ export abstract class AbstractFileUploadService<T extends UpdatableEntity> {
             //actualiza en la base de datos en la tabla de la entidad
             await this.repository.update(entityId, updatePayload as any);
 
+            //retorna un DTO indicando el ID actualizado y un mensaje de exito
             return new UpdateResultDto(entityId, `Entidad ${entityId} actualizada con éxito.`);
 
         } catch (error) {
