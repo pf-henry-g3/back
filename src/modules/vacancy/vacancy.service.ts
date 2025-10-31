@@ -91,7 +91,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     const vacancy = await this.vacancyRepository.findOneBy({ id: vacancyId });
 
     if (!vacancy) {
-      throw new NotFoundException('Usuario no encontrado');
+      throw new NotFoundException('Vacante no encontrado');
     }
 
     return this.uploadImage(file, vacancyId);
@@ -101,8 +101,8 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     return `This action updates a #${id} vacancy`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vacancy`;
+  async remove(id: number) {
+    return await this.vacancyRepository.softDelete(id)
   }
 
   async seederVacancies(): Promise<void> {

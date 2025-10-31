@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 
 
@@ -6,13 +6,15 @@ import { SearchService } from './search.service';
 export class SearchController {
   constructor(private readonly searchService: SearchService) { }
 
-  @Get()
-  findAll() {
-    return this.searchService.findAll();
-  }
+  @Get('global')
+  globalSearch(@Query('q') query: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    if (!query || query.length < 2) { //limite para evitar busquedas muy cortas
+      return [];
+    }
+    if (page && limit) {
+      return this.searchService.globalSearch(query, +page, +limit);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.searchService.findOne(+id);
+    return this.searchService.globalSearch(query);
   }
 }

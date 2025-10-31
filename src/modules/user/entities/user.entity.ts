@@ -3,7 +3,7 @@ import { BandMember } from "src/modules/band/entities/bandMember.entity";
 import { Genre } from "src/modules/genre/entities/genre.entity";
 import { Role } from "src/modules/role/entities/role.entity";
 import { Vacancy } from "src/modules/vacancy/entities/vacancy.entity";
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {
@@ -116,11 +116,17 @@ export class User {
 
   //Relacion con BandMembers
   @OneToMany(() => BandMember, (member) => member.user)
-  meberships: BandMember[]
+  memberships: BandMember[]
 
   //Relacion con SocialLinks
   //Relacion con ArtistMusicalInstruments
   //Relacion con Payment
   //Relacion con Review
   //Relacion con Media
+
+  //Borrado logico
+  @DeleteDateColumn({
+    nullable: true,
+  })
+  deleteAt: Date;
 }

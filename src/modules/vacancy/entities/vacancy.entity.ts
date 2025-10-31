@@ -1,7 +1,7 @@
 import { Band } from "src/modules/band/entities/band.entity";
 import { Genre } from "src/modules/genre/entities/genre.entity";
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "vacancies" })
 export class Vacancy {
@@ -50,6 +50,9 @@ export class Vacancy {
     })
     @JoinColumn({ name: 'ownerId' })
     ownerId: User;
+
+     @DeleteDateColumn({ nullable: true })
+    deletedAt?: Date;
 
     // @ManyToOne(() => Band, (band) => band.bandVacancies, {
     //     nullable: false,          // pertenece SIEMPRE a un usuario
