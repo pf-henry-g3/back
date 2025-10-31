@@ -4,9 +4,18 @@ export interface GlobalSearchResult {
     id: string;
     name: string;
     type: SearchEntitytype;
-    description?: string;
     urlImage?: string;
+    description?: string;
+    //user
+    birthDate?: Date;
+    averageRating?: number;
     city?: string;
     country?: string;
+    //vacancy
+    requireEntityType?: 'Artist';
+    ownerId?: string;
     isOpen?: boolean;
+    //band
+    leaderId?: string;
+    formationDate?: Date;
 }

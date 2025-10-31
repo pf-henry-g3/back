@@ -31,7 +31,7 @@ export class SearchService {
           { userName: ILike(searchPattern), },
           { aboutMe: ILike(searchPattern) }
         ],
-        select: ['id', 'userName', 'urlImage', 'aboutMe', 'city', 'country'],
+        select: ['id', 'userName', 'urlImage', 'aboutMe', 'city', 'country', 'birthDate', 'averageRating'],
       }),
       this.bandsRepository.findAndCount({
         skip: (page - 1) * limit,
@@ -40,13 +40,13 @@ export class SearchService {
           { bandName: ILike(searchPattern), },
           { bandDescription: ILike(searchPattern) }
         ],
-        select: ['id', 'bandName', 'urlImage', 'bandDescription'],
+        select: ['id', 'bandName', 'urlImage', 'bandDescription', 'formationDate', 'leader'],
       }),
       this.vacacniesRepository.findAndCount({
         skip: (page - 1) * limit,
         take: limit,
         where: { name: ILike(searchPattern) },
-        select: ['id', 'name', 'urlImage', 'vacancyDescription', 'isOpen'],
+        select: ['id', 'name', 'urlImage', 'vacancyDescription', 'owner', 'isOpen'],
       }),
     ]);
 
@@ -59,7 +59,9 @@ export class SearchService {
       name: user.userName,
       type: 'user',
       urlImage: user.urlImage,
+      birthDate: user.birthDate,
       description: user.aboutMe,
+      averageRating: user.averageRating,
       city: user.city,
       country: user.country,
     }))
@@ -70,6 +72,8 @@ export class SearchService {
       type: 'band',
       urlImage: band.urlImage,
       description: band.bandDescription,
+      formationDate: band.formationDate,
+      leaderId: band.leader.id,
     }))
 
     const mappedVacancies: GlobalSearchResult[] = vacancies.map(vacancy => ({
@@ -78,6 +82,7 @@ export class SearchService {
       type: 'vacancy',
       urlImage: vacancy.urlImage,
       description: vacancy.vacancyDescription,
+      ownerId: vacancy.owner.id,
       isOpen: vacancy.isOpen
     }))
 

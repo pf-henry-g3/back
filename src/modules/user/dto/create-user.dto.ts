@@ -76,15 +76,13 @@ export class CreateUserDto {
         example: "Juan",
         description: "Nombre real del usuario"
     })
-    @IsNotEmpty({ message: "El nombre es obligatorio" })
+    @IsNotEmpty({ message: 'El nombre es obligatorio' })
+    @IsString({ message: 'El nombre debe ser un string' })
+    @MinLength(3, { message: 'El nombre debe tener al menos 3 caracteres' })
+    @MaxLength(80, { message: 'El nombre no puede tener mas de 80 caracteres' })
     name: string;
 
-    @ApiProperty({
-        example: "Musico instrumento con experiencia comprobable en genero1 y genero2",
-        description: "Descripción personal del usuario (opcional)"
-    })
-    @IsOptional()
-    @IsString()
+    //validaciones innecesarias por ahora
     aboutMe?: string;
 
     // @ApiProperty({

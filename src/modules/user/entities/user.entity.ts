@@ -109,7 +109,7 @@ export class User {
   genres: Genre[]
 
   //Relacion con vacante (creo vacantes)
-  @OneToMany(() => Vacancy, (vacancy) => vacancy.ownerId, {
+  @OneToMany(() => Vacancy, (vacancy) => vacancy.owner, {
     eager: false,
   })
   vacancies: Vacancy[];
