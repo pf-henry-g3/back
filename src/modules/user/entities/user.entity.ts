@@ -41,12 +41,13 @@ export class User {
 
   @Column({
     type: 'varchar',
-    length: 100,
+    length: 100
   })
   name: string;
 
   @Column({
     type: "text",
+    nullable: true
   })
   aboutMe: string;
 
@@ -55,23 +56,27 @@ export class User {
     precision: 2,
     scale: 1,
     default: 0.0,
+    nullable: true
   })
   averageRating: number;
 
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
+    nullable: true
   })
   city: string;
 
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
+    nullable: true
   })
   country: string;
 
   @Column({
-    type: 'text'
+    type: 'text',
+    nullable: true
   })
   address: string;
 
