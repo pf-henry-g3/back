@@ -11,6 +11,8 @@ import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 import { UpdateBandDto } from './dto/update-band.dto';
 import { BandMember } from './entities/bandMember.entity';
+import { AddMemberDto } from './dto/add-member.dto';
+import { ApiResponse } from 'src/helper/api-response';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -114,14 +116,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         if (!bands) throw new NotFoundException('Bandas no encontrado');
 
-        return {
-            meta: {
-                total,
-                page,
-                limit,
-            },
-            data: bands,
-        };
+        return ApiResponse('Bandas encontradas.', bands, { total, page, limit })
     }
 
     async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -146,12 +141,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         if (!bands.length) throw new NotFoundException('No hay bandas para este genero');
 
-        return {
-            total,
-            page,
-            limit,
-            result: bands
-        }
+        return ApiResponse('Bandas encontradas.', bands, { limit, page, total })
     }
 
     async findOne(id: string) {
@@ -169,7 +159,8 @@ export class BandsService extends AbstractFileUploadService<Band> {
         }
 
         const { ...bandData } = band;
-        return bandData;
+
+        return ApiResponse('Bandas encontradas. ', bandData)
     }
 
     async updateProfilePicture(file: Express.Multer.File, bandId: string) {
@@ -228,7 +219,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
     }
 
-    async addOneMember(bandId, addMemberDto) {
+    async addOneMember(bandId: string, addMemberDto: AddMemberDto) {
         //Por ahora se agregarán miembors de la banda de a uno con este endpoint
         const band = await this.bandsRepository.findOne({
             where: {
@@ -257,10 +248,14 @@ export class BandsService extends AbstractFileUploadService<Band> {
         band.bandMembers.push(bandMember)
         await this.bandsRepository.save(band);
 
-        return {
-            message: `El artista ${user.name} fue incorporado correctamente en la banda ${band.bandName}`,
-            date: newMember.entryDate,
-            newMember: newMember.user
+
+        const data = {
+            band: band.id,
+            members: band.bandMembers,
+            newMember: user.id
+
         }
+
+        return ApiResponse('Miembro de la banda agregado. ', data)
     }
 }
