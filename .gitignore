@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# El archio que uso para armar los json para las pruebas en etapa de desarrollo
+/jsonForCheck
+
 # Logs
 logs
 *.log
@@ -57,3 +60,4 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 consultas.md
+

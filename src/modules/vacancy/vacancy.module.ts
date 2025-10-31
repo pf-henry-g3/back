@@ -7,10 +7,15 @@ import { Band } from '../band/entities/band.entity';
 import { User } from '../user/entities/user.entity';
 import { Genre } from '../genre/entities/genre.entity';
 import { Role } from '../role/entities/role.entity';
+import { FileUploadModule } from '../file-upload/file-upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Vacancy, Band, User, Genre, Role])],
+  imports: [
+    TypeOrmModule.forFeature([Vacancy, Band, User, Genre, Role]),
+    FileUploadModule,
+  ],
   controllers: [VacancyController],
   providers: [VacancyService],
+  exports: [VacancyService],
 })
 export class VacancyModule { }

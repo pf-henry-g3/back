@@ -10,6 +10,7 @@ export class Role {
         type: 'varchar',
         length: 30,
         nullable: false,
+        unique: true
     })
     name: String
 

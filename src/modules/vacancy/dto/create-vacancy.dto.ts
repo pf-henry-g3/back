@@ -2,7 +2,8 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 export class CreateVacancyDto {
     @ApiProperty({
-        example: "Busqueda Guitarrista"
+        example: "Busqueda Guitarrista",
+        description: 'Titulo de la vacante',
     })
     @IsString()
     @IsNotEmpty()
@@ -10,26 +11,41 @@ export class CreateVacancyDto {
     name: string;
 
     @ApiProperty({
-        example: "Se busca guitarrista con experiencia en pop +5 años"
+        example: "Se busca guitarrista con experiencia en pop +5 años",
+        description: 'Descripcion de la vacante',
     })
     @IsString()
     @IsNotEmpty()
     @MaxLength(50)
     vacancyDescription: string
 
-
     @ApiProperty({
-        example: "Evento"
+        example: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif",
+        description: 'Imagen de la vacante',
     })
     @IsString()
-    @IsNotEmpty()
+    urlImage?: string
+
+    @ApiProperty({
+        example: "Evento",
+        description: 'Para que es la vacante',
+    })
+    @IsString()
     @MaxLength(50)
-    owerType: string
+    owerType?: string
 
     @ApiProperty({
-        example: "UUID"
+        example: "UUID",
+        description: 'Id del usuario propietario de la vacante'
     })
     @IsString()
+    owerId?: string;
+
+    @ApiProperty({
+        example: ['Rock', 'Reggae', 'Jazz'],
+        description: 'Generos de interes en la vacante'
+    })
+    @IsString({ each: true })
     @IsNotEmpty()
-    owerId: string;
+    genres: string[];
 }
