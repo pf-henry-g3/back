@@ -53,36 +53,6 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     };
   }
 
-  async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
-    let genre = await this.vacancyRepository.findOne({
-      where: {
-        name: ILike(`%${genreName}%`)
-      },
-      relations: {
-        vacancyGenres: true,
-      }
-    });
-
-    if (!genre) throw new NotFoundException('Genero no encontrado');
-
-    const [vacancies, total] = await this.usersRepository
-      .createQueryBuilder('vacancy')
-      .innerJoin('vacancy.genres', 'genre')
-      .where('genre.id = :genreId', { genreId: genre.id })
-      .skip((page - 1) * limit)
-      .take(limit)
-      .getManyAndCount();
-
-    if (!vacancies.length) throw new NotFoundException('No hay vacantes para este genero');
-
-    return {
-      total,
-      page,
-      limit,
-      result: vacancies
-    }
-  }
-
   async findOne(id: string) {
     return await this.vacancyRepository.findOne({ where: { id: id } })
   }

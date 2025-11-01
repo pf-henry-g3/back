@@ -183,38 +183,6 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return userWithOutPassword;
   }
 
-  async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
-    let genre = await this.genresRepository.findOne({
-      where: {
-        name: ILike(`%${genreName}%`) //Trae todo lo que contenga texto parecido al enviado
-      },
-      relations: {
-        users: true,
-      }
-    });
-
-    if (!genre) throw new NotFoundException('Genero no encontrado');
-
-    const [users, total] = await this.usersRepository
-      .createQueryBuilder('user')
-      .innerJoin('user.genres', 'genre') //tabla temporal para traer en la respuesta
-      .where('genre.id = :genreId', { genreId: genre.id }) //criterio de unificacion
-      .skip((page - 1) * limit) //paginacion
-      .take(limit)
-      .getManyAndCount();
-
-    if (!users.length) throw new NotFoundException('No hay usuarios para este genero');
-
-    const usersWithOutPassword = genre.users.map(({ password, ...rest }) => rest)
-
-    return {
-      total,
-      page,
-      limit,
-      result: usersWithOutPassword
-    }
-  }
-
   async updateProfilePicture(file: Express.Multer.File, userId: string) {
     const user = await this.usersRepository.findOneBy({ id: userId });
 

@@ -30,14 +30,6 @@ export class BandController {
     return this.bandsService.findAll();
   }
 
-  @Get('/genre')
-  findAllByGenre(@Query('genre') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.bandsService.findAllByGenre(genreName, +page, +limit);
-    }
-    return this.bandsService.findAllByGenre(genreName);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.bandsService.findOne(id);
