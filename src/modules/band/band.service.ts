@@ -119,31 +119,6 @@ export class BandsService extends AbstractFileUploadService<Band> {
         return ApiResponse('Bandas encontradas.', bands, { total, page, limit })
     }
 
-    async findAllByGenre(genreName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
-        let genre = await this.genresRepository.findOne({
-            where: {
-                name: ILike(`%${genreName}%`)
-            },
-            relations: {
-                bands: true,
-            }
-        });
-
-        if (!genre) throw new NotFoundException('Genero no encontrado');
-
-        const [bands, total] = await this.bandsRepository
-            .createQueryBuilder('band')
-            .innerJoin('band.bandGenre', 'genre')
-            .where('genre.id = :genreId', { genreId: genre.id })
-            .skip((page - 1) * limit)
-            .take(limit)
-            .getManyAndCount();
-
-        if (!bands.length) throw new NotFoundException('No hay bandas para este genero');
-
-        return ApiResponse('Bandas encontradas.', bands, { limit, page, total })
-    }
-
     async findOne(id: string) {
         const band = await this.bandsRepository.findOne({
             where: { id },
