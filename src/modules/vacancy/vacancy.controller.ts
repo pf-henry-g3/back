@@ -21,14 +21,6 @@ export class VacancyController {
     return this.vacancyService.findAll();
   }
 
-  @Get('/genre')
-  findAllByGenre(@Query('genre') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.vacancyService.findAllByGenre(genreName, +page, +limit);
-    }
-    return this.vacancyService.findAllByGenre(genreName);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.vacancyService.findOne(id);

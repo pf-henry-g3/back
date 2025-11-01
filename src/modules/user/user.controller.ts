@@ -21,35 +21,6 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get('genre')
-  findAllByGenre(@Query('genre') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.userService.findAllByGenre(genreName, +page, +limit);
-    }
-    return this.userService.findAllByGenre(genreName);
-  }
-
-  @Get('deleted')
-  findAllIncludingDeleted(@Query('page') page?: string, @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.userService.findAllIncludingDeleted(+page, +limit);
-    }
-    return this.userService.findAllIncludingDeleted();
-  }
-
-  @Get('deleted/only-deleted')
-  findAllDeletedUsers(@Query('page') page?: string, @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.userService.findAllDeletedUsers(+page, +limit);
-    }
-    return this.userService.findAllDeletedUsers();
-  }
-
-  @Get('delete/:id')
-  findOneDeletedUser(@Param('id') id: string) {
-    return this.userService.findOneDeletedUser(id);
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
@@ -88,3 +59,26 @@ export class UserController {
     return this.userService.softDelete(id);
   }
 }
+
+//Rutas de Admin o Super Admin
+
+// @Get('deleted')
+// findAllIncludingDeleted(@Query('page') page?: string, @Query('limit') limit?: string) {
+//   if (page && limit) {
+//     return this.userService.findAllIncludingDeleted(+page, +limit);
+//   }
+//   return this.userService.findAllIncludingDeleted();
+// }
+
+// @Get('deleted/only-deleted')
+// findAllDeletedUsers(@Query('page') page?: string, @Query('limit') limit?: string) {
+//   if (page && limit) {
+//     return this.userService.findAllDeletedUsers(+page, +limit);
+//   }
+//   return this.userService.findAllDeletedUsers();
+// }
+
+// @Get('delete/:id')
+// findOneDeletedUser(@Param('id') id: string) {
+//   return this.userService.findOneDeletedUser(id);
+// }
