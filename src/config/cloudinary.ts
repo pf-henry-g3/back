@@ -4,12 +4,12 @@ import { config as dotenvConfig } from "dotenv";
 dotenvConfig({ path: ".env.development" });
 
 export const CloudinaryConfig = {
-  provide: "CLOUDINARY", //Proveedor de cloudinary. Lo vamos a utilziar para la carga de imagenes.
+  provide: "CLOUDINARY", //Proveedor de cloudinary. Lo vamos a utilziar para la carga de archivos.
   useFactory: () => {
     return cloudinary.config({
-      cloud_name: process.env.CL_NAME,
-      api_key: process.env.CL_APIKEY,
-      api_secret: process.env.CL_API_SECRET,
+      cloud_name: process.env.CLOUD_NAME,
+      api_key: process.env.CLOUD_API_KEY,
+      api_secret: process.env.CLOUD_API_SECRET,
     });
   },
 };

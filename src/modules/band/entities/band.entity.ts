@@ -18,17 +18,32 @@ export class Band {
     @JoinColumn({ name: 'leaderId' })
     leader: User;
 
-    @Column({ type: 'varchar', length: 100, unique: true })
+    @Column({
+        type: 'varchar',
+        length: 100,
+        unique: true,
+        nullable: false,
+    })
     bandName: string;
 
-    @Column({ type: 'text' })
+    @Column({
+        type: 'text',
+        nullable: false,
+    })
     bandDescription: string;
 
-    @Column({ type: 'date' })
+    @Column({
+        type: 'date',
+        nullable: false,
+    })
     formationDate: Date;
 
-    @Column({ type: 'text', default: 'No image' })
-    bandImage: string;
+    @Column({
+        type: 'text',
+        default: 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoImage_p0ke5q.avif',
+        nullable: true,
+    })
+    urlImage: string;
 
     //Relacion con Genre
     @ManyToMany(() => Genre, genre => genre.bands)
@@ -44,9 +59,9 @@ export class Band {
     // @OneToMany(() => BandEvent, bandEvent => bandEvent.band)
     // bandEvents: BandEvents[];
 
-    //Relacion con Vacancy
-    @OneToMany(() => Vacancy, vacancy => vacancy.bandOwnerId)
-    bandVacancies: Vacancy[];
+    // //Relacion con Vacancy
+    // @OneToMany(() => Vacancy, vacancy => vacancy.bandOwnerId)
+    // bandVacancies: Vacancy[];
 
 }
 

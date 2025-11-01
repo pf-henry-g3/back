@@ -1,5 +1,3 @@
-//NO HACEMOS INTANCIA DE DATASOURCE, CONSTRUIMOS UN OPBJETO ON ESOS DATOS
-
 import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config as dotenvConfig } from 'dotenv';
@@ -12,9 +10,9 @@ const config = {
   port: process.env.DB_PORT,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  dropSchema: true,
+  dropSchema: true,   //desactivar antes de deployar o migrar
+  synchronize: true,  //desactivar antes de migrar
   logging: false,
-  synchronize: true,
   entities: ['dist/**/*.entity{.js,.ts}'],
   migrations: ['dist/**/*.migrations{.js,.ts}'],
 };

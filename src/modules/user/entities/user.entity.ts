@@ -3,7 +3,7 @@ import { BandMember } from "src/modules/band/entities/bandMember.entity";
 import { Genre } from "src/modules/genre/entities/genre.entity";
 import { Role } from "src/modules/role/entities/role.entity";
 import { Vacancy } from "src/modules/vacancy/entities/vacancy.entity";
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'users' })
 export class User {
@@ -29,6 +29,7 @@ export class User {
     type: 'varchar',
     length: 20,
     nullable: false,
+    unique: true,
   })
   userName: string;
 
@@ -41,11 +42,13 @@ export class User {
   @Column({
     type: 'varchar',
     length: 100,
+    nullable: false,
   })
   name: string;
 
   @Column({
     type: "text",
+    nullable: true
   })
   aboutMe: string;
 
@@ -54,23 +57,27 @@ export class User {
     precision: 2,
     scale: 1,
     default: 0.0,
+    nullable: true
   })
   averageRating: number;
 
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
+    nullable: true
   })
   city: string;
 
   @Column({
     type: 'varchar',
-    length: 50
+    length: 50,
+    nullable: true
   })
   country: string;
 
   @Column({
-    type: 'text'
+    type: 'text',
+    nullable: true
   })
   address: string;
 
@@ -88,9 +95,9 @@ export class User {
 
   @Column({
     type: 'text',
-    default: 'No Image',
+    default: 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
   })
-  profilePicture: string;
+  urlImage: string;
 
   //Relacion con Role (roles del usuario)
   @ManyToMany(() => Role, (role) => role.users)
@@ -103,7 +110,7 @@ export class User {
   genres: Genre[]
 
   //Relacion con vacante (creo vacantes)
-  @OneToMany(() => Vacancy, (vacancy) => vacancy.ownerId, {
+  @OneToMany(() => Vacancy, (vacancy) => vacancy.owner, {
     eager: false,
   })
   vacancies: Vacancy[];
@@ -115,11 +122,17 @@ export class User {
 
   //Relacion con BandMembers
   @OneToMany(() => BandMember, (member) => member.user)
-  meberships: BandMember[]
+  memberships: BandMember[]
 
   //Relacion con SocialLinks
   //Relacion con ArtistMusicalInstruments
   //Relacion con Payment
   //Relacion con Review
   //Relacion con Media
+
+  //Borrado logico
+  @DeleteDateColumn({
+    nullable: true,
+  })
+  deleteAt: Date;
 }

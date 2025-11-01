@@ -12,6 +12,7 @@ export class Genre {
         type: 'varchar',
         length: 30,
         nullable: false,
+        unique: true,
     })
     name: string;
 
