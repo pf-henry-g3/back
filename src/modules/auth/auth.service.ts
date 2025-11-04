@@ -6,12 +6,14 @@ import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import bcrypt from 'node_modules/bcryptjs';
 import { ApiResponse } from 'src/helper/api-response';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly jwtService: JwtService,
   ) { }
   async signup(createUserDto: CreateUserDto) {
     if (createUserDto.password !== createUserDto.confirmPassword) {
@@ -53,8 +55,27 @@ export class AuthService {
     return ApiResponse('Created User.', newUser);
   }
 
-  async signin(loginUserDto) {
-    return 'login user'
+  async signin(loginUser: LoginUserDto) {
+    const user = await this.userRepository.findOneBy({ email: loginUser.email });
+    if (!user) {
+      throw new BadRequestException('Credenciales invalidas');
+    }
+    const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Credenciales invalidas.');
+    }
+
+    const payload = {
+      sub: user.id, // "sub" es el estándar para el ID del usuario
+      email: user.email
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    return ApiResponse('Success Login. ', user)
   }
 
 }

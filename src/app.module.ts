@@ -10,6 +10,7 @@ import { SeederModule } from './modules/seeder/seeder.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SearchModule } from './modules/search/search.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -28,6 +29,11 @@ import { AuthModule } from './modules/auth/auth.module';
     SeederModule,
     FileUploadModule,
     SearchModule,
-    AuthModule]
+    AuthModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1h' },
+      global: true,
+    }),]
 })
 export class AppModule { }
