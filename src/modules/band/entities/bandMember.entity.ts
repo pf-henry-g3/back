@@ -11,7 +11,7 @@ export class BandMember {
     @JoinColumn({ name: 'bandId' })
     band: Band;
 
-    @ManyToOne(() => User, (user) => user.meberships, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, (user) => user.memberships, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;
 

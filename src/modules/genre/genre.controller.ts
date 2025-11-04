@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { GenreService } from './genre.service';
 import { CreateGenreDto } from './dto/create-genre.dto';
-import { UpdateGenreDto } from './dto/update-genre.dto';
 
 @Controller('genre')
 export class GenreController {
@@ -13,18 +12,19 @@ export class GenreController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+    if (page && limit) {
+      return this.genreService.findAll(+page, +limit);
+    }
     return this.genreService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.genreService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGenreDto: UpdateGenreDto) {
-    return this.genreService.update(+id, updateGenreDto);
+  @Get('/by-name')
+  findByName(@Query('genreName') genreName: string, @Query('page') page?: string, @Query('limit') limit?: string) {
+    if (page && limit) {
+      return this.genreService.findRolByName(genreName, +page, +limit);
+    }
+    return this.genreService.findRolByName(genreName);
   }
 
   @Delete(':id')

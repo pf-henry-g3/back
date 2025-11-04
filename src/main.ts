@@ -6,12 +6,12 @@ import morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
-  
+
   app.use(morgan('dev'))
-  
+
   const swaggerDoc = new DocumentBuilder()
     .setTitle('PI-BACKEND')
-    .setDescription('This is an API for an E-commerce')
+    .setDescription('This is an API for a social network')
     .setVersion('1.0.0')
     .addBearerAuth()
     .build(); //Para que todos estos metodos encadenados construyan el doc inicial
@@ -27,7 +27,28 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3013); 
+  //conexion entre front y back
+
+  const allowedOrigins = [
+    'http://localhost:3001',
+    'http://localhost:3000',
+    'http://localhost:3013',
+    process.env.FRONTEND_URL,
+  ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
+    credentials: true,
+  });
+
+  await app.listen(process.env.PORT ?? 3013);
 
 
 }

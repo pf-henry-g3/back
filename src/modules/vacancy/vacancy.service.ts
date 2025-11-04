@@ -1,42 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
+import vacancysData from '../../data/vacancy.data.json';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { GenreService } from '../genre/genre.service';
-import { Genre } from '../genre/entities/genre.entity';
-import { Repository } from 'typeorm';
 import { Vacancy } from './entities/vacancy.entity';
+import { ILike, Repository } from 'typeorm';
+import { User } from '../user/entities/user.entity';
+import e from 'express';
+import { Band } from '../band/entities/band.entity';
+import { Pages } from 'src/enums/pages.enum';
+import { FileUploadService } from '../file-upload/file-upload.service';
+import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 
 @Injectable()
-export class VacancyService {
+export class VacancyService extends AbstractFileUploadService<Vacancy> {
   constructor(
     @InjectRepository(Vacancy)
-    private readonly vacancyRepository: Repository<User>,
+    private readonly vacancyRepository: Repository<Vacancy>,
+
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
 
-    @InjectRepository(Genre)
-    private readonly genresRepository: Repository<Genre>,
+    @InjectRepository(Band)
+    private readonly bandsRepository: Repository<Band>,
 
-  ) { }
+    fileUploadService: FileUploadService
+  ) { super(fileUploadService, vacancyRepository) }
+
 
   create(createVacancyDto: CreateVacancyDto) {
     return 'This action adds a new vacancy';
   }
 
-  async findAll(page: number = 1, limit: number = 30) {
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
     const [vacancies, total] = await this.vacancyRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
+      relations: {
+        vacancyGenres: true
+      }
     });
+
+    if (!vacancies) throw new NotFoundException("Vacantes no encontrados");
+
     return {
-      data: vacancies,
       meta: {
         total,
         page,
         limit,
       },
+      data: vacancies,
     };
   }
 
@@ -44,11 +57,47 @@ export class VacancyService {
     return await this.vacancyRepository.findOne({ where: { id: id } })
   }
 
+  async updateProfilePicture(file: Express.Multer.File, vacancyId: string) {
+    const vacancy = await this.vacancyRepository.findOneBy({ id: vacancyId });
+
+    if (!vacancy) {
+      throw new NotFoundException('Vacante no encontrado');
+    }
+
+    return this.uploadImage(file, vacancyId);
+  }
+
   update(id: number, updateVacancyDto: UpdateVacancyDto) {
     return `This action updates a #${id} vacancy`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} vacancy`;
+  async remove(id: number) {
+    return await this.vacancyRepository.softDelete(id)
+  }
+
+  async seederVacancies(): Promise<void> {
+    console.log('⏳ Precargando vacantes...');
+    for (const vacancyData of vacancysData) {
+      const existingVacancy = await this.vacancyRepository.findOne({
+        where: { name: vacancyData.name }
+      });
+      if (existingVacancy) {
+        console.log(`⚠️ Vacante ${vacancyData.name} ya existe, saltando...`);
+        continue;
+      }
+      const user = await this.usersRepository.findOne({
+        where: { userName: vacancyData.vacancyuserName }
+      });
+      if (!user) {
+        console.log(`⚠️ Usuario con nombre ${vacancyData.vacancyuserName} no encontrado, saltando vacante ${vacancyData.name}...`);
+        continue;
+      }
+
+      const newVacancy = this.vacancyRepository.create(vacancyData);
+      newVacancy.owner = user;
+      await this.vacancyRepository.save(newVacancy);
+      console.log(`✅ Vacante ${vacancyData.name} creada.`);
+    }
+    console.log('🎉 Precarga de vacantes completada.');
   }
 }
