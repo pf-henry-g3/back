@@ -134,5 +134,5 @@ export class User {
   @DeleteDateColumn({
     nullable: true,
   })
-  deleteAt: Date;
+  deleteAt: Date | null;
 }
