@@ -33,6 +33,7 @@ async function bootstrap() {
     'http://localhost:3001',
     'http://localhost:3000',
     'http://localhost:3013',
+    'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io',
     process.env.FRONTEND_URL,
   ];
 
@@ -49,6 +50,8 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT ?? 3013);
+  console.log(`App corriendo en puerto ${process.env.PORT}`);
+
 
 
 }
