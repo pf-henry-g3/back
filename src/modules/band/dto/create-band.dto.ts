@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsDate, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 export class CreateBandDto {
@@ -8,14 +8,14 @@ export class CreateBandDto {
         description: 'Nombre de la banda, es unico'
     })
     @IsString()
-    name: string;
+    bandName: string;
 
     @ApiProperty({
         example: "Banda de musica tropical con 30 años de trayectoria",
         description: 'Biografia de la banda',
     })
     @IsString()
-    description: string;
+    bandDescription: string;
 
     @ApiProperty({
         example: "2005-01-01",
@@ -30,7 +30,7 @@ export class CreateBandDto {
     })
     @IsString()
     @IsOptional()
-    image?: string;
+    urlImage?: string;
 
 
     @ApiProperty({
@@ -40,12 +40,5 @@ export class CreateBandDto {
     @IsNotEmpty()
     @IsArray()
     @IsString({ each: true })
-    genreIds: string[];
-
-    @ApiProperty({
-        example: "UUID",
-        description: 'Id del usuario propietario de la vacante'
-    })
-    @IsString()
-    leaderId: string;
+    genres: string[];
 }

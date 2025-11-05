@@ -1,5 +1,5 @@
 import { User } from "src/modules/user/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "roles" })
 export class Role {
@@ -14,6 +14,6 @@ export class Role {
     })
     name: String
 
-    @ManyToOne(() => User, (user) => user.roles)
+    @ManyToMany(() => User, (user) => user.roles)
     users: User[]
 }
