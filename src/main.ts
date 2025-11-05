@@ -52,7 +52,8 @@ async function bootstrap() {
     'http://localhost:3000',
     'http://localhost:3013',
     'https://syncroapp.us.auth0.com',
-    process.env.FRONTEND_URL,
+    'http://sincro.72.61.129.102.sslip.io/',
+    process.env.FRONTEND_URL_DEPLOY,
   ];
 
   app.enableCors({
