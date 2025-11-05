@@ -16,7 +16,13 @@ async function bootstrap() {
       baseURL: process.env.BASE_URL,
       clientID: process.env.AUTH0_CLIENT_ID,
       issuerBaseURL: process.env.AUTH0_ISSUER,
-    }),
+      routes: {
+        // 👇 aquí definís tus rutas personalizadas
+        login: '/login',
+        logout: '/logout',
+        callback: '/callback'
+      },
+    })
   );
 
   app.use(morgan('dev'))
