@@ -94,7 +94,6 @@ export class UserController {
     return this.userService.updateProfilePicture(file, userId);
   }
 
-
   @Patch(':id')
   @ApiParam({
     name: 'id',
@@ -156,4 +155,3 @@ export class UserController {
 // @Get('delete/:id')
 // findOneDeletedUser(@Param('id') id: string) {
 //   return this.userService.findOneDeletedUser(id);
-// }
