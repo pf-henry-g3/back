@@ -27,30 +27,6 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
 
-  async create(createUserDto: CreateUserDto) {
-    const { confirmPassword, ...userData } = createUserDto
-    console.log(createUserDto.aboutMe);
-
-    if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
-
-    const user = await this.usersRepository.findOne({
-      where: [
-        { email: userData.email },
-        { userName: userData.userName }
-      ],
-    })
-
-    if (user) throw new BadRequestException('Usuario ya registrado');
-
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    if (!hashedPassword) throw new BadRequestException('La contraseña no se pudo hashear')
-
-    const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
-    await this.usersRepository.save(newUser);
-
-    return `Usuario ${userData.userName} creado exitosamente`;
-  }
-
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
     let [users, total] = await this.usersRepository.findAndCount({
       skip: (page - 1) * limit,

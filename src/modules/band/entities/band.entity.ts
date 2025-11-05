@@ -45,10 +45,51 @@ export class Band {
     })
     urlImage: string;
 
+    @Column({
+        type: 'decimal',
+        precision: 2,
+        scale: 1,
+        default: 0.0,
+        nullable: true
+    })
+    averageRating: number;
+
+    @Column({
+        type: 'varchar',
+        length: 50,
+        nullable: true
+    })
+    city: string;
+
+    @Column({
+        type: 'varchar',
+        length: 50,
+        nullable: true
+    })
+    country: string;
+
+    @Column({
+        type: 'text',
+        nullable: true
+    })
+    address: string;
+
+    @Column({
+        type: 'decimal',
+        default: null,
+    })
+    latitude: number;
+
+    @Column({
+        type: 'decimal',
+        default: null,
+    })
+    longitude: number;
+
     //Relacion con Genre
     @ManyToMany(() => Genre, genre => genre.bands)
     @JoinTable({ name: 'bandGenres' })
-    bandGenre: Genre[];
+    genres: Genre[];
 
     //Relacion con User (miembros)
     @OneToMany(() => BandMember, (member) => member.band, {

@@ -1,67 +1,67 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { SearchService } from './search.service';
 import { ApiQuery, ApiResponse } from '@nestjs/swagger';
-
 
 @Controller('search')
 export class SearchController {
   constructor(private readonly searchService: SearchService) { }
 
   @Get('global')
-  //Ejemplo para la documentacion de swagger
   @ApiQuery({
     name: 'q',
     required: true,
-    description: 'Texto a buscar en la DB'
+    description: 'Texto a buscar en la base de datos',
   })
   @ApiQuery({
     name: 'types',
     required: false,
-    description: 'Filtro opcional por tipo de entidad, no es un array',
-    example: 'user,vacancy'
+    description: 'Filtro opcional por tipo de entidad (separado por comas)',
+    example: 'user,vacancy,band',
   })
   @ApiQuery({
     name: 'genres',
     required: false,
-    description: 'Filtro opcional por genero, no es un array',
-    example: 'rock,jazz'
+    description: 'Filtro opcional por género (separado por comas)',
+    example: 'rock,jazz',
   })
   @ApiQuery({
     name: 'page',
     required: false,
-    description: 'Paginado opcional',
-    example: '1'
+    description: 'Página actual para paginación',
+    example: '1',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
-    description: 'Paginado opcional',
-    example: '10'
-  })
-  @ApiQuery({
-    name: 'genres',
-    required: false,
-    description: 'Filtro opcional por genero, no es un array',
-    example: 'rock,jazz'
+    description: 'Cantidad de resultados por página',
+    example: '10',
   })
   @ApiResponse({
-    status: 200, description: 'Resultado de busqueda global filtrado.'
+    status: 200,
+    description: 'Resultado de búsqueda global filtrado.',
   })
-  //Metodo del endpoint
-  globalSearch(
+  async globalSearch(
     @Query('q') query: string,
-    @Query('types') types?: string, //filtro por tipo de entidad
-    @Query('genres') genres?: string, //filtro por generos
+    @Query('types') typesRaw?: string,
+    @Query('genres') genresRaw?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    if (!query || query.length < 2) { //limite para evitar busquedas muy cortas
+    if (!query || query.length < 2) {
       return [];
     }
 
+    const types = typesRaw ? typesRaw.split(',').map(t => t.trim()) : undefined;
+    const genres = genresRaw ? genresRaw.split(',').map(g => g.trim()) : undefined;
     const pageNum = page ? +page : undefined;
     const limitNum = limit ? +limit : undefined;
 
-    return this.searchService.globalSearch(query, types, genres, pageNum, limitNum);
+    // construir el objeto filters para Generos
+    const filters: Record<string, any> = {};
+    if (genres && genres.length > 0) {
+      filters.genre = genres;
+    }
+
+    return this.searchService.globalSearch(query, filters, types, pageNum, limitNum);
   }
 }

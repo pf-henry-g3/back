@@ -1,19 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/guards/Auth.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
+  @ApiBearerAuth()
   @Get()
+  @UseGuards(AuthGuard)
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {
       return this.userService.findAll(+page, +limit);

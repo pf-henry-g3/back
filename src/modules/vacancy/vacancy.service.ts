@@ -37,7 +37,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       skip: (page - 1) * limit,
       take: limit,
       relations: {
-        vacancyGenres: true
+        genres: true
       }
     });
 
