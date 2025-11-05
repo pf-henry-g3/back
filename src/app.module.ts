@@ -33,9 +33,12 @@ import { AuthMiddleware } from './middlewares/auth0/auth0.middleware';
     AuthModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+      signOptions: {
+        expiresIn: '1h',
+      },
       global: true,
-    }),]
+    }),
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

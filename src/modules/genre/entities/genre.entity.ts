@@ -19,9 +19,9 @@ export class Genre {
     @ManyToMany(() => User, (user) => user.genres)
     users: User[];
 
-    @ManyToMany(() => Band, (band) => band.bandGenre)
+    @ManyToMany(() => Band, (band) => band.genres)
     bands: Band[];
 
-    @ManyToMany(() => Vacancy, (vacancy) => vacancy.vacancyGenres)
+    @ManyToMany(() => Vacancy, (vacancy) => vacancy.genres)
     vacancies: Vacancy[];
 }
