@@ -70,15 +70,24 @@ export class AuthService {
     return ApiResponse('Success Login. ', data)
   }
 
-
   async syncAuth0User(auth0User: any) {
-    if (!auth0User?.email) {
-      throw new Error('No email found in Auth0 user');
+    let user = await this.usersRepository.findOne({
+      where: { authProviderId: auth0User.sub },
+    });
+
+    if (!user) {
+      user = await this.usersRepository.findOne({
+        where: { email: auth0User.email },
+      });
+
+      if (user) {
+        user.authProviderId = auth0User.sub;
+        await this.usersRepository.save(user);
+        console.log(`Usuario ${user.email} vinculado con Auth0.`);
+        return user;
+      }
     }
 
-    let user = await this.usersRepository.findOne({ where: { email: auth0User.email } });
-
-    //pedirle al usuario si comparte la fecha para agregar birthdat (opcional)
     if (!user) {
       user = this.usersRepository.create({
         email: auth0User.email,
@@ -87,16 +96,11 @@ export class AuthService {
         authProviderId: auth0User.sub,
         urlImage: auth0User.picture,
       });
-      console.log(`Usuario ${auth0User.name} agregado correctamente a la DB. `);
 
       await this.usersRepository.save(user);
+      console.log(`Nuevo usuario ${auth0User.name} agregado correctamente a la DB.`);
     }
-    //Mejorar esta logica    
-    else {
-      console.log("El email ya se encuentra registrado en la base de datos. ");
-      //Si el usuario esta registrado manda un error, tendría que automaticamente iniciar sesion.
-      throw new BadRequestException("El email ya se encuentra registrado en la base de datos.")
-    }
-    return user;
+
+    return ApiResponse('Usuario creado correctamente. ', user);
   }
 }
