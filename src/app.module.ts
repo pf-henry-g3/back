@@ -11,7 +11,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SearchModule } from './modules/search/search.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { AuthMiddleware } from './middlewares/auth0/auth0.middleware';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -39,9 +39,6 @@ import { AuthMiddleware } from './middlewares/auth0/auth0.middleware';
       global: true,
     }),
   ],
+  controllers: [AppController]
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('*')
-  }
-}
+export class AppModule { }
