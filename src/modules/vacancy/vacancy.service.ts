@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import vacancysData from '../../data/vacancy.data.json';
@@ -6,11 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Vacancy } from './entities/vacancy.entity';
 import { ILike, Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
-import e from 'express';
-import { Band } from '../band/entities/band.entity';
 import { Pages } from 'src/enums/pages.enum';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
+import { Genre } from '../genre/entities/genre.entity';
 
 @Injectable()
 export class VacancyService extends AbstractFileUploadService<Vacancy> {
@@ -21,15 +20,32 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
 
-    @InjectRepository(Band)
-    private readonly bandsRepository: Repository<Band>,
+    @InjectRepository(Genre)
+    private readonly genresRepository: Repository<Genre>,
 
     fileUploadService: FileUploadService
   ) { super(fileUploadService, vacancyRepository) }
 
 
-  create(createVacancyDto: CreateVacancyDto) {
-    return 'This action adds a new vacancy';
+  async create(createVacancyDto: CreateVacancyDto, user: User) {
+    //Buscamos los generos de la DB que coincidan con los recibidos
+    const genres = await this.genresRepository.find({
+      where: createVacancyDto.genres.map(name => ({ name })),
+    });
+
+    // Validar que existan todos
+    if (genres.length !== createVacancyDto.genres.length) {
+      throw new BadRequestException('Uno o más géneros no existen en la base de datos.');
+    }
+
+    //Crear la nueva vacante
+    const newVacancy = this.vacancyRepository.create({
+      ...createVacancyDto,
+      owner: { id: user.id },
+      genres,
+    })
+
+    return await this.vacancyRepository.save(newVacancy);
   }
 
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -54,7 +70,26 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
   }
 
   async findOne(id: string) {
-    return await this.vacancyRepository.findOne({ where: { id: id } })
+    let foundVacancy = await this.vacancyRepository.findOne({
+      where: { id: id },
+      relations: {
+        owner: true,
+        genres: true,
+      }
+    });
+
+    if (!foundVacancy) throw new BadRequestException('Vacante no encontrada')
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: foundVacancy?.owner.id },
+      select: ['id', 'userName', 'name', 'email', 'aboutMe', 'averageRating', 'country', 'city']
+    })
+
+    if (!owner) throw new BadRequestException('Usuario no encontrada')
+
+    foundVacancy.owner = owner;
+
+    return { message: 'Vacante encontrada', foundVacancy };
   }
 
   async updateProfilePicture(file: Express.Multer.File, vacancyId: string) {

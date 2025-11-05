@@ -2,7 +2,10 @@ import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, HttpCode 
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/guards/Auth.guard';
+import { AuthGuard } from '../../guards/Auth.guard';
+import { RolesGuard } from '../../guards/Role.guard';
+import { Role } from 'src/enums/roles.enum';
+import { Roles } from 'src/decorators/role.decorator';
 
 @Controller('role')
 export class RoleController {
@@ -17,7 +20,8 @@ export class RoleController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
   create(
     @Body() createRoleDto: CreateRoleDto
@@ -43,7 +47,8 @@ export class RoleController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findAll(
     @Query('page') page?: string,
@@ -79,7 +84,8 @@ export class RoleController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findByName(
     @Query('rolName') rolName: string,
@@ -102,7 +108,8 @@ export class RoleController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(204)
   remove(
     @Param('id') id: string

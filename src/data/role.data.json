@@ -1,5 +1,14 @@
-
 [
-  { "name": "Artist" },
-  { "name": "BandLeader" }
+  {
+    "name": "Artist"
+  },
+  {
+    "name": "BandLeader"
+  },
+  {
+    "name": "Admin"
+  },
+  {
+    "name": "SuperAdmin"
+  }
 ]

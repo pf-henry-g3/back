@@ -3,10 +3,11 @@ import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/guards/Auth.guard';
-import { RolesGuard } from '../auth/guards/Role.guard';
+import { AuthGuard } from '../../guards/Auth.guard';
+import { RolesGuard } from '../../guards/Role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/enums/roles.enum';
+import { SelfIdOrAdminGuard } from '../../guards/SelfIdOrAdmin.guard'
 
 @Controller('user')
 export class UserController {
@@ -30,7 +31,8 @@ export class UserController {
     description: 'Busqueda exitosa con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findAll(
     @Query('page') page?: string,
@@ -43,6 +45,7 @@ export class UserController {
   }
 
   @Get(':id')
+
   @ApiParam({
     name: 'id',
     required: true,
@@ -53,7 +56,8 @@ export class UserController {
     description: 'Busqueda exitosa con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findOne(
     @Param('id') id: string
@@ -72,7 +76,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
@@ -105,7 +109,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(200)
   update(
     @Param('id') id: string,
@@ -125,7 +129,7 @@ export class UserController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(204)
   softDelete(
     @Param('id') id: string

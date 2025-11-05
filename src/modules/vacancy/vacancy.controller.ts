@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/guards/Auth.guard';
+import { AuthGuard } from '../../guards/Auth.guard';
+import { User } from '../user/entities/user.entity';
 
 @Controller('vacancy')
 export class VacancyController {
@@ -22,9 +23,11 @@ export class VacancyController {
   @UseGuards(AuthGuard)
   @HttpCode(201)
   create(
-    @Body() createVacancyDto: CreateVacancyDto
+    @Body() createVacancyDto: CreateVacancyDto,
+    @Req() req
   ) {
-    return this.vacancyService.create(createVacancyDto);
+    const user = req.user as User
+    return this.vacancyService.create(createVacancyDto, user);
   }
 
   @Get()

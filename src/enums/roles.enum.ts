@@ -1,6 +1,6 @@
 export enum Role {
     Admin = 'Admin',
-    SuperAdmin = 'Super Admin',
+    SuperAdmin = 'SuperAdmin',
     Artist = 'Artist',
-    BandLeader = 'Band Leader',
+    BandLeader = 'BandLeader',
 }
