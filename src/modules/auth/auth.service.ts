@@ -12,70 +12,58 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) { }
+
   async signup(createUserDto: CreateUserDto) {
-    if (createUserDto.password !== createUserDto.confirmPassword) {
-      throw new BadRequestException('Las contraseñas no coinciden');
-    }
+    const { confirmPassword, ...userData } = createUserDto
+    console.log(createUserDto.aboutMe);
 
-    const existingUser = await this.userRepository.findOne({
-      where: { email: createUserDto.email },
-      withDeleted: true,
-    });
+    if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
 
-    if (existingUser) {
-      if (existingUser.deleteAt) {
-        existingUser.deleteAt = null;
-        Object.assign(existingUser, createUserDto);
-        return await this.userRepository.save(existingUser);
-      } else {
-        throw new BadRequestException({
-          success: false,
-          message: `El usuario con email ${createUserDto.email} ya se encuentra registrado `,
-          existingUser,
-        });
-      }
-    }
+    const user = await this.usersRepository.findOne({
+      where: [
+        { email: userData.email },
+        { userName: userData.userName }
+      ],
+    })
 
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    if (user) throw new BadRequestException('Usuario ya registrado');
 
-    const { confirmPassword, password, ...userSinPass } = createUserDto;
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    if (!hashedPassword) throw new BadRequestException('La contraseña no se pudo hashear')
 
-    const newUser = await this.userRepository.create({
-      ...userSinPass,
-      password: hashedPassword,
-    });
+    const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
+    await this.usersRepository.save(newUser);
 
-    await this.userRepository.save(newUser)
-
-    const { password: _, ...userResponse } = newUser;
-
-    return ApiResponse('Created User.', newUser);
+    return `Usuario ${userData.userName} creado exitosamente`;
   }
 
   async signin(loginUser: LoginUserDto) {
-    const user = await this.userRepository.findOneBy({ email: loginUser.email });
-    if (!user) {
-      throw new BadRequestException('Credenciales invalidas');
-    }
+    if (!loginUser.email || !loginUser.password) throw new BadRequestException('Email y contraseña obligatorios');
+
+    const user = await this.usersRepository.findOneBy({ email: loginUser.email });
+
+    if (!user) throw new BadRequestException('Credenciales invalidas');
+
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
-    if (!isPasswordValid) {
-      throw new BadRequestException('Credenciales invalidas.');
-    }
+    if (!isPasswordValid) throw new BadRequestException('Credenciales invalidas.');
 
     const payload = {
       sub: user.id, // "sub" es el estándar para el ID del usuario
-      email: user.email
+      email: user.email,
+      roles: user.roles?.map(r => r.name)
     };
+    console.log('usuario', payload)
 
     const token = this.jwtService.sign(payload);
 
-    const { password: _, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
 
-    return ApiResponse('Success Login. ', user)
+    const data = { login: true, access_token: token, userWithoutPassword }
+
+    return ApiResponse('Success Login. ', data)
   }
-
 }
