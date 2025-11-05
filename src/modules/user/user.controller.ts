@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/Auth.guard';
 import { RolesGuard } from '../auth/guards/Role.guard';
 import { Roles } from 'src/decorators/role.decorator';
@@ -12,11 +12,30 @@ import { Role } from 'src/enums/roles.enum';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @ApiBearerAuth()
   @Get()
-  @Roles(Role.Artist)
-  @UseGuards(AuthGuard, RolesGuard)
-  findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página actual para paginación',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados por página',
+    example: '10',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ) {
     if (page && limit) {
       return this.userService.findAll(+page, +limit);
     }
@@ -24,12 +43,37 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario a buscar y relaciones',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  findOne(
+    @Param('id') id: string
+  ) {
     return this.userService.findOne(id, { relations: ['genres'], throwIfNotFound: true });
   }
 
-
   @Patch('photo/:userId')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario que actualiza su foto de perfil',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso actualizado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
     @UploadedFile(
@@ -52,12 +96,41 @@ export class UserController {
 
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario que actualiza sus datos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso actualizado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(200)
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto
+  ) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  softDelete(@Param('id') id: string) {
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario eliminar de forma logica',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Recurso eliminado sin retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
+  softDelete(
+    @Param('id') id: string
+  ) {
     return this.userService.softDelete(id);
   }
 }

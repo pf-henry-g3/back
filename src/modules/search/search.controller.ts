@@ -40,7 +40,7 @@ export class SearchController {
     status: 200,
     description: 'Resultado de búsqueda global filtrado.',
   })
-  async globalSearch(
+  globalSearch(
     @Query('q') query: string,
     @Query('types') typesRaw?: string,
     @Query('genres') genresRaw?: string,
