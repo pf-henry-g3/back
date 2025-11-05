@@ -103,4 +103,11 @@ export class AuthService {
 
     return ApiResponse('Usuario creado correctamente. ', user);
   }
+
+
+  callback() {
+    console.log("OJala se de cueck");
+
+    return 'Esta enpoint debería llegar cuando se realiza un login exitoso. '
+  }
 }

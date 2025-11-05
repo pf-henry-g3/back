@@ -21,4 +21,9 @@ export class AppController {
             return res.json({ message: 'No estás logueado' });
         }
     }
+
+    @Get()
+    async callback() {
+        return this.authService.callback();
+    }
 }

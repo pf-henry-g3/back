@@ -20,7 +20,7 @@ async function bootstrap() {
         // 👇 aquí definís tus rutas personalizadas
         login: '/login',
         logout: '/logout',
-        callback: '/callback'
+        callback: '/callback',
       },
     })
   );
