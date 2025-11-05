@@ -47,6 +47,9 @@ export class AuthService {
 
     if (!user) throw new BadRequestException('Credenciales invalidas');
 
+    if (!user.password)
+      throw new BadRequestException('Este usuario usa autenticación externa. Iniciá sesión con Google o Auth0.');
+
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
     if (!isPasswordValid) throw new BadRequestException('Credenciales invalidas.');
@@ -65,5 +68,35 @@ export class AuthService {
     const data = { login: true, access_token: token, userWithoutPassword }
 
     return ApiResponse('Success Login. ', data)
+  }
+
+
+  async syncAuth0User(auth0User: any) {
+    if (!auth0User?.email) {
+      throw new Error('No email found in Auth0 user');
+    }
+
+    let user = await this.usersRepository.findOne({ where: { email: auth0User.email } });
+
+    //pedirle al usuario si comparte la fecha para agregar birthdat (opcional)
+    if (!user) {
+      user = this.usersRepository.create({
+        email: auth0User.email,
+        name: auth0User.name,
+        userName: auth0User.nickname,
+        authProviderId: auth0User.sub,
+        urlImage: auth0User.picture,
+      });
+      console.log(`Usuario ${auth0User.name} agregado correctamente a la DB. `);
+
+      await this.usersRepository.save(user);
+    }
+    //Mejorar esta logica    
+    else {
+      console.log("El email ya se encuentra registrado en la base de datos. ");
+      //Si el usuario esta registrado manda un error, tendría que automaticamente iniciar sesion.
+      throw new BadRequestException("El email ya se encuentra registrado en la base de datos.")
+    }
+    return user;
   }
 }
