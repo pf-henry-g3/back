@@ -54,109 +54,25 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     };
   }
 
-  async findAllIncludingDeleted(page: number = Pages.Pages, limit: number = Pages.Limit) {
-    let [users, total] = await this.usersRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: {
-        genres: true,
-        memberships: true,
-      },
-      withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-    });
-
-    if (!users) throw new NotFoundException("Usuarios no encontrados");
-
-    let usersWithOutPassword = users.map((user) => {
-      const { password, ...userWithOutPassword } = user;
-      return userWithOutPassword;
-    })
-
-    return {
-      meta: {
-        total,
-        page,
-        limit,
-      },
-      data: usersWithOutPassword,
-    };
-  }
-
-  async findAllDeletedUsers(page: number = Pages.Pages, limit: number = Pages.Limit) {
-    let [users, total] = await this.usersRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: {
-        genres: true,
-        memberships: true,
-      },
-      where: { deleteAt: Not(IsNull()) },
-      withDeleted: true,
-    });
-
-    if (!users) throw new NotFoundException("Usuarios eliminados no encontrados");
-    if (!users.length) throw new NotFoundException("Sin usuarios eliminados");
-
-    let usersWithOutPassword = users.map((user) => {
-      const { password, ...userWithOutPassword } = user;
-      return userWithOutPassword;
-    })
-
-    return {
-      meta: {
-        total,
-        page,
-        limit,
-      },
-      data: usersWithOutPassword,
-    };
-  }
-
-  async findOne(id: string) {
+  async findOne(
+    id: string,
+    options?: {
+      relations?: string[],
+      throwIfNotFound?: boolean
+    }
+  ): Promise<Partial<User> | null> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: {
-        genres: true
-        //bandas
-        //reviews
-        //instrumentos
-        //media
-        //pagos
-        //socialLinks
-      }
+      relations: options?.relations?.reduce((acc, rel) => ({ ...acc, [rel]: true }), {}),
     });
 
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (!user) {
+      if (options?.throwIfNotFound) throw new NotFoundException('Usuario no encontrado');
+      return null;
+    }
 
-    const { password, ...userWithOutPassword } = user;
-
-    return userWithOutPassword;
-  }
-
-  async findOneDeletedUser(id: string) {
-    const user = await this.usersRepository.findOne({
-      where: {
-        id,
-        deleteAt: Not(IsNull()),
-      },
-      relations: {
-        genres: true,
-        roles: true
-        //bandas
-        //reviews
-        //instrumentos
-        //media
-        //pagos
-        //socialLinks
-      },
-      withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-    });
-
-    if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
-
-    const { password, ...userWithOutPassword } = user;
-
-    return userWithOutPassword;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 
   async updateProfilePicture(file: Express.Multer.File, userId: string) {
@@ -254,6 +170,90 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     return `Usuario ${id} eliminado con exito`;
   }
+
+  //   async findAllIncludingDeleted(page: number = Pages.Pages, limit: number = Pages.Limit) {
+  //   let [users, total] = await this.usersRepository.findAndCount({
+  //     skip: (page - 1) * limit,
+  //     take: limit,
+  //     relations: {
+  //       genres: true,
+  //       memberships: true,
+  //     },
+  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
+  //   });
+
+  //   if (!users) throw new NotFoundException("Usuarios no encontrados");
+
+  //   let usersWithOutPassword = users.map((user) => {
+  //     const { password, ...userWithOutPassword } = user;
+  //     return userWithOutPassword;
+  //   })
+
+  //   return {
+  //     meta: {
+  //       total,
+  //       page,
+  //       limit,
+  //     },
+  //     data: usersWithOutPassword,
+  //   };
+  // }
+
+  // async findAllDeletedUsers(page: number = Pages.Pages, limit: number = Pages.Limit) {
+  //   let [users, total] = await this.usersRepository.findAndCount({
+  //     skip: (page - 1) * limit,
+  //     take: limit,
+  //     relations: {
+  //       genres: true,
+  //       memberships: true,
+  //     },
+  //     where: { deleteAt: Not(IsNull()) },
+  //     withDeleted: true,
+  //   });
+
+  //   if (!users) throw new NotFoundException("Usuarios eliminados no encontrados");
+  //   if (!users.length) throw new NotFoundException("Sin usuarios eliminados");
+
+  //   let usersWithOutPassword = users.map((user) => {
+  //     const { password, ...userWithOutPassword } = user;
+  //     return userWithOutPassword;
+  //   })
+
+  //   return {
+  //     meta: {
+  //       total,
+  //       page,
+  //       limit,
+  //     },
+  //     data: usersWithOutPassword,
+  //   };
+  // }
+
+  // async findOneDeletedUser(id: string) {
+  //   const user = await this.usersRepository.findOne({
+  //     where: {
+  //       id,
+  //       deleteAt: Not(IsNull()),
+  //     },
+  //     relations: {
+  //       genres: true,
+  //       roles: true
+  //       //bandas
+  //       //reviews
+  //       //instrumentos
+  //       //media
+  //       //pagos
+  //       //socialLinks
+  //     },
+  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
+  //   });
+
+  //   if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
+
+  //   const { password, ...userWithOutPassword } = user;
+
+  //   return userWithOutPassword;
+  // }
 
   async seedUsers() {
     console.log('⏳ Precargando usuarios...');

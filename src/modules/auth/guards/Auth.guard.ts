@@ -1,20 +1,23 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
 import { Observable } from "rxjs";
+import { UserService } from "src/modules/user/user.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private readonly jwtService: JwtService) { }
+    constructor(
+        private readonly jwtService: JwtService,
+        private readonly usersService: UserService
 
-    canActivate(
-        context: ExecutionContext
-    ): boolean | Promise<boolean> | Observable<boolean> {
+    ) { }
+
+    async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest();
 
         const authHeader = request.headers.authorization;
 
-        if (!authHeader) return false;
+        if (!authHeader) throw new UnauthorizedException('Token de autenticación no proporcionado.');
 
         const token = authHeader.startsWith('Bearer ')
             ? authHeader.slice(7).trim()
@@ -23,21 +26,19 @@ export class AuthGuard implements CanActivate {
         const secret = process.env.JWT_SECRET;
 
         try {
-            const user = this.jwtService.verify(token, { secret });
+            const { sub: userId } = this.jwtService.verify(token, { secret });
 
-            request['user'] = user;
+            const userWithRoles = await this.usersService.findOne(userId, { relations: ['roles'] });
 
-            user.iat = new Date(user.iat * 1000).toLocaleString();
-            user.exp = new Date(user.exp * 1000).toLocaleString();
-            console.log(user);
+            if (!userWithRoles) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
+
+            request['user'] = userWithRoles;
 
         } catch (error) {
             console.log(error);
-
-            return false;
+            throw new UnauthorizedException('Token inválido o expirado.');
         }
 
         return true;
     }
-
 }

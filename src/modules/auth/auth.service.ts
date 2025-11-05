@@ -53,8 +53,10 @@ export class AuthService {
 
     const payload = {
       sub: user.id, // "sub" es el estándar para el ID del usuario
-      email: user.email
+      email: user.email,
+      roles: user.roles?.map(r => r.name)
     };
+    console.log('usuario', payload)
 
     const token = this.jwtService.sign(payload);
 
@@ -64,5 +66,4 @@ export class AuthService {
 
     return ApiResponse('Success Login. ', data)
   }
-
 }

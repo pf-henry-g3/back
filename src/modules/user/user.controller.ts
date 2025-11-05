@@ -4,6 +4,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guards/Auth.guard';
+import { RolesGuard } from '../auth/guards/Role.guard';
+import { Roles } from 'src/decorators/role.decorator';
+import { Role } from 'src/enums/roles.enum';
 
 @Controller('user')
 export class UserController {
@@ -11,7 +14,8 @@ export class UserController {
 
   @ApiBearerAuth()
   @Get()
-  @UseGuards(AuthGuard)
+  @Roles(Role.Artist)
+  @UseGuards(AuthGuard, RolesGuard)
   findAll(@Query('page') page?: string, @Query('limit') limit?: string) {
     if (page && limit) {
       return this.userService.findAll(+page, +limit);
@@ -21,7 +25,7 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+    return this.userService.findOne(id, { relations: ['genres'], throwIfNotFound: true });
   }
 
 
