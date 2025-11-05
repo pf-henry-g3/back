@@ -16,7 +16,6 @@ export class CreateVacancyDto {
     })
     @IsString()
     @IsNotEmpty()
-    @MaxLength(50)
     vacancyDescription: string
 
     @ApiProperty({
@@ -32,14 +31,7 @@ export class CreateVacancyDto {
     })
     @IsString()
     @MaxLength(50)
-    owerType?: string
-
-    @ApiProperty({
-        example: "UUID",
-        description: 'Id del usuario propietario de la vacante'
-    })
-    @IsString()
-    owerId?: string;
+    vacancyType?: string
 
     @ApiProperty({
         example: ['Rock', 'Reggae', 'Jazz'],

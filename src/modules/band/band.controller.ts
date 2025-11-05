@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -6,7 +6,8 @@ import { UpdateBandDto } from './dto/update-band.dto';
 import { AddMemberDto } from './dto/add-member.dto';
 import { UUID } from 'typeorm/driver/mongodb/bson.typings.js';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { AuthGuard } from '../auth/guards/Auth.guard';
+import { AuthGuard } from '../../guards/Auth.guard';
+import { User } from '../user/entities/user.entity';
 
 @Controller('band')
 export class BandController {
@@ -24,9 +25,11 @@ export class BandController {
   @UseGuards(AuthGuard)
   @HttpCode(201)
   create(
-    @Body() createBandDto: CreateBandDto
+    @Body() createBandDto: CreateBandDto,
+    @Req() req
   ) {
-    return this.bandsService.create(createBandDto);
+    const user = req.user as User
+    return this.bandsService.create(createBandDto, user);
   }
 
   @Patch(':id')
