@@ -2,10 +2,22 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { auth } from 'express-openid-connect'
 import morgan from 'morgan';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
+  app.use(
+    auth({
+      authRequired: false,
+      auth0Logout: true,
+      secret: process.env.AUTH0_SECRET,
+      baseURL: process.env.BASE_URL,
+      clientID: process.env.AUTH0_CLIENT_ID,
+      issuerBaseURL: process.env.AUTH0_ISSUER,
+    }),
+  );
 
   app.use(morgan('dev'))
 
@@ -33,6 +45,7 @@ async function bootstrap() {
     'http://localhost:3001',
     'http://localhost:3000',
     'http://localhost:3013',
+    'https://syncroapp.us.auth0.com',
     process.env.FRONTEND_URL,
   ];
 
