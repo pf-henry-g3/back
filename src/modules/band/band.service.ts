@@ -60,7 +60,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const randomLeader = allUsers[Math.floor(Math.random() * allUsers.length)]
         band.leader = randomLeader
 
-        band.bandGenre = genres;
+        band.genres = genres;
 
         return this.bandsRepository.save(band);
     }
@@ -69,7 +69,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const bandExisting = await this.bandsRepository.findOne({
             where: { id },
             relations: {
-                bandGenre: true,
+                genres: true,
                 bandMembers: true
             }
         });
@@ -89,14 +89,14 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 throw new BadRequestException(`Algunos generos agregados no existen. Generos invalidos: ${notFoundNames.join(', ')}`)
             }
 
-            const existingGenres = new Set(bandExisting.bandGenre.map(genre => genre.id));
+            const existingGenres = new Set(bandExisting.genres.map(genre => genre.id));
 
             const genresToMerge = foundGenres.filter(
                 genre => !existingGenres.has(genre.id)
             );
 
-            const updatedGenres = [...bandExisting.bandGenre, ...genresToMerge];
-            bandExisting.bandGenre = updatedGenres;
+            const updatedGenres = [...bandExisting.genres, ...genresToMerge];
+            bandExisting.genres = updatedGenres;
         }
 
         Object.assign(bandExisting, updatebandDto);
@@ -109,7 +109,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
             skip: (page - 1) * limit,
             take: limit,
             relations: {
-                bandGenre: true,
+                genres: true,
                 bandMembers: true
             }
         });
@@ -123,7 +123,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const band = await this.bandsRepository.findOne({
             where: { id },
             relations: {
-                bandGenre: true,
+                genres: true,
                 bandMembers: true,
                 // bandDescription: true,
             },
@@ -184,7 +184,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 formationDate: bandData.formationDate
             });
 
-            newBand.bandGenre = genres;
+            newBand.genres = genres;
 
             await this.bandsRepository.save(newBand);
             console.log(`🎸 Banda "${bandData.bandName}" creada.`);

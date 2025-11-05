@@ -1,7 +1,7 @@
 [
   {
     "email": "rock.singer@mail.com",
-    "password": "securePass123",
+    "password": "securePass123!",
     "confirmPassword": "securePass123",
     "userName": "RockStar45",
     "birthDate": "1988-05-15",
@@ -24,7 +24,7 @@
   },
   {
     "email": "jazz.drummer@mail.com",
-    "password": "drummerPass456",
+    "password": "drummerPass456!",
     "confirmPassword": "drummerPass456",
     "userName": "RhythmKing",
     "birthDate": "1995-11-22",
@@ -46,7 +46,7 @@
   },
   {
     "email": "classic.guitar@mail.com",
-    "password": "guitarPass789",
+    "password": "guitarPass789!",
     "confirmPassword": "guitarPass789",
     "userName": "SixStringer",
     "birthDate": "1975-01-30",
@@ -67,7 +67,7 @@
   },
   {
     "email": "pop.bassist@mail.com",
-    "password": "bassPass101",
+    "password": "bassPass101!",
     "confirmPassword": "bassPass101",
     "userName": "BassGroove",
     "birthDate": "2000-08-01",
@@ -89,7 +89,7 @@
   },
   {
     "email": "electronic.producer@mail.com",
-    "password": "synthPass202",
+    "password": "synthPass202!",
     "confirmPassword": "synthPass202",
     "userName": "DigitalSound",
     "birthDate": "1992-04-12",
@@ -110,7 +110,7 @@
   },
   {
     "email": "metal.vocal@mail.com",
-    "password": "screamPass303",
+    "password": "screamPass303!",
     "confirmPassword": "screamPass303",
     "userName": "MetalScreamer",
     "birthDate": "1985-12-05",
@@ -133,7 +133,7 @@
   },
   {
     "email": "reggae.keyboard@mail.com",
-    "password": "reggaePass404",
+    "password": "reggaePass404!",
     "confirmPassword": "reggaePass404",
     "userName": "DubMaster",
     "birthDate": "1979-07-25",
@@ -154,7 +154,7 @@
   },
   {
     "email": "country.fiddle@mail.com",
-    "password": "fiddlePass505",
+    "password": "fiddlePass505!",
     "confirmPassword": "fiddlePass505",
     "userName": "FiddlePlayer",
     "birthDate": "1998-03-17",
@@ -175,7 +175,7 @@
   },
   {
     "email": "punk.guitarist@mail.com",
-    "password": "punkPass606",
+    "password": "punkPass606!",
     "confirmPassword": "punkPass606",
     "userName": "PowerChord",
     "birthDate": "1990-10-10",
@@ -197,7 +197,7 @@
   },
   {
     "email": "session.musician@mail.com",
-    "password": "proPass707",
+    "password": "proPass707!",
     "confirmPassword": "proPass707",
     "userName": "ProSession",
     "birthDate": "1980-06-28",

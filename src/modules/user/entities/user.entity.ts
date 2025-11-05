@@ -12,6 +12,13 @@ export class User {
 
   @Column({
     type: 'varchar',
+    length: 100,
+    nullable: false,
+  })
+  name: string;
+
+  @Column({
+    type: 'varchar',
     length: 50,
     nullable: false,
     unique: true,
@@ -21,9 +28,9 @@ export class User {
   @Column({
     type: 'varchar',
     length: 100,
-    nullable: false,
+    nullable: true,
   })
-  password: string;
+  password: string | null;
 
   @Column({
     type: 'varchar',
@@ -34,17 +41,17 @@ export class User {
   userName: string;
 
   @Column({
-    type: 'date',
-    nullable: false,
+    type: 'varchar',
+    nullable: true,
+    default: null
   })
-  birthDate: Date;
+  authProviderId: string | null;
 
   @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: false,
+    type: 'date',
+    nullable: true,
   })
-  name: string;
+  birthDate: Date | null;
 
   @Column({
     type: "text",
