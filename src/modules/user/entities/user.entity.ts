@@ -142,4 +142,7 @@ export class User {
     nullable: true,
   })
   deleteAt: Date | null;
+
+  @Column({ default: false })
+  isVerified: boolean;
 }
