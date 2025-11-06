@@ -49,8 +49,10 @@ export class AuthController {
 
   @Post('auth0/callback')
   @UseGuards(Auth0Guard) //El guard Verifica el token
-  async auth0Callback(@Req() req: any) {
-    return this.authService.syncAuth0User(req.auth0User); //Sincorniza con el user de la db
+  async auth0Callback(
+    @Req() req: any,
+    @Body() userFront) {
+    return this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
   }
 
   //SignOut ?

@@ -135,25 +135,24 @@ export class AuthService {
     return ApiResponse('Success Login. ', data)
   }
 
-  async syncAuth0User(auth0Payload: any) {
-    // auth0Payload viene del token verificado (sub, email, name, etc.)
+  async syncAuth0User(auth0Payload: any, userFront) {
+    userFront = userFront.user
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: auth0Payload.sub },
-      relations: ['roles'],
+      where: { authProviderId: auth0Payload.sub }
     });
+
 
     if (!user) {
       user = await this.usersRepository.findOne({
-        where: { email: auth0Payload.email },
-        relations: ['roles'],
+        where: { email: userFront.email }
       });
 
       if (user) {
         user.authProviderId = auth0Payload.sub;
 
-        if (auth0Payload.picture) user.urlImage = auth0Payload.picture;
-        if (auth0Payload.name && !user.name) user.name = auth0Payload.name;
+        if (userFront.picture) user.urlImage = userFront.picture;
+        if (userFront.name && !user.name) user.name = userFront.name;
 
         user.isVerified = true;
 
@@ -164,8 +163,8 @@ export class AuthService {
 
     // Creo nuevo usuario desde Auth0
     if (!user) {
-      const baseUsername = auth0Payload.nickname || auth0Payload.email.split('@')[0];
-      let userName = baseUsername;
+      const baseUsername = userFront.nickname || userFront.email.split('@')[0];
+      let userName = userFront.nickname;
       let counter = 1;
 
       // Verificar que userName sea único
@@ -175,17 +174,17 @@ export class AuthService {
       }
 
       user = this.usersRepository.create({
-        email: auth0Payload.email,
-        name: auth0Payload.name || auth0Payload.nickname,
+        email: userFront.email,
+        name: userFront.name || userFront.nickname,
         userName,
         authProviderId: auth0Payload.sub,
-        urlImage: auth0Payload.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        urlImage: userFront.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,
       });
 
       await this.usersRepository.save(user);
-      console.log(`Nuevo usuario ${auth0Payload.email} creado desde Auth0.`);
+      console.log(`Nuevo usuario ${userFront.email} creado desde Auth0.`);
     }
 
     // Generar mi propio JWT para mantener sesión
