@@ -136,6 +136,9 @@ export class AuthService {
   }
 
   async syncAuth0User(auth0Payload: any, userFront) {
+
+    console.log(auth0Payload, userFront);
+
     userFront = userFront.user
 
     let user = await this.usersRepository.findOne({
@@ -198,10 +201,8 @@ export class AuthService {
 
     const { password, ...userWithoutPassword } = user;
 
-    return ApiResponse('Autenticación exitosa con Auth0', {
-      login: true,
-      access_token: token,
-      user: userWithoutPassword,
-    });
+    const data = { login: true, access_token: token, userWithoutPassword }
+
+    return ApiResponse('Autenticación exitosa con Auth0', data);
   }
 }
