@@ -12,7 +12,9 @@ import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.s
 import { UpdateBandDto } from './dto/update-band.dto';
 import { BandMember } from './entities/bandMember.entity';
 import { AddMemberDto } from './dto/add-member.dto';
-import { ApiResponse } from 'src/helper/api-response';
+import { ApiResponse } from 'src/common/utils/api-response';
+import { plainToInstance } from 'class-transformer';
+import { BandResponseDto } from './dto/band-response.dto';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -108,6 +110,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
             skip: (page - 1) * limit,
             take: limit,
             relations: {
+                leader: { roles: true, genres: true },
                 genres: true,
                 bandMembers: true
             }
@@ -115,7 +118,11 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         if (!bands) throw new NotFoundException('Bandas no encontrado');
 
-        return ApiResponse('Bandas encontradas.', bands, { total, page, limit })
+        const transformedBands = plainToInstance(BandResponseDto, bands, {
+            excludeExtraneousValues: true,
+        })
+
+        return ApiResponse('Bandas encontradas.', transformedBands, { total, page, limit })
     }
 
     async findOne(id: string) {

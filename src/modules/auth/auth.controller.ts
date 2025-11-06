@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, Get, Req, Param, Query } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get, Req, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -32,16 +32,6 @@ export class AuthController {
   @HttpCode(200)
   signin(@Body() loginUserDto: LoginUserDto) {
     return this.authService.signin(loginUserDto);
-  }
-
-  @Post('verify-email')
-  verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('resend-verification')
-  resendVerification(@Body('email') email: string) {
-    return this.authService.resendVerificationEmail(email);
   }
 
   //SignOut ?
