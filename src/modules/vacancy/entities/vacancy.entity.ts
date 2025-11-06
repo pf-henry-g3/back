@@ -41,7 +41,7 @@ export class Vacancy {
 
     @ManyToMany(() => Genre, genre => genre.vacancies, { eager: true })
     @JoinTable({ name: 'vacancyGenres' })
-    vacancyGenres: Genre[];
+    genres: Genre[];
 
     // muchas vacantes {pertenecen} un usuario 
     @ManyToOne(() => User, (user) => user.vacancies, {

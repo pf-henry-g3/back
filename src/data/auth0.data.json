@@ -1,0 +1,14 @@
+{
+    "message": "Bienvenido 🎉",
+    "user": {
+        "sid": "c-YxgqXXBOLGCYabVWvbk1BWEahYiOn7",
+        "given_name": "Proyecto",
+        "nickname": "pf.henry.g3",
+        "name": "Proyecto",
+        "picture": "https://lh3.googleusercontent.com/a/ACg8ocKQTh7XaQuyePeEatYnYk0CWJHWqvNlyJxMnwB2-0FgwHI6pw=s96-c",
+        "updated_at": "2025-11-05T13:24:17.701Z",
+        "email": "pf.henry.g3@gmail.com",
+        "email_verified": true,
+        "sub": "google-oauth2|114048161916446092299"
+    }
+}

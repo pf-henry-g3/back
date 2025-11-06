@@ -8,9 +8,13 @@ import { User } from '../user/entities/user.entity';
 import { Genre } from '../genre/entities/genre.entity';
 import { Role } from '../role/entities/role.entity';
 import { FileUploadModule } from '../file-upload/file-upload.module';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
+    AuthModule,
+    UserModule,
     TypeOrmModule.forFeature([Vacancy, Band, User, Genre, Role]),
     FileUploadModule,
   ],

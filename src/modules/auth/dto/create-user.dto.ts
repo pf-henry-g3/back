@@ -5,7 +5,6 @@ import {
     IsNotEmpty,
     IsNumber,
     IsOptional,
-    isString,
     IsString,
     IsStrongPassword,
     MaxLength,
@@ -84,70 +83,74 @@ export class CreateUserDto {
     @MaxLength(80, { message: 'El nombre no puede tener mas de 80 caracteres' })
     name: string;
 
-    //validaciones innecesarias por ahora
-    @IsString()
+    @ApiProperty({
+        example: "Vocalista apasionado por el rock alternativo. Buscando músicos para una banda de covers.",
+        description: "Biografia del usuario",
+        required: false,
+    })
+    @IsString({ message: 'La descripcion debe ser un string' })
     @IsOptional()
     aboutMe?: string;
 
-    // @ApiProperty({
-    //     example: "Buenos Aires",
-    //     description: "Ciudad de residencia",
-    //     required: false,
-    // })
-    @IsString()
+    @ApiProperty({
+        example: "Buenos Aires",
+        description: "Ciudad de residencia",
+        required: false,
+    })
+    @IsString({ message: 'La ciudad debe ser un string' })
     @IsOptional()
     city?: string;
 
-    // @ApiProperty({
-    //     example: "Argentina",
-    //     description: "País de residencia"
-    // })
-    @IsString()
+    @ApiProperty({
+        example: "Argentina",
+        description: "País de residencia"
+    })
+    @IsString({ message: 'El pais debe ser un string' })
     @IsOptional()
     country?: string;
 
-    // @ApiProperty({
-    //     example: 4.5,
-    //     description: "Calificación promedio del usuario (opcional)",
-    //     required: false,
-    // })
+    @ApiProperty({
+        example: 4.5,
+        description: "Calificación promedio del usuario calculada desde las reviews",
+        required: false,
+    })
     @IsNumber()
     @IsOptional()
     averageRating?: number;
 
-    // @ApiProperty({
-    //     example: "Av. Corrientes 1234",
-    //     description: "Dirección física (opcional)",
-    //     required: false,
-    // })
-    @IsString()
+    @ApiProperty({
+        example: "Av. Corrientes 1234",
+        description: "Dirección física",
+        required: false,
+    })
+    @IsString({ message: 'La direccion debe ser un string' })
     @IsOptional()
     address?: string;
 
-    // @ApiProperty({
-    //     example: -34.6037,
-    //     description: "Latitud geográfica (opcional)",
-    //     required: false,
-    // })
+    @ApiProperty({
+        example: -34.6037,
+        description: "Latitud geográfica",
+        required: false,
+    })
     @IsNumber()
     @IsOptional()
     latitude?: number;
 
-    // @ApiProperty({
-    //     example: -58.3816,
-    //     description: "Longitud geográfica (opcional)",
-    //     required: false,
-    // })
+    @ApiProperty({
+        example: -58.3816,
+        description: "Longitud geográfica",
+        required: false,
+    })
     @IsNumber()
     @IsOptional()
     longitude?: number;
 
-    // @ApiProperty({
-    //     example: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg",
-    //     description: "URL de la foto de perfil (opcional)",
-    //     required: false,
-    // })
-    @IsString()
+    @ApiProperty({
+        example: "https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg",
+        description: "URL de la foto de perfil",
+        required: false,
+    })
+    @IsString({ message: 'La URL de la imagen ser un string' })
     @IsOptional()
     profilePicture?: string;
 }
