@@ -135,37 +135,74 @@ export class AuthService {
     return ApiResponse('Success Login. ', data)
   }
 
-  async syncAuth0User(auth0User: any) {
+  async syncAuth0User(auth0Payload: any) {
+    // auth0Payload viene del token verificado (sub, email, name, etc.)
+
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: auth0User.sub },
+      where: { authProviderId: auth0Payload.sub },
+      relations: ['roles'],
     });
 
     if (!user) {
       user = await this.usersRepository.findOne({
-        where: { email: auth0User.email },
+        where: { email: auth0Payload.email },
+        relations: ['roles'],
       });
 
       if (user) {
-        user.authProviderId = auth0User.sub;
+        user.authProviderId = auth0Payload.sub;
+
+        if (auth0Payload.picture) user.urlImage = auth0Payload.picture;
+        if (auth0Payload.name && !user.name) user.name = auth0Payload.name;
+
+        user.isVerified = true;
+
         await this.usersRepository.save(user);
         console.log(`Usuario ${user.email} vinculado con Auth0.`);
-        return user;
       }
     }
 
+    // Creo nuevo usuario desde Auth0
     if (!user) {
+      const baseUsername = auth0Payload.nickname || auth0Payload.email.split('@')[0];
+      let userName = baseUsername;
+      let counter = 1;
+
+      // Verificar que userName sea único
+      while (await this.usersRepository.findOne({ where: { userName } })) {
+        userName = `${baseUsername}${counter}`; //agrega numero despues del username existente
+        counter++;
+      }
+
       user = this.usersRepository.create({
-        email: auth0User.email,
-        name: auth0User.name,
-        userName: auth0User.nickname,
-        authProviderId: auth0User.sub,
-        urlImage: auth0User.picture,
+        email: auth0Payload.email,
+        name: auth0Payload.name || auth0Payload.nickname,
+        userName,
+        authProviderId: auth0Payload.sub,
+        urlImage: auth0Payload.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        password: null,
+        isVerified: true,
       });
 
       await this.usersRepository.save(user);
-      console.log(`Nuevo usuario ${auth0User.name} agregado correctamente a la DB.`);
+      console.log(`Nuevo usuario ${auth0Payload.email} creado desde Auth0.`);
     }
 
-    return ApiResponse('Usuario creado correctamente. ', user);
+    // Generar mi propio JWT para mantener sesión
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      roles: user.roles?.map(r => r.name) || [],
+    };
+
+    const token = this.jwtService.sign(payload);
+
+    const { password, ...userWithoutPassword } = user;
+
+    return ApiResponse('Autenticación exitosa con Auth0', {
+      login: true,
+      access_token: token,
+      user: userWithoutPassword,
+    });
   }
 }

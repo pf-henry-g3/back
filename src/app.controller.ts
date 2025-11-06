@@ -7,18 +7,25 @@ import { AuthService } from './modules/auth/auth.service';
 export class AppController {
     constructor(private readonly authService: AuthService) { }
 
-    @Get()
+    @Get('checkcallback')
     async getRoot(@Req() req, @Res() res: Response) {
-        if (req.oidc?.isAuthenticated()) {
-            await this.authService.syncAuth0User(req.oidc.user);
+        console.log({
+            message: "Llega perfectamente a checkcallback y muestro req and res",
+            req: req,
+            res: res
+        });
 
-            // Luego podés redirigir al front o devolver datos
-            return res.json({
-                message: 'Bienvenido 🎉',
-                user: req.oidc.user,
-            });
-        } else {
-            return res.json({ message: 'No estás logueado' });
-        }
+
+        // if (req.oidc?.isAuthenticated()) {
+        //     await this.authService.syncAuth0User(req.oidc.user);
+
+        //     // Luego podés redirigir al front o devolver datos
+        //     return res.json({
+        //         message: 'Bienvenido 🎉',
+        //         user: req.oidc.user,
+        //     });
+        // } else {
+        //     return res.json({ message: 'No estás logueado' });
+        // }
     }
 }
