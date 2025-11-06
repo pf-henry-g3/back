@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, Get, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Get, Req, Param, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -17,8 +17,8 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(201)
-  async signup(@Body() createUserDto: CreateUserDto) {
-    return await this.authService.signup(createUserDto);
+  signup(@Body() createUserDto: CreateUserDto) {
+    return this.authService.signup(createUserDto);
   }
 
   @Post('signin')
@@ -30,8 +30,18 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(200)
-  async signin(@Body() loginUserDto: LoginUserDto) {
+  signin(@Body() loginUserDto: LoginUserDto) {
     return this.authService.signin(loginUserDto);
+  }
+
+  @Post('verify-email')
+  verifyEmail(@Query('token') token: string) {
+    return this.authService.verifyEmail(token);
+  }
+
+  @Post('resend-verification')
+  resendVerification(@Body('email') email: string) {
+    return this.authService.resendVerificationEmail(email);
   }
 
   //SignOut ?

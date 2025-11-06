@@ -12,6 +12,7 @@ import { SearchModule } from './modules/search/search.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { AppController } from './app.controller';
+import { MailerConfigModule } from './modules/mailer/mailer.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AppController } from './app.controller';
       },
       global: true,
     }),
+    MailerConfigModule,
   ],
   controllers: [AppController]
 })
