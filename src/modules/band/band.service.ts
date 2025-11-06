@@ -32,44 +32,43 @@ export class BandsService extends AbstractFileUploadService<Band> {
         fileUploadService: FileUploadService,
     ) { super(fileUploadService, bandsRepository) }
 
-    async create(createBandDto: CreateBandDto) {
+    async create(createBandDto: CreateBandDto, user: User) {
+        //Buscamos que la banda no exista
         const bandExisting = await this.bandsRepository.findOneBy({
-            bandName: createBandDto.name
+            bandName: createBandDto.bandName
         })
         if (bandExisting) {
-            throw new BadRequestException(`La banda ${createBandDto.name} ya existe.`)
+            throw new BadRequestException(`La banda ${createBandDto.bandName} ya existe.`)
         }
-        const genres = (
-            await Promise.all(
-                createBandDto.genreIds.map(async (genre) => {
-                    return this.genresRepository.findOne({
-                        where: { id: genre },
-                    });
-                }),
-            )
-        ).filter((genre): genre is Genre => genre !== null);
 
-        const band = this.bandsRepository.create({
-            bandName: createBandDto.name,
-            bandDescription: createBandDto.description,
-            formationDate: new Date(createBandDto.formationDate)
+        //Buscamos los generos de la DB que coincidan con los recibidos
+        const genres = await this.genresRepository.find({
+            where: createBandDto.genres.map(name => ({ name })),
         });
 
-        //El usuario se genera random de la DB (Solo para agilizar en desarrollo, luego lo hacemos con el usuario logueado)
-        const allUsers = await this.usersRepository.find();
-        const randomLeader = allUsers[Math.floor(Math.random() * allUsers.length)]
-        band.leader = randomLeader
+        // Validar que existan todos
+        if (genres.length !== createBandDto.genres.length) {
+            throw new BadRequestException('Uno o más géneros no existen en la base de datos.');
+        }
 
-        band.bandGenre = genres;
+        // Crear la nueva banda
+        const newBand = this.bandsRepository.create({
+            ...createBandDto,
+            formationDate: new Date(createBandDto.formationDate),
+            leader: { id: user.id },
+            genres,
+        })
 
-        return this.bandsRepository.save(band);
+        await this.bandsRepository.save(newBand);
+
+        return newBand;
     }
 
     async update(id: string, updatebandDto: UpdateBandDto) {
         const bandExisting = await this.bandsRepository.findOne({
             where: { id },
             relations: {
-                bandGenre: true,
+                genres: true,
                 bandMembers: true
             }
         });
@@ -89,14 +88,14 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 throw new BadRequestException(`Algunos generos agregados no existen. Generos invalidos: ${notFoundNames.join(', ')}`)
             }
 
-            const existingGenres = new Set(bandExisting.bandGenre.map(genre => genre.id));
+            const existingGenres = new Set(bandExisting.genres.map(genre => genre.id));
 
             const genresToMerge = foundGenres.filter(
                 genre => !existingGenres.has(genre.id)
             );
 
-            const updatedGenres = [...bandExisting.bandGenre, ...genresToMerge];
-            bandExisting.bandGenre = updatedGenres;
+            const updatedGenres = [...bandExisting.genres, ...genresToMerge];
+            bandExisting.genres = updatedGenres;
         }
 
         Object.assign(bandExisting, updatebandDto);
@@ -109,7 +108,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
             skip: (page - 1) * limit,
             take: limit,
             relations: {
-                bandGenre: true,
+                genres: true,
                 bandMembers: true
             }
         });
@@ -120,22 +119,51 @@ export class BandsService extends AbstractFileUploadService<Band> {
     }
 
     async findOne(id: string) {
-        const band = await this.bandsRepository.findOne({
-            where: { id },
-            relations: {
-                bandGenre: true,
-                bandMembers: true,
-                // bandDescription: true,
+        const band = await this.bandsRepository
+            .createQueryBuilder('band')
+            .leftJoinAndSelect('band.genres', 'genre')
+            .leftJoinAndSelect('band.leader', 'leader')
+            .leftJoinAndSelect('band.bandMembers', 'bandMember', 'bandMember.departureDate IS NULL')
+            .leftJoinAndSelect('bandMember.user', 'memberUser')
+            .where('band.id = :id', { id })
+            .getOne();
+
+        if (!band) throw new NotFoundException('Banda no encontrada');
+
+        const bandData = {
+            id: band.id,
+            name: band.bandName,
+            description: band.bandDescription,
+            formationDate: band.formationDate,
+            image: band.urlImage,
+            genres: band.genres.map((g) => g.name),
+            leader: {
+                id: band.leader.id,
+                userName: band.leader.userName,
+                name: band.leader.name,
+                email: band.leader.email,
+                aboutMe: band.leader.aboutMe,
+                averageRating: band.leader.averageRating,
+                country: band.leader.country,
+                city: band.leader.city,
             },
-        });
+            members: band.bandMembers.map((bm) => ({
+                id: bm.id,
+                entryDate: bm.entryDate,
+                user: {
+                    id: bm.user.id,
+                    userName: bm.user.userName,
+                    name: bm.user.name,
+                    email: bm.user.email,
+                    aboutMe: bm.user.aboutMe,
+                    averageRating: bm.user.averageRating,
+                    country: bm.user.country,
+                    city: bm.user.city,
+                },
+            })),
+        };
 
-        if (!band) {
-            throw new NotFoundException('Banda no encontrada');
-        }
-
-        const { ...bandData } = band;
-
-        return ApiResponse('Bandas encontradas. ', bandData)
+        return ApiResponse('Banda encontrada. ', bandData)
     }
 
     async updateProfilePicture(file: Express.Multer.File, bandId: string) {
@@ -184,7 +212,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 formationDate: bandData.formationDate
             });
 
-            newBand.bandGenre = genres;
+            newBand.genres = genres;
 
             await this.bandsRepository.save(newBand);
             console.log(`🎸 Banda "${bandData.bandName}" creada.`);
@@ -197,39 +225,55 @@ export class BandsService extends AbstractFileUploadService<Band> {
     async addOneMember(bandId: string, addMemberDto: AddMemberDto) {
         //Por ahora se agregarán miembors de la banda de a uno con este endpoint
         const band = await this.bandsRepository.findOne({
-            where: {
-                id: bandId
-            },
+            where: { id: bandId },
             relations: {
                 bandMembers: true
             }
         })
         if (!band) {
-            throw new NotFoundException(`No se encontró una banda con el id especificado`)
+            throw new NotFoundException(`Banda no encontrada`)
         }
 
         const user = await this.usersRepository.findOneBy({ userName: addMemberDto.userName })
-        if (!user) {
-            throw new NotFoundException(`Usuario ${addMemberDto.userName} no encontrado`)
-        }
+
+        if (!user) throw new NotFoundException(`Usuario ${addMemberDto.userName} no encontrado`)
+
+        const alreadyMember = band.bandMembers.some(
+            (bandMember) => bandMember.user.id === user.id && bandMember.departureDate === null,
+        );
+
+        if (alreadyMember) throw new BadRequestException(`El usuario ya es miembro activo de la banda.`);
 
         const newMember = this.memberRepository.create({
-            band: band,
-            user: user,
-            entryDate: new Date()
+            band: { id: band.id },
+            user: { id: user.id },
+            entryDate: new Date(),
         })
-        const bandMember = await this.memberRepository.save(newMember)
 
-        band.bandMembers.push(bandMember)
+        const savedMember = await this.memberRepository.save(newMember)
+
+        band.bandMembers.push(savedMember);
+
         await this.bandsRepository.save(band);
 
 
         const data = {
             band: band.id,
-            members: band.bandMembers,
-            newMember: user.id
-
-        }
+            newMember: {
+                id: savedMember.id,
+                entryDate: savedMember.entryDate,
+                user: {
+                    id: user.id,
+                    userName: user.userName,
+                    name: user.name,
+                    email: user.email,
+                    aboutMe: user.aboutMe,
+                    averageRating: user.averageRating,
+                    country: user.country,
+                    city: user.city,
+                },
+            },
+        };
 
         return ApiResponse('Miembro de la banda agregado. ', data)
     }
