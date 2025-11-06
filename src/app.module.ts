@@ -9,6 +9,7 @@ import { VacancyModule } from './modules/vacancy/vacancy.module';
 import { SeederModule } from './modules/seeder/seeder.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SearchModule } from './modules/search/search.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SearchModule } from './modules/search/search.module';
     RoleModule,
     SeederModule,
     FileUploadModule,
-    SearchModule]
+    SearchModule,
+    PaymentModule]
 })
 export class AppModule { }
