@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
+import { Auth0Guard } from './guards/Auth0.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +22,7 @@ export class AuthController {
     return this.authService.signup(createUserDto);
   }
 
+
   @Post('signin')
   @ApiProperty({
     description: 'Login de un usuario',
@@ -32,6 +34,14 @@ export class AuthController {
   @HttpCode(200)
   signin(@Body() loginUserDto: LoginUserDto) {
     return this.authService.signin(loginUserDto);
+  }
+
+  @Post('auth0/callback')
+  @UseGuards(Auth0Guard) //El guard Verifica el token
+  async auth0Callback(
+    @Req() req: any,
+    @Body() userFront) {
+    return this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
   }
 
   //SignOut ?
