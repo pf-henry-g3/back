@@ -8,6 +8,7 @@ import { UUID } from 'typeorm/driver/mongodb/bson.typings.js';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/Auth.guard';
 import { User } from '../user/entities/user.entity';
+import { VerifiedUserGuard } from 'src/guards/VerifiedUser.guard';
 
 @Controller('band')
 export class BandController {

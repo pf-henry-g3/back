@@ -36,17 +36,6 @@ export class AuthController {
     return this.authService.signin(loginUserDto);
   }
 
-
-  @Post('verify-email')
-  verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
-  }
-
-  @Post('resend-verification')
-  resendVerification(@Body('email') email: string) {
-    return this.authService.resendVerificationEmail(email);
-  }
-
   @Post('auth0/callback')
   @UseGuards(Auth0Guard) //El guard Verifica el token
   async auth0Callback(
