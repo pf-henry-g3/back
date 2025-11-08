@@ -64,7 +64,7 @@ export class UserController {
     return this.userVerificationService.verifyEmail(token);
   }
 
-  @Post('resend-verification')
+  @Post('send-verification')
   @ApiProperty({
     description: 'Reenviar email al usuario',
   })
