@@ -9,7 +9,7 @@ export class SelfIdOrAdminGuard implements CanActivate {
     canActivate(
         context: ExecutionContext
     ): boolean | Promise<boolean> | Observable<boolean> {
-        const request: Request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest();
         const user = request.user as User;
         const targetId = request.params.id;
 

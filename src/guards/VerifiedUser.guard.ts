@@ -8,7 +8,7 @@ export class VerifiedUserGuard implements CanActivate {
     canActivate(
         context: ExecutionContext
     ): boolean | Promise<boolean> | Observable<boolean> {
-        const request: Request = context.switchToHttp().getRequest();
+        const request = context.switchToHttp().getRequest();
         const user = request.user as User;
 
         if (!user) throw new ForbiddenException('Usuario no autenticado');
