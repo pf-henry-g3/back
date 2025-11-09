@@ -1,0 +1,28 @@
+# Dependencies and build output
+node_modules
+dist
+
+# VCS
+.git
+.gitignore
+
+# Tests and local tools
+test
+coverage
+utilsDev
+
+# Env files (Coolify will inject envs at runtime)
+.env
+.env.*
+
+# Docker artifacts
+Dockerfile
+docker-compose*
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+
+
