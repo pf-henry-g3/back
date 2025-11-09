@@ -16,7 +16,6 @@ utilsDev
 .env.*
 
 # Docker artifacts
-Dockerfile
 docker-compose*
 
 # OS/editor junk
