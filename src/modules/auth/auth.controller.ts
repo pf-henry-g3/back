@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
-import { Auth0Guard } from './guards/Auth0.guard';
+import { Auth0Guard } from '../../guards/Auth0.guard';
 
 @Controller('auth')
 export class AuthController {
