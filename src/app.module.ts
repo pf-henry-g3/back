@@ -9,9 +9,13 @@ import { VacancyModule } from './modules/vacancy/vacancy.module';
 import { SeederModule } from './modules/seeder/seeder.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
 import { SearchModule } from './modules/search/search.module';
+
+import { PaymentModule } from './modules/payment/payment.module';
+
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { AppController } from './app.controller';
+import { MailerConfigModule } from './modules/mailer/mailer.module';
+
 
 @Module({
   imports: [
@@ -23,6 +27,7 @@ import { AppController } from './app.controller';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
+
     UserModule,
     VacancyModule,
     GenreModule,
@@ -30,15 +35,16 @@ import { AppController } from './app.controller';
     SeederModule,
     FileUploadModule,
     SearchModule,
+    PaymentModule,
+
     AuthModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: {
-        expiresIn: '1h',
-      },
+      signOptions: { expiresIn: '1h' },
       global: true,
     }),
-  ],
-  controllers: [AppController]
+    MailerConfigModule,
+  ]
+
 })
 export class AppModule { }

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Verificación de cuenta</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f6f8fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e6e6e6;
+        }
+
+        .header {
+            background-color: #0d1117;
+            text-align: center;
+        }
+
+        .header img {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .content {
+            padding: 40px;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #222;
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 15px;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 15px;
+            display: inline-block;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .footer {
+            background-color: #f9fafb;
+            text-align: center;
+            padding: 25px 15px;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #e6e6e6;
+        }
+
+        .footer a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://res.cloudinary.com/dgxzi3eu0/image/upload/w_800/LOGO_cs74ae.png" alt="Encabezado Syncro">
+        </div>
+
+        <div class="content">
+            <h1>¡Hola {{name}}!</h1>
+            <p>Gracias por registrarte en <strong>{{appName}}</strong>. Estamos muy contentos de tenerte con nosotros.
+            </p>
+
+            <p>Antes de comenzar, necesitamos que verifiques tu cuenta para garantizar la seguridad de tu información.
+            </p>
+
+            <div class="button-container">
+                <a class="button" href="{{verificationUrl}}">Verificar mi cuenta</a>
+            </div>
+
+            <p style="font-size: 13px; color: #777; margin-top: 25px;">
+                Si no creaste esta cuenta, podés ignorar este correo.
+            </p>
+        </div>
+
+        <div class="footer">
+            © {{year}} {{appName}}. Todos los derechos reservados.<br>
+            <a href="http://sincro.72.61.129.102.sslip.io/">Visitar sitio web</a>
+        </div>
+    </div>
+</body>
+
+</html>

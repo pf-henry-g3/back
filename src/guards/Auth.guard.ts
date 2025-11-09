@@ -18,6 +18,8 @@ export class AuthGuard implements CanActivate {
 
         if (!authHeader) throw new UnauthorizedException('Token de autenticación no proporcionado.');
 
+        console.log(authHeader);
+
         const token = authHeader.startsWith('Bearer ')
             ? authHeader.slice(7).trim()
             : authHeader.trim();
@@ -29,9 +31,9 @@ export class AuthGuard implements CanActivate {
 
             const userWithRoles = await this.usersService.findOne(userId, { relations: ['roles'] });
 
-            if (!userWithRoles) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
+            if (!userWithRoles.success) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
 
-            request['user'] = userWithRoles;
+            request['user'] = userWithRoles.data;
 
         } catch (error) {
             console.log(error);

@@ -1,9 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { ILike, IsNull, Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
 import * as bcrypt from 'bcryptjs';
 import usersData from '../../data/users.data.json';
@@ -11,6 +10,9 @@ import { Role } from '../role/entities/role.entity';
 import { FileUploadService } from '../file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../file-upload/file-upload.abstract.service';
 import { Pages } from 'src/enums/pages.enum';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDto } from './dto/user-response.dto';
+import { ApiResponse } from 'src/common/utils/api-response';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -33,25 +35,18 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       take: limit,
       relations: {
         genres: true,
+        roles: true,
         memberships: true,
-      }
+      },
     });
 
-    if (!users) throw new NotFoundException("Usuarios no encontrados");
+    if (!users.length) throw new NotFoundException("Usuarios no encontrados");
 
-    let usersWithOutPassword = users.map((user) => {
-      const { password, ...userWithOutPassword } = user;
-      return userWithOutPassword;
-    })
+    const transformedUsers = plainToInstance(UserResponseDto, users, {
+      excludeExtraneousValues: true,
+    });
 
-    return {
-      meta: {
-        total,
-        page,
-        limit,
-      },
-      data: usersWithOutPassword,
-    };
+    return ApiResponse('Usuarios encontrados', transformedUsers, { total, page, limit });
   }
 
   async findOne(
@@ -60,19 +55,19 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       relations?: string[],
       throwIfNotFound?: boolean
     }
-  ): Promise<Partial<User> | null> {
+  ) {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: options?.relations?.reduce((acc, rel) => ({ ...acc, [rel]: true }), {}),
     });
 
-    if (!user) {
-      if (options?.throwIfNotFound) throw new NotFoundException('Usuario no encontrado');
-      return null;
-    }
+    if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    const transformedUser = plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+
+    return ApiResponse('Usuario encontrado', transformedUser);
   }
 
   async updateProfilePicture(file: Express.Multer.File, userId: string) {

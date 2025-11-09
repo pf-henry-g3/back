@@ -1,17 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/Auth.guard';
 import { RolesGuard } from '../../guards/Role.guard';
 import { Roles } from 'src/decorators/role.decorator';
 import { Role } from 'src/enums/roles.enum';
 import { SelfIdOrAdminGuard } from '../../guards/SelfIdOrAdmin.guard'
+import { VerifiedUserGuard } from 'src/guards/VerifiedUser.guard';
+import { UserVerificationService } from './userVerification.service';
+import { Request } from 'express';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(
+    private readonly userService: UserService,
+    private readonly userVerificationService: UserVerificationService,
+  ) { }
 
   @Get()
   @ApiQuery({
@@ -44,8 +51,22 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @Get('verify')
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'token de verificacion del usuario',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @HttpCode(200)
+  verifyEmail(@Query('token') token: string) {
+    return this.userVerificationService.verifyEmail(token);
+  }
 
+  @Get(':id')
   @ApiParam({
     name: 'id',
     required: true,
@@ -76,7 +97,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
@@ -109,7 +130,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   update(
     @Param('id') id: string,
@@ -129,7 +150,7 @@ export class UserController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(204)
   softDelete(
     @Param('id') id: string

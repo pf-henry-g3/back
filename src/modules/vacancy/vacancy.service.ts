@@ -29,6 +29,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
   async create(createVacancyDto: CreateVacancyDto, user: User) {
     //Buscamos los generos de la DB que coincidan con los recibidos
+
     const genres = await this.genresRepository.find({
       where: createVacancyDto.genres.map(name => ({ name })),
     });

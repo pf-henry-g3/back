@@ -69,12 +69,6 @@ export class Band {
     country: string;
 
     @Column({
-        type: 'text',
-        nullable: true
-    })
-    address: string;
-
-    @Column({
         type: 'decimal',
         default: null,
     })
