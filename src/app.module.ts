@@ -1,20 +1,20 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './modules/user/user.module';
-import { GenreModule } from './modules/genre/genre.module';
-import { RoleModule } from './modules/role/role.module';
+import { UserModule } from './domain/user/user.module';
+import { GenreModule } from './domain/genre/genre.module';
+import { RoleModule } from './domain/role/role.module';
 import typeorm from './config/typeorm';
-import { VacancyModule } from './modules/vacancy/vacancy.module';
-import { SeederModule } from './modules/seeder/seeder.module';
-import { FileUploadModule } from './modules/file-upload/file-upload.module';
-import { SearchModule } from './modules/search/search.module';
+import { VacancyModule } from './domain/vacancy/vacancy.module';
+import { SeederModule } from './core/seeder/seeder.module';
+import { FileUploadModule } from './core/file-upload/file-upload.module';
+import { SearchModule } from './core/search/search.module';
 
-import { PaymentModule } from './modules/payment/payment.module';
+import { PaymentModule } from './domain/payment/payment.module';
 
-import { AuthModule } from './modules/auth/auth.module';
+import { AuthModule } from './core/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { MailerConfigModule } from './modules/mailer/mailer.module';
+import { MailerConfigModule } from './core/mailer/mailer.module';
 
 
 @Module({
