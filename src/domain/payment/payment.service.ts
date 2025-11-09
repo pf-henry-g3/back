@@ -30,11 +30,12 @@ export class PaymentService {
           },
         ],
         back_urls: {
-          success: "http://localhost:3000/success",
+          success: "http://localhost:3000/home",
           failure: "http://localhost:3000/failure",
-          pending: "http://localhost:3000/pending"
+          pending: "http://localhost:3000/home"
 
         },
+        auto_return: "approved",
         notification_url: "http://localhost:3000/webhook"
       },
 
