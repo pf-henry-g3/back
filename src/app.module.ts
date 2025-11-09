@@ -14,7 +14,6 @@ import { PaymentModule } from './modules/payment/payment.module';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { AppController } from './app.controller';
 import { MailerConfigModule } from './modules/mailer/mailer.module';
 
 
@@ -45,8 +44,7 @@ import { MailerConfigModule } from './modules/mailer/mailer.module';
       global: true,
     }),
     MailerConfigModule,
-  ],
-  controllers: [AppController],
+  ]
 
 })
 export class AppModule { }

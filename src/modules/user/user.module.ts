@@ -8,14 +8,17 @@ import { Band } from '../band/entities/band.entity';
 import { BandMember } from '../band/entities/bandMember.entity';
 import { Role } from '../role/entities/role.entity';
 import { FileUploadModule } from '../file-upload/file-upload.module';
+import { MailerConfigModule } from '../mailer/mailer.module';
+import { UserVerificationService } from './userVerification.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Genre, Band, BandMember, Role]),
-    FileUploadModule
+    FileUploadModule,
+    MailerConfigModule,
   ],
   controllers: [UserController],
-  providers: [UserService],
-  exports: [UserService],
+  providers: [UserService, UserVerificationService],
+  exports: [UserService, UserVerificationService],
 })
 export class UserModule { }

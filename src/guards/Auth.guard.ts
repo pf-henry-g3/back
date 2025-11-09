@@ -29,7 +29,9 @@ export class AuthGuard implements CanActivate {
 
             const userWithRoles = await this.usersService.findOne(userId, { relations: ['roles'] });
 
-            if (!userWithRoles) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
+            console.log(userWithRoles)
+
+            if (!userWithRoles.success) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
 
             request['user'] = userWithRoles;
 
