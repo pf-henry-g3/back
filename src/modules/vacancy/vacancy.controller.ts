@@ -47,8 +47,8 @@ export class VacancyController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @ApiBearerAuth()
+  // @UseGuards(AuthGuard)
   @HttpCode(200)
   findAll(
     @Query('page') page?: string,
