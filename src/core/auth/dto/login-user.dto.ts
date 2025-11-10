@@ -1,19 +1,22 @@
-import { ApiProperty, PickType } from "@nestjs/swagger";
-import { CreateUserDto } from "./create-user.dto";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
-export class LoginUserDto extends PickType(CreateUserDto, [
-    'email',
-    'password'
-]) {
+// Nota: en login no imponemos reglas de "strong password".
+// Solo validamos formato básico para no rechazar contraseñas válidas ya registradas.
+export class LoginUserDto {
     @ApiProperty({
         example: 'rock.singer@mail.com',
         description: "Email del usuario para iniciar sesión"
     })
-    email: string; // Se sobrescribe solo la metadata de Swagger
+    @IsNotEmpty({ message: "El email es obligatorio" })
+    @IsEmail({}, { message: "Formato inválido" })
+    email: string;
 
     @ApiProperty({
-        example: 'securePass123!',
+        example: 'CualquierContraseñaRegistrada',
         description: "Contraseña para iniciar sesión"
     })
+    @IsNotEmpty({ message: "La contraseña es obligatoria" })
+    @IsString({ message: "La contraseña debe ser un string" })
     password: string;
 }
