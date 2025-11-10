@@ -88,7 +88,7 @@ export class UserController {
   })
   @ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findOne(
     @Param('id') id: string

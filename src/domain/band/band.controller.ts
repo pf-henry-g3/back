@@ -77,7 +77,7 @@ export class BandController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
