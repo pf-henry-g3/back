@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../guards/Auth.guard';
 import { RolesGuard } from '../../guards/Role.guard';
 import { Roles } from 'src/decorators/role.decorator';
@@ -10,6 +10,8 @@ import { Role } from 'src/enums/roles.enum';
 import { SelfIdOrAdminGuard } from '../../guards/SelfIdOrAdmin.guard'
 import { VerifiedUserGuard } from 'src/guards/VerifiedUser.guard';
 import { UserVerificationService } from './userVerification.service';
+import { Request } from 'express';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
@@ -62,19 +64,6 @@ export class UserController {
   @HttpCode(200)
   verifyEmail(@Query('token') token: string) {
     return this.userVerificationService.verifyEmail(token);
-  }
-
-  @Post('send-verification')
-  @ApiProperty({
-    description: 'Reenviar email al usuario',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso creado sin retorno de datos',
-  })
-  @HttpCode(204)
-  resendVerification(@Body('email') email: string) {
-    return this.userVerificationService.sendEmail(email);
   }
 
   @Get(':id')

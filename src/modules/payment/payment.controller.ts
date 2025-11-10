@@ -14,7 +14,7 @@ export class PaymentController {
   }
 
   //ruta creacion orden de pago - donacion
-  @Get('create-donation')
+  @Post('create-donation')
   async createDonation(@Body() dto: CreatePaymentDto) {
     return await this.paymentService.createDonacion(dto);
   }

@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class PaymentService {
   private mp = new MercadoPagoConfig({
-    accessToken: "TEST-8369416514283842-110409-fdb31d3bc9dc8a824423c1db870d955f-796070948"
+    accessToken: process.env.MP_ACCESS_TOKEN!,
   });
   constructor(
     @InjectRepository(PaymentEntity)
@@ -30,12 +30,13 @@ export class PaymentService {
           },
         ],
         back_urls: {
-          success: "http://localhost:3000/success",
-          failure: "http://localhost:3000/failure",
-          pending: "http://localhost:3000/pending"
+          success: `${process.env.FRONTEND_URL}/home`,
+          failure: `${process.env.FRONTEND_URL}/failure`,
+          pending: `${process.env.FRONTEND_URL}/home`
 
         },
-        notification_url: "http://localhost:3000/webhook"
+        auto_return: undefined,
+        notification_url: `${process.env.FRONTEND_URL}/webhook`
       },
 
     });
@@ -53,7 +54,7 @@ export class PaymentService {
 
   }
 
-  async getAll(){
+  async getAll() {
     return await this.paymentRepo.find()
   }
 

@@ -64,9 +64,10 @@ export class AuthService {
       roles: user.roles?.map(r => r.name)
     };
 
-    // if (!user.isVerified) {
-    //   throw new BadRequestException('Tu cuenta aún no está verificada.');
-    // }
+    if (!user.isVerified) {
+      await this.userVerificationService.sendEmail(user.email);
+      throw new BadRequestException('Tu cuenta no está verificada. Te reenviamos un correo de verificación.');
+    }
 
     const token = this.jwtService.sign(payload);
 
@@ -146,5 +147,12 @@ export class AuthService {
     const data = { login: true, access_token: token, userWithoutPassword }
 
     return ApiResponse('Autenticación exitosa con Auth0', data);
+  }
+
+
+  callback() {
+    console.log("OJala se de cueck");
+
+    return 'Esta enpoint debería llegar cuando se realiza un login exitoso. '
   }
 }

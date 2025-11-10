@@ -26,7 +26,7 @@ export class VacancyController {
     @Body() createVacancyDto: CreateVacancyDto,
     @Req() req
   ) {
-    const user = req.user as User
+    const user = req.user as User;
     return this.vacancyService.create(createVacancyDto, user);
   }
 
