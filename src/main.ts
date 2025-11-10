@@ -52,9 +52,11 @@ async function bootstrap() {
       }
       return callback(new Error('Not allowed by CORS'));
     },
-    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
+    exposedHeaders: ['Authorization'],
     credentials: true,
+    optionsSuccessStatus: 204,
   });
 
   await app.listen(process.env.PORT ?? 3013);
