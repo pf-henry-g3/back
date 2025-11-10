@@ -1,10 +1,12 @@
 import { Controller, FileTypeValidator, MaxFileSizeValidator, Param, ParseFilePipe, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileUploadService } from './file-upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import 'multer';
+
 
 @Controller('files')
 export class FileUploadController {
-  constructor(private readonly fileUploadService: FileUploadService) {}
+  constructor(private readonly fileUploadService: FileUploadService) { }
 
   @Put('upload/:id')
   @UseInterceptors(FileInterceptor('file'))

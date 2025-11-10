@@ -9,6 +9,8 @@ import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@ne
 import { AuthGuard } from '../../guards/Auth.guard';
 import { User } from '../user/entities/user.entity';
 import { VerifiedUserGuard } from 'src/guards/VerifiedUser.guard';
+import 'multer';
+
 
 @Controller('band')
 export class BandController {
