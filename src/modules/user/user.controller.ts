@@ -39,7 +39,7 @@ export class UserController {
   })
   @ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
+  // @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findAll(
     @Query('page') page?: string,
