@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, Req, UseGuards, Res } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Req, UseGuards, Res, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -9,6 +9,7 @@ import type { Response } from 'express';
 import { passportJwtSecret } from 'jwks-rsa';
 import { RESPONSE_PASSTHROUGH_METADATA } from '@nestjs/common/constants';
 import { PassThrough } from 'stream';
+import { commonResponse } from 'src/common/utils/common-response.constant';
 
 
 @Controller('auth')
@@ -67,5 +68,22 @@ export class AuthController {
 
   }
 
-  //SignOut ?
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
+
+    return commonResponse('Logout exitoso')
+  }
+
+  @Get('me')
+  @UseGuards(Auth0Guard)
+  async getMe(@Req() req: any) {
+    commonResponse('Usuario autenticado', req.user)
+  }
+
 }
