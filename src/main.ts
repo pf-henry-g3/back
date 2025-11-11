@@ -3,12 +3,15 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
 
-  app.use(morgan('dev'))
+  app.use(morgan('dev'));
+  app.use(cookieParser());
+
 
   const swaggerDoc = new DocumentBuilder()
     .setTitle('PI-BACKEND')
