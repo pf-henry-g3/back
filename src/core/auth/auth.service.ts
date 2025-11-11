@@ -39,7 +39,12 @@ export class AuthService {
     const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
     await this.usersRepository.save(newUser);
 
-    await this.userVerificationService.sendEmail(createUserDto.email);
+    try {
+      await this.userVerificationService.sendEmail(createUserDto.email);
+    } catch (err) {
+      // No bloquear el registro si el correo falla
+      console.error('Error enviando correo de verificación:', err);
+    }
 
     return `Usuario ${userData.userName} creado exitosamente`;
   }
