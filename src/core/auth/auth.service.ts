@@ -149,10 +149,4 @@ export class AuthService {
     return commonResponse('Autenticación exitosa con Auth0', data);
   }
 
-
-  callback() {
-    console.log("OJala se de cueck");
-
-    return 'Esta enpoint debería llegar cuando se realiza un login exitoso. '
-  }
 }
