@@ -1,9 +1,12 @@
-import { Controller, Post, Body, HttpCode, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Req, UseGuards, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
+import { cookieConfig } from 'src/config/cookie.config';
+import type { Response } from 'express';
+
 
 @Controller('auth')
 export class AuthController {
@@ -32,8 +35,17 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(200)
-  signin(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.signin(loginUserDto);
+  async signin(
+    @Body() loginUserDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.signin(loginUserDto);
+    const token = result.data.access_token
+
+    res.cookie('access_token', token, cookieConfig)
+
+    delete result.data.access_token;
+
+    return result
   }
 
   @Post('auth0/callback')
