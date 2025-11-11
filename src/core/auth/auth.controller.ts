@@ -6,6 +6,9 @@ import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
 import { cookieConfig } from 'src/config/cookie.config';
 import type { Response } from 'express';
+import { passportJwtSecret } from 'jwks-rsa';
+import { RESPONSE_PASSTHROUGH_METADATA } from '@nestjs/common/constants';
+import { PassThrough } from 'stream';
 
 
 @Controller('auth')
@@ -52,8 +55,16 @@ export class AuthController {
   @UseGuards(Auth0Guard) //El guard Verifica el token
   async auth0Callback(
     @Req() req: any,
-    @Body() userFront) {
-    return this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
+    @Body() userFront,
+    @Res({ passthrough: true }) res: Response) {
+
+    const result = await this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
+    const token = result.data.access_token;
+    res.cookie('access_token', token, cookieConfig);
+
+    delete result.data.access_token;
+    return result
+
   }
 
   //SignOut ?
