@@ -52,16 +52,25 @@ export class BandsService extends AbstractFileUploadService<Band> {
             throw new BadRequestException('Uno o más géneros no existen en la base de datos.');
         }
 
-        // Crear la nueva banda
+        // Crear al miembro nuevo (el lider)
+        const leaderMember = this.memberRepository.create({
+            user,
+            entryDate: new Date(),
+        });
+
+        // Crear la banda
         const newBand: Band = this.bandsRepository.create({
             ...createBandDto,
             formationDate: new Date(createBandDto.formationDate),
             leader: user,
             genres,
+            bandMembers: [leaderMember],
         })
 
+        // Como la relacion tiene cascade: true guarda todo en una sola operacion
         await this.bandsRepository.save(newBand);
 
+        // Transformar la respuesta para evitar datos sensibles
         const transformedBand = plainToInstance(BandResponseDto, newBand, {
             excludeExtraneousValues: true,
         })
@@ -73,8 +82,9 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const bandExisting: Band | null = await this.bandsRepository.findOne({
             where: { id },
             relations: {
+                leader: { roles: true, genres: true },
                 genres: true,
-                bandMembers: true
+                bandMembers: { band: true, user: true },
             }
         });
         if (!bandExisting) {
@@ -129,18 +139,19 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         const transformedBands = plainToInstance(BandResponseDto, bands, {
             excludeExtraneousValues: true,
-        })
+        });
 
-        const meta = { total, page, limit }
-        return { transformedBands, meta }
+        const meta = { total, page, limit };
+        return { transformedBands, meta };
     }
 
     async findOne(id: string) {
         const bandExisting: Band | null = await this.bandsRepository.findOne({
             where: { id },
             relations: {
+                leader: { roles: true, genres: true },
                 genres: true,
-                bandMembers: true
+                bandMembers: { band: true, user: true },
             }
         });
 
@@ -154,7 +165,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
     }
 
     async updateProfilePicture(file: Express.Multer.File, bandId: string) {
-        const band = await this.bandsRepository.findOneBy({ id: bandId });
+        const band: Band | null = await this.bandsRepository.findOneBy({ id: bandId });
 
         if (!band) {
             throw new NotFoundException('Usuario no encontrado');

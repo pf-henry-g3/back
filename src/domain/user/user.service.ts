@@ -36,7 +36,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       relations: {
         genres: true,
         roles: true,
-        memberships: true,
+        memberships: { band: true },
       },
     });
 
@@ -46,7 +46,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuarios encontrados', transformedUsers, { total, page, limit });
+    const meta = { total, page, limit };
+
+    return { transformedUsers, meta };
   }
 
   async findOne(
@@ -67,7 +69,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuario encontrado', transformedUser);
+    return transformedUser;
   }
 
   async updateProfilePicture(file: Express.Multer.File, userId: string) {

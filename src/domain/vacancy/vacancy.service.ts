@@ -10,6 +10,8 @@ import { Pages } from 'src/common/enums/pages.enum';
 import { FileUploadService } from '../../core/file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../../core/file-upload/file-upload.abstract.service';
 import { Genre } from '../genre/entities/genre.entity';
+import { plainToInstance } from 'class-transformer';
+import { VacancyResponseDto } from './dto/vacancy-response.dto';
 
 @Injectable()
 export class VacancyService extends AbstractFileUploadService<Vacancy> {
@@ -53,20 +55,20 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       skip: (page - 1) * limit,
       take: limit,
       relations: {
+        owner: true,
         genres: true
       }
     });
 
     if (!vacancies) throw new NotFoundException("Vacantes no encontrados");
 
-    return {
-      meta: {
-        total,
-        page,
-        limit,
-      },
-      data: vacancies,
-    };
+    const transformedVacancies = plainToInstance(VacancyResponseDto, vacancies, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta = { total, page, limit };
+
+    return { transformedVacancies, meta };
   }
 
   async findOne(id: string) {
@@ -80,16 +82,11 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
     if (!foundVacancy) throw new BadRequestException('Vacante no encontrada')
 
-    const owner = await this.usersRepository.findOne({
-      where: { id: foundVacancy?.owner.id },
-      select: ['id', 'userName', 'name', 'email', 'aboutMe', 'averageRating', 'country', 'city']
+    const transformedVacancy = plainToInstance(VacancyResponseDto, foundVacancy, {
+      excludeExtraneousValues: true,
     })
 
-    if (!owner) throw new BadRequestException('Usuario no encontrada')
-
-    foundVacancy.owner = owner;
-
-    return { message: 'Vacante encontrada', foundVacancy };
+    return transformedVacancy;
   }
 
   async updateProfilePicture(file: Express.Multer.File, vacancyId: string) {
@@ -100,10 +97,6 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     }
 
     return this.uploadImage(file, vacancyId);
-  }
-
-  update(id: number, updateVacancyDto: UpdateVacancyDto) {
-    return `This action updates a #${id} vacancy`;
   }
 
   async remove(id: number) {
