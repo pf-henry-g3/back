@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
+import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('auth')
 export class AuthController {
@@ -18,8 +19,11 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(201)
-  signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signup(createUserDto);
+  async signup(@Body() createUserDto: CreateUserDto) {
+    return commonResponse(
+      'Usuario registrado extisamente',
+      await this.authService.signup(createUserDto),
+    );
   }
 
 
@@ -32,8 +36,11 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(200)
-  signin(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.signin(loginUserDto);
+  async signin(@Body() loginUserDto: LoginUserDto) {
+    return commonResponse(
+      'Inicio de sesion exitoso',
+      await this.authService.signin(loginUserDto)
+    );
   }
 
   @Post('auth0/callback')
@@ -41,7 +48,10 @@ export class AuthController {
   async auth0Callback(
     @Req() req: any,
     @Body() userFront) {
-    return this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
+    return commonResponse(
+      'Usuario registrado extisamente',
+      await this.authService.syncAuth0User(req.auth0User, userFront), //Sincorniza con el user de la db
+    );
   }
 
   //SignOut ?

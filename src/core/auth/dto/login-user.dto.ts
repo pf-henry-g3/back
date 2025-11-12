@@ -13,7 +13,7 @@ export class LoginUserDto {
     email: string;
 
     @ApiProperty({
-        example: 'CualquierContraseñaRegistrada',
+        example: 'securePass123!',
         description: "Contraseña para iniciar sesión"
     })
     @IsNotEmpty({ message: "La contraseña es obligatoria" })
