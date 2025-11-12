@@ -93,7 +93,7 @@ export class UserController {
   findOne(
     @Param('id') id: string
   ) {
-    return this.userService.findOne(id, { relations: ['genres'], throwIfNotFound: true });
+    return this.userService.findOne(id, { relations: ['genres', 'roles'], throwIfNotFound: true });
   }
 
   @Patch('photo/:userId')

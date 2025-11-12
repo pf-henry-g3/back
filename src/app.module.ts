@@ -21,6 +21,7 @@ import { MailerConfigModule } from './core/mailer/mailer.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: ['.env', '.env.development', '.env.local'],
       load: [typeorm],
     }),
     TypeOrmModule.forRootAsync({
@@ -38,10 +39,14 @@ import { MailerConfigModule } from './core/mailer/mailer.module';
     PaymentModule,
 
     AuthModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h' },
+    JwtModule.registerAsync({
       global: true,
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1h' },
+      }),
     }),
     MailerConfigModule,
   ]
