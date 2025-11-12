@@ -8,6 +8,8 @@ import bcrypt from 'node_modules/bcryptjs';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
+import { plainToInstance } from 'class-transformer';
+import { UserMinimalResponseDto } from 'src/common/dto/user-minimal-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -46,7 +48,11 @@ export class AuthService {
       console.error('Error enviando correo de verificación:', err);
     }
 
-    return `Usuario ${userData.userName} creado exitosamente`;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, newUser, {
+      excludeExtraneousValues: true,
+    });
+
+    return tranformedUser;
   }
 
   async signin(loginUser: LoginUserDto) {
@@ -75,11 +81,11 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password, ...userWithoutPassword } = user;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
 
-    const data = { login: true, access_token: token, userWithoutPassword }
-
-    return commonResponse('Success Login. ', data)
+    return { login: true, access_token: token, tranformedUser }
   }
 
   async syncAuth0User(auth0Payload: any, userFront) {
@@ -146,10 +152,10 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password, ...userWithoutPassword } = user;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
 
-    const data = { login: true, access_token: token, userWithoutPassword }
-
-    return commonResponse('Autenticación exitosa con Auth0', data);
+    return { login: true, access_token: token, tranformedUser }
   }
 }

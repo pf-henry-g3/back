@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './domain/user/user.module';
@@ -14,7 +14,9 @@ import { PaymentModule } from './domain/payment/payment.module';
 
 import { AuthModule } from './core/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { MailerConfigModule } from './core/mailer/mailer.module';
+import { ReviewModule } from './domain/review/review.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { mailerConfig } from './config/mailer.config';
 
 
 @Module({
@@ -28,7 +30,9 @@ import { MailerConfigModule } from './core/mailer/mailer.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
-
+    MailerModule.forRootAsync({
+      useFactory: mailerConfig,
+    }),
     UserModule,
     VacancyModule,
     GenreModule,
@@ -37,6 +41,7 @@ import { MailerConfigModule } from './core/mailer/mailer.module';
     FileUploadModule,
     SearchModule,
     PaymentModule,
+    ReviewModule,
 
     AuthModule,
     JwtModule.registerAsync({
@@ -48,7 +53,6 @@ import { MailerConfigModule } from './core/mailer/mailer.module';
         signOptions: { expiresIn: '1h' },
       }),
     }),
-    MailerConfigModule,
   ]
 
 })

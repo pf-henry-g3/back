@@ -2,13 +2,14 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile,
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/Auth.guard';
 import { RolesGuard } from '../../common/guards/Role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from 'src/common/enums/roles.enum';
-import { SelfIdOrAdminGuard } from '../../common/guards/SelfIdOrAdmin.guard'
 import { UserVerificationService } from './userVerification.service';
+import { commonResponse } from 'src/common/utils/common-response.constant';
+import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
 
 @Controller('user')
 export class UserController {
@@ -34,18 +35,21 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
-  // @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findAll(
+  async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string
   ) {
-    if (page && limit) {
-      return this.userService.findAll(+page, +limit);
-    }
-    return this.userService.findAll();
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundUsers = await this.userService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Usuarios encontrados.',
+      foundUsers.transformedUsers,
+      foundUsers.meta,
+    )
   }
 
   @Get('verify')
@@ -63,19 +67,6 @@ export class UserController {
     return this.userVerificationService.verifyEmail(token);
   }
 
-  @Post('send-verification')
-  @ApiProperty({
-    description: 'Reenviar email al usuario',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso creado sin retorno de datos',
-  })
-  @HttpCode(204)
-  resendVerification(@Body('email') email: string) {
-    return this.userVerificationService.sendEmail(email);
-  }
-
   @Get(':id')
   @ApiParam({
     name: 'id',
@@ -88,12 +79,15 @@ export class UserController {
   })
   @ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  // @UseGuards(AuthGuard, RolesGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id') id: string
   ) {
-    return this.userService.findOne(id, { relations: ['genres', 'roles'], throwIfNotFound: true });
+    return commonResponse(
+      'Usuario encontrado',
+      await this.userService.findOne(id, { relations: ['genres', 'roles'], throwIfNotFound: true }),
+    )
   }
 
   @Patch('photo/:userId')
@@ -160,7 +154,7 @@ export class UserController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(204)
   softDelete(
     @Param('id') id: string

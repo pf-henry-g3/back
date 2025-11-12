@@ -12,7 +12,6 @@ import { AbstractFileUploadService } from '../../core/file-upload/file-upload.ab
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user-response.dto';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -36,7 +35,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       relations: {
         genres: true,
         roles: true,
-        memberships: true,
+        memberships: { band: true },
       },
     });
 
@@ -46,7 +45,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuarios encontrados', transformedUsers, { total, page, limit });
+    const meta = { total, page, limit };
+
+    return { transformedUsers, meta };
   }
 
   async findOne(
@@ -67,7 +68,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuario encontrado', transformedUser);
+    return transformedUser;
   }
 
   async updateProfilePicture(file: Express.Multer.File, userId: string) {

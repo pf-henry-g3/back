@@ -110,9 +110,9 @@ export class CreateUserDto {
     country?: string;
 
     @ApiProperty({
-        example: 4.5,
         description: "Calificación promedio del usuario calculada desde las reviews",
         required: false,
+        default: 0
     })
     @IsNumber()
     @IsOptional()

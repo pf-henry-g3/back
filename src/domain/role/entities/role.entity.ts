@@ -1,5 +1,5 @@
 import { User } from "src/domain/user/entities/user.entity";
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "roles" })
 export class Role {
@@ -16,4 +16,9 @@ export class Role {
 
     @ManyToMany(() => User, (user) => user.roles)
     users: User[]
+
+    @DeleteDateColumn({
+        nullable: true,
+    })
+    deletedAt: Date | null;
 }

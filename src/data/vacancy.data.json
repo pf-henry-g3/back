@@ -5,7 +5,7 @@
     "isOpen": true,
     "vacancyImage": "vacancy_armonia.jpg",
     "vacancyuserName": "SixStringer",
-    "genresNameSeeder": [
+    "genresSeeder": [
       "Clásica",
       "Jazz"
     ]
@@ -16,7 +16,7 @@
     "isOpen": true,
     "vacancyImage": "vacancy_bass.jpg",
     "vacancyuserName": "BassGroove",
-    "genresNameSeeder": [
+    "genresSeeder": [
       "Rock",
       "Funk"
     ]
@@ -27,7 +27,7 @@
     "isOpen": true,
     "vacancyImage": "vacancy_vocal.jpg",
     "vacancyuserName": "DigitalSound",
-    "genresNameSeeder": [
+    "genresSeeder": [
       "Electronic",
       "Hip Hop"
     ]
@@ -38,7 +38,7 @@
     "isOpen": false,
     "vacancyImage": "vacancy_guitar_closed.jpg",
     "vacancyuserName": "MetalScreamer",
-    "genresNameSeeder": [
+    "genresSeeder": [
       "Metal"
     ]
   },
@@ -48,7 +48,7 @@
     "isOpen": true,
     "vacancyImage": "vacancy_drums_country.jpg",
     "vacancyuserName": "FiddlePlayer",
-    "genresNameSeeder": [
+    "genresSeeder": [
       "Country"
     ]
   }

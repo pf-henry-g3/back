@@ -1,7 +1,6 @@
 import { Genre } from "src/domain/genre/entities/genre.entity";
 import { User } from "src/domain/user/entities/user.entity";
-import { Vacancy } from "src/domain/vacancy/entities/vacancy.entity";
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { BandMember } from "./bandMember.entity";
 
 @Entity('bands')
@@ -79,6 +78,11 @@ export class Band {
         default: null,
     })
     longitude: number;
+
+    @DeleteDateColumn({
+        nullable: true,
+    })
+    deletedAt: Date | null;
 
     //Relacion con Genre
     @ManyToMany(() => Genre, genre => genre.bands)

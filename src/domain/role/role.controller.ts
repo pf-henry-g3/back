@@ -6,6 +6,7 @@ import { AuthGuard } from '../../common/guards/Auth.guard';
 import { RolesGuard } from '../../common/guards/Role.guard';
 import { Role } from 'src/common/enums/roles.enum';
 import { Roles } from 'src/common/decorators/role.decorator';
+import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('role')
 export class RoleController {
@@ -20,7 +21,7 @@ export class RoleController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
   create(
@@ -47,17 +48,23 @@ export class RoleController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findAll(
+  async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string
   ) {
-    if (page && limit) {
-      return this.roleService.findAll(+page, +limit);
-    }
-    return this.roleService.findAll();
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundRoles = await this.roleService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Roles encontrados.',
+      foundRoles.transformedRoles,
+      foundRoles.meta,
+    )
   }
 
   @Get('/by-name')
@@ -84,36 +91,42 @@ export class RoleController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findByName(
+  async findByName(
     @Query('rolName') rolName: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.roleService.findRolByName(rolName, +page, +limit);
-    }
-    return this.roleService.findRolByName(rolName);
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundRoles = await this.roleService.findRolByName(rolName, pageNum, limitNum);
+
+    return commonResponse(
+      'Roles encontrados.',
+      foundRoles.transformedRoles,
+      foundRoles.meta,
+    )
   }
 
   @Delete(':id')
   @ApiParam({
     name: 'id',
     required: true,
-    description: 'id de la vacante a eliminar de forma fisica',
+    description: 'id del rol a eliminar de forma logica',
   })
   @ApiResponse({
     status: 204,
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(204)
-  remove(
+  softDelete(
     @Param('id') id: string
   ) {
-    return this.roleService.remove(+id);
+    return this.roleService.softDelete(id);
   }
 }
