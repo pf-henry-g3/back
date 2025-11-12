@@ -76,8 +76,8 @@ export class BandController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
@@ -104,8 +104,8 @@ export class BandController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard)
   @HttpCode(200)
   async findOne(
     @Param('id') id: string

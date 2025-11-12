@@ -42,7 +42,7 @@ export class UserVerificationService {
         const payload = { email: user.email };
         const token = this.jwtService.sign(payload, { expiresIn: '1d' });
 
-        const verifyLink = `http://localhost:3000/user/verify?token=${token}`;
+        const verifyLink = `http://localhost:3001/user/verify?token=${token}`;
 
         await this.mailerService.sendMail({
             to: user.email,

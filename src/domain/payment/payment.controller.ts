@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -19,26 +19,11 @@ export class PaymentController {
     return await this.paymentService.createDonacion(dto);
   }
 
-  // pago con exito
-  @Get('/success')
-  success(@Param('id') id: string) {
-    //return this.paymentService.findOne(+id);
-  }
-
-    // pago sin exito
-  @Get('/success')
-  failure(@Param('id') id: string) {
-    //return this.paymentService.findOne(+id);
-  }
-    // pago pendiente
-  @Get('/success')
-  pending(@Param('id') id: string) {
-    //return this.paymentService.findOne(+id);
-  }
-
-  @Get('/webhook')
-  webhook(@Param('id') id: string) {
-    //return this.paymentService.findOne(+id);
+ @Post('webhook')
+@HttpCode(200) 
+  async mpWebhook(@Body() body: any) {
+    await this.paymentService.reciveWebhook(body);
+    return { ok: true };
   }
 
 

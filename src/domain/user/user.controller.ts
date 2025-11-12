@@ -34,9 +34,9 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  @ApiBearerAuth()
+  //@ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findAll(
     @Query('page') page?: string,
@@ -86,9 +86,9 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  @ApiBearerAuth()
+  //@ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   findOne(
     @Param('id') id: string

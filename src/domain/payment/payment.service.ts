@@ -35,7 +35,7 @@ export class PaymentService {
           pending: "http://localhost:3000/home"
 
         },
-        auto_return: "approved",
+        //auto_return: "approved",
         notification_url: "http://localhost:3000/webhook"
       },
 
@@ -50,9 +50,52 @@ export class PaymentService {
     return res.init_point
   }
 
-  async reciveWebhook() {
+  async reciveWebhook(payload) {
 
+  //el tipo debe ser de pago 
+  if ((payload?.type || payload?.topic) !== "payment") return true;
+
+  const paymentId = String(payload?.data?.id || payload?.id || "");
+  if (!paymentId) return true;
+
+  //busco el pago 
+  const mpPayment = await new Payment(this.mp).get({ id: paymentId });
+
+  
+  const prefId = mpPayment?.external_reference;
+  if (!prefId) return true;
+
+  
+  const current = await this.paymentRepo.findOne({ where: { id: prefId } });
+  if (!current) return true;
+  if (current.transactionStatus === TransactionStatus.APPROVED) return true;
+
+  const s = String(mpPayment?.status || "").toLowerCase();
+
+  if (s === "approved") {
+    await this.paymentRepo.update(
+      { id: prefId },
+      {
+        transactionStatus: TransactionStatus.APPROVED,
+        description: `Donación - pref:${prefId} - pay:${paymentId}`,
+      }
+    );
+    return true;
   }
+
+  if (["rejected", "cancelled", "canceled", "refunded", "charged_back"].includes(s)) {
+    await this.paymentRepo.update(
+      { id: prefId },
+      {
+        transactionStatus: TransactionStatus.FAILURE,
+        description: `Donación - pref:${prefId} - pay:${paymentId} - ${s}`,
+      }
+    );
+    return true;
+  }
+
+  return true;
+}
 
   async getAll(){
     return await this.paymentRepo.find()
