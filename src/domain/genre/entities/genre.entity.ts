@@ -1,7 +1,7 @@
 import { Band } from "src/domain/band/entities/band.entity";
 import { User } from "src/domain/user/entities/user.entity";
 import { Vacancy } from "src/domain/vacancy/entities/vacancy.entity";
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "genres" })
 export class Genre {
@@ -24,4 +24,9 @@ export class Genre {
 
     @ManyToMany(() => Vacancy, (vacancy) => vacancy.genres)
     vacancies: Vacancy[];
+
+    @DeleteDateColumn({
+        nullable: true
+    })
+    deletedAt: Date | null;
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req, Delete } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -6,6 +6,9 @@ import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@ne
 import { AuthGuard } from '../../common/guards/Auth.guard';
 import { User } from '../user/entities/user.entity';
 import { commonResponse } from 'src/common/utils/common-response.constant';
+import { Role } from 'src/common/enums/roles.enum';
+import { Roles } from 'src/common/decorators/role.decorator';
+import { VacancyOwnerGuard } from 'src/common/factories/OwnerOrAdmin.factory';
 
 @Controller('vacancy')
 export class VacancyController {
@@ -121,5 +124,24 @@ export class VacancyController {
     @Param('vacancyId') vacancyId: string
   ) {
     return this.vacancyService.updateProfilePicture(file, vacancyId);
+  }
+
+  @Delete(':id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la vacante a eliminar de forma fisica',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Recurso eliminado sin retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, VacancyOwnerGuard())
+  @HttpCode(204)
+  softDelete(
+    @Param('id') id: string
+  ) {
+    return this.vacancyService.softDelete(id);
   }
 }

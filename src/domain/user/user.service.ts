@@ -12,7 +12,6 @@ import { AbstractFileUploadService } from '../../core/file-upload/file-upload.ab
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user-response.dto';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos

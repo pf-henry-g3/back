@@ -99,7 +99,11 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     return this.uploadImage(file, vacancyId);
   }
 
-  async remove(id: number) {
+  async softDelete(id: string) {
+    const foundVacancy: Vacancy | null = await this.vacancyRepository.findOneBy({ id });
+
+    if (!foundVacancy) throw new NotFoundException('Vacante no encontrado');
+
     return await this.vacancyRepository.softDelete(id)
   }
 
@@ -123,6 +127,13 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
       const newVacancy = this.vacancyRepository.create(vacancyData);
       newVacancy.owner = user;
+
+      const genres = await this.genresRepository.find({
+        where: vacancyData.genresSeeder.map((genreName: string) => ({ name: genreName })),
+      });
+
+      newVacancy.genres = genres;
+
       await this.vacancyRepository.save(newVacancy);
       console.log(`✅ Vacante ${vacancyData.name} creada.`);
     }

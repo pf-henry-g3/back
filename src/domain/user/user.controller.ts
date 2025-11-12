@@ -9,6 +9,7 @@ import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from 'src/common/enums/roles.enum';
 import { UserVerificationService } from './userVerification.service';
 import { commonResponse } from 'src/common/utils/common-response.constant';
+import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
 
 @Controller('user')
 export class UserController {
@@ -153,7 +154,7 @@ export class UserController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(204)
   softDelete(
     @Param('id') id: string

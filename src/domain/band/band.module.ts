@@ -7,12 +7,10 @@ import { User } from '../user/entities/user.entity';
 import { Genre } from '../genre/entities/genre.entity';
 import { FileUploadModule } from '../../core/file-upload/file-upload.module';
 import { BandMember } from './entities/bandMember.entity';
-import { AuthModule } from '../../core/auth/auth.module';
 import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
-    AuthModule,
     UserModule,
     TypeOrmModule.forFeature([Band, User, Genre, BandMember]),
     FileUploadModule,

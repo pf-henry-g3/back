@@ -25,7 +25,7 @@ export class VacancyResponseDto {
 
     @Expose()
     @Type(() => UserMinimalResponseDto)
-    leader: UserMinimalResponseDto;
+    owner: UserMinimalResponseDto;
 
     @Exclude()
     deletedAt: Date;
