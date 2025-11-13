@@ -31,7 +31,11 @@ export class RoleService {
 
 
   async create(createRoleDto: CreateRoleDto) {
-    const foundRole = await this.roleRepository.findOneBy({ name: createRoleDto.name });
+    const foundRole = await this.roleRepository.findOne({
+      where: {
+        name: ILike(`%${createRoleDto.name}%`)
+      }
+    });
 
     if (foundRole) throw new BadRequestException('El rol ya existe');
 
