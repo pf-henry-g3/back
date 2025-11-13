@@ -215,6 +215,16 @@ export class BandsService extends AbstractFileUploadService<Band> {
         return transformedBand;
     }
 
+    async softDelete(id: string) {
+        const band = await this.bandsRepository.findOneBy({ id });
+
+        if (!band) throw new NotFoundException('Banda no encontrada');
+
+        await this.bandsRepository.softDelete(id);
+
+        return `Banda ${id} eliminada con éxito`;
+    }
+
     async seederBandas() {
         console.log('⏳ Precargando bandas...');
         for (const bandData of bandsData) {

@@ -22,7 +22,6 @@ export class AuthService {
 
   async signup(createUserDto: CreateUserDto) {
     const { confirmPassword, ...userData } = createUserDto
-    console.log(createUserDto.aboutMe);
 
     if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
 
@@ -45,7 +44,6 @@ export class AuthService {
       await this.userVerificationService.sendEmail(createUserDto.email);
     } catch (err) {
       // No bloquear el registro si el correo falla
-      console.error('Error enviando correo de verificación:', err);
     }
 
     const tranformedUser = plainToInstance(UserMinimalResponseDto, newUser, {
@@ -89,9 +87,6 @@ export class AuthService {
   }
 
   async syncAuth0User(auth0Payload: any, userFront) {
-
-    console.log(auth0Payload, userFront);
-
     userFront = userFront.user
 
     let user = await this.usersRepository.findOne({
@@ -113,11 +108,9 @@ export class AuthService {
         user.isVerified = true;
 
         await this.usersRepository.save(user);
-        console.log(`Usuario ${user.email} vinculado con Auth0.`);
       }
     }
 
-    // Creo nuevo usuario desde Auth0
     if (!user) {
       const baseUsername = userFront.nickname || userFront.email.split('@')[0];
       let userName = userFront.nickname;
@@ -140,10 +133,8 @@ export class AuthService {
       });
 
       await this.usersRepository.save(user);
-      console.log(`Nuevo usuario ${userFront.email} creado desde Auth0.`);
     }
 
-    // Generar mi propio JWT para mantener sesión
     const payload = {
       sub: user.id,
       email: user.email,

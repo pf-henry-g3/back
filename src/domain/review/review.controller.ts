@@ -8,6 +8,9 @@ import { User } from '../user/entities/user.entity';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ReviewOwnerGuard } from 'src/common/factories/OwnerOrAdmin.factory';
+import { RolesGuard } from 'src/common/guards/Role.guard';
+import { Roles } from 'src/common/decorators/role.decorator';
+import { Role } from 'src/common/enums/roles.enum';
 
 @Controller('review')
 export class ReviewController {
@@ -34,6 +37,43 @@ export class ReviewController {
       'Review creada',
       await this.reviewService.create(createReviewDto, user),
     )
+  }
+
+  @Get('admin/all')
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página actual para paginación',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados por página',
+    example: '10',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos.',
+  })
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @HttpCode(200)
+  async findAllForAdmin(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundReviews = await this.reviewService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Reviews encontradas',
+      foundReviews.tranformedReviews,
+      foundReviews.meta,
+    );
   }
 
   @Get(':userRole')
