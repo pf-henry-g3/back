@@ -58,10 +58,5 @@ export class UserResponseDto {
 
     @Expose()
     @Type(() => RoleResponseDto)
-    @Transform(({ value }) =>
-        Array.isArray(value)
-            ? value.filter(role => !['Admin', 'SuperAdmin'].includes(role.name))
-            : []
-    )
     roles: RoleResponseDto[];
 }

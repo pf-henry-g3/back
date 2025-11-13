@@ -1,11 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Query, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req, Delete } from '@nestjs/common';
 import { VacancyService } from './vacancy.service';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
-import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/Auth.guard';
 import { User } from '../user/entities/user.entity';
+import { commonResponse } from 'src/common/utils/common-response.constant';
+import { Role } from 'src/common/enums/roles.enum';
+import { Roles } from 'src/common/decorators/role.decorator';
+import { VacancyOwnerGuard } from 'src/common/factories/OwnerOrAdmin.factory';
 
 @Controller('vacancy')
 export class VacancyController {
@@ -22,12 +25,16 @@ export class VacancyController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @HttpCode(201)
-  create(
+  async create(
     @Body() createVacancyDto: CreateVacancyDto,
     @Req() req
   ) {
     const user = req.user as User
-    return this.vacancyService.create(createVacancyDto, user);
+
+    return commonResponse(
+      'Vacante Creada',
+      await this.vacancyService.create(createVacancyDto, user)
+    )
   }
 
   @Get()
@@ -50,13 +57,20 @@ export class VacancyController {
   //@ApiBearerAuth()
   //@UseGuards(AuthGuard)
   @HttpCode(200)
-  findAll(
+  async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.vacancyService.findAll(+page, +limit);
-    }
-    return this.vacancyService.findAll();
+
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundVacancies = await this.vacancyService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Vacantes encontradas.',
+      foundVacancies.transformedVacancies,
+      foundVacancies.meta,
+    )
   }
 
   @Get(':id')
@@ -72,10 +86,13 @@ export class VacancyController {
   //@ApiBearerAuth()
   //@UseGuards(AuthGuard)
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id') id: string
   ) {
-    return this.vacancyService.findOne(id);
+    return commonResponse(
+      'Vacante encontrada.',
+      await this.vacancyService.findOne(id)
+    );
   }
 
   @Patch('photo/:vacancyId')
@@ -111,26 +128,6 @@ export class VacancyController {
     return this.vacancyService.updateProfilePicture(file, vacancyId);
   }
 
-  @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id de la vacante a actualizar sus datos',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Recurso actualizado con retorno de datos',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
-  @HttpCode(200)
-  update(
-    @Param('id') id: string,
-    @Body() updateVacancyDto: UpdateVacancyDto
-  ) {
-    return this.vacancyService.update(+id, updateVacancyDto);
-  }
-
   @Delete(':id')
   @ApiParam({
     name: 'id',
@@ -142,11 +139,11 @@ export class VacancyController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, VacancyOwnerGuard())
   @HttpCode(204)
-  remove(
+  softDelete(
     @Param('id') id: string
   ) {
-    return this.vacancyService.remove(+id);
+    return this.vacancyService.softDelete(id);
   }
 }

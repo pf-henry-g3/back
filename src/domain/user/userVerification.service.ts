@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
-import { Repository } from "typeorm";
+import { Repository, IsNull } from "typeorm";
 
 @Injectable()
 export class UserVerificationService {
@@ -56,5 +56,70 @@ export class UserVerificationService {
             },
         });
         return { message: 'Correo de verificación reenviado correctamente' };
+    }
+
+    async sendMassEmail(subject: string, body: string) {
+        const users = await this.usersRepository.find({
+            where: { deleteAt: IsNull() },
+            select: ['email', 'name'],
+        });
+
+        if (users.length === 0) {
+            throw new NotFoundException('No hay usuarios para enviar el email');
+        }
+
+        const results = {
+            total: users.length,
+            sent: 0,
+            failed: 0,
+            errors: [] as string[],
+        };
+
+        const escapeHtml = (text: string) => {
+            const map: { [key: string]: string } = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;',
+            };
+            return text.replace(/[&<>"']/g, (m) => map[m]);
+        };
+
+        const safeSubject = escapeHtml(subject);
+        const safeBody = escapeHtml(body).replace(/\n/g, '<br>');
+
+        for (const user of users) {
+            try {
+                await this.mailerService.sendMail({
+                    to: user.email,
+                    subject: safeSubject,
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                            <h2 style="color: #333; margin-bottom: 20px;">${safeSubject}</h2>
+                            <div style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                                ${safeBody}
+                            </div>
+                            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                            <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                                Este es un mensaje automático de Syncro. Por favor no respondas a este correo.
+                            </p>
+                        </div>
+                    `,
+                });
+                results.sent++;
+            } catch (error: any) {
+                results.failed++;
+                results.errors.push(`Error enviando a ${user.email}: ${error.message}`);
+            }
+        }
+
+        return {
+            message: `Emails enviados: ${results.sent} de ${results.total}`,
+            total: results.total,
+            sent: results.sent,
+            failed: results.failed,
+            errors: results.errors,
+        };
     }
 }
