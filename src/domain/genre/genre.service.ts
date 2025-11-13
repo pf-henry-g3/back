@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateGenreDto } from './dto/create-genre.dto';
 import genres from '../../data/genre.data.json'
 import { InjectRepository } from '@nestjs/typeorm';
-import { ILike, Like, Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Genre } from './entities/genre.entity';
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
@@ -30,7 +30,11 @@ export class GenreService {
   }
 
   async create(createGenreDto: CreateGenreDto) {
-    const foundGenre: Genre | null = await this.genreRepository.findOneBy({ name: createGenreDto.name });
+    const foundGenre: Genre | null = await this.genreRepository.findOne({
+      where: {
+        name: ILike(`%${createGenreDto.name}%`),
+      }
+    });
 
     if (foundGenre) throw new BadRequestException('El genero ya existe');
 

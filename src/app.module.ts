@@ -17,6 +17,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { ReviewModule } from './domain/review/review.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './config/mailer.config';
+import { EventModule } from './domain/event/event.module';
+import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
 
 
 @Module({
@@ -42,6 +44,8 @@ import { mailerConfig } from './config/mailer.config';
     SearchModule,
     PaymentModule,
     ReviewModule,
+    EventModule,
+    MusicalInstrumentModule,
 
     AuthModule,
     JwtModule.registerAsync({

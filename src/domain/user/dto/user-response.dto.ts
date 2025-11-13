@@ -1,6 +1,9 @@
-import { Exclude, Expose, Transform, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { GenreResponseDto } from 'src/common/dto/genre-response.dto';
 import { RoleResponseDto } from 'src/common/dto/role-response.dto';
+import { BandResponseDto } from 'src/domain/band/dto/band-response.dto';
+import { BandMemberResponseDto } from 'src/domain/band/dto/bandMember-response.dto';
+import { ArtistInstrumentResponseDto } from 'src/domain/musical-instrument/dto/artist-instrument-response.dto';
 
 export class UserResponseDto {
     @Expose()
@@ -33,30 +36,23 @@ export class UserResponseDto {
     @Expose()
     isVerified: boolean;
 
-
-    @Exclude()
-    password: string;
-
-    @Exclude()
-    address: string;
-
-    @Exclude()
-    authProviderId: string;
-
-    @Exclude()
-    latitude: number;
-
-    @Exclude()
-    longitude: number;
-
-    @Exclude()
-    deleteAt: Date;
-
     @Expose()
     @Type(() => GenreResponseDto)
     genres: GenreResponseDto[];
 
     @Expose()
+    @Type(() => BandResponseDto)
+    leaderOf: BandResponseDto;
+
+    @Expose()
+    @Type(() => BandMemberResponseDto)
+    memberShips: BandMemberResponseDto[];
+
+    @Expose()
     @Type(() => RoleResponseDto)
     roles: RoleResponseDto[];
+
+    @Expose()
+    @Type(() => ArtistInstrumentResponseDto)
+    instruments: ArtistInstrumentResponseDto[];
 }

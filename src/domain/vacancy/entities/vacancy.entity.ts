@@ -1,5 +1,6 @@
 import { Band } from "src/domain/band/entities/band.entity";
 import { Genre } from "src/domain/genre/entities/genre.entity";
+import { MusicalInstrument } from "src/domain/musical-instrument/entities/musical-instrument.entity";
 import { User } from "src/domain/user/entities/user.entity";
 import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -39,9 +40,18 @@ export class Vacancy {
     // })
     // owerType: string
 
+    @DeleteDateColumn({ nullable: true })
+    deletedAt?: Date;
+
+    //Relacion con generos
     @ManyToMany(() => Genre, genre => genre.vacancies, { eager: true })
     @JoinTable({ name: 'vacancyGenres' })
     genres: Genre[];
+
+    //Relacion con instrumentos musicales
+    @ManyToMany(() => MusicalInstrument, instrument => instrument.vacancies, { eager: true })
+    @JoinTable({ name: 'vacancyInstruments' })
+    instruments: MusicalInstrument[];
 
     // muchas vacantes {pertenecen} un usuario 
     @ManyToOne(() => User, (user) => user.vacancies, {
@@ -52,14 +62,4 @@ export class Vacancy {
     @JoinColumn({ name: 'ownerId' })
     owner: User;
 
-    @DeleteDateColumn({ nullable: true })
-    deletedAt?: Date;
-
-    // @ManyToOne(() => Band, (band) => band.bandVacancies, {
-    //     nullable: false,          // pertenece SIEMPRE a un usuario
-    //     onDelete: 'CASCADE',      // se borra al borrar la banda 
-    //     eager: false,
-    // })
-    // @JoinColumn({ name: 'bandOwnerId' })
-    // bandOwnerId: Band[];
 }
