@@ -20,9 +20,8 @@ export enum PaymentMethod {
 export enum TransactionStatus {
     PENDING = 'PENDING',
     APPROVED = 'APPROVED',
-    REJECTED = 'REJECTED',
-    REFUNDED = 'REFUNDED',
-    CANCELLED = 'CANCELLED',
+    FAILURE = 'FAILURE',
+
 }
 
 @Entity({ name: 'payments' })
