@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import bcrypt from 'node_modules/bcryptjs';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
 import { plainToInstance } from 'class-transformer';
@@ -61,7 +60,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('Credenciales invalidas');
 
     if (!user.password)
-      throw new BadRequestException('Este usuario usa autenticación externa. Iniciá sesión con Google o Auth0.');
+      throw new BadRequestException('Este usuario utiliza autenticación externa. Iniciá sesión con Google.');
 
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
@@ -73,9 +72,10 @@ export class AuthService {
       roles: user.roles?.map(r => r.name)
     };
 
-    // if (!user.isVerified) {
-    //   throw new BadRequestException('Tu cuenta aún no está verificada.');
-    // }
+    if (!user.isVerified) {
+      await this.userVerificationService.sendEmail(user.email);
+      throw new BadRequestException('Tu cuenta no está verificada. Te reenviamos un correo de verificación.');
+    }
 
     const token = this.jwtService.sign(payload);
 
@@ -86,24 +86,24 @@ export class AuthService {
     return { login: true, access_token: token, tranformedUser }
   }
 
-  async syncAuth0User(auth0Payload: any, userFront) {
-    userFront = userFront.user
+  async syncAuth0User(auth0Payload: any, userAuth0) {
+    userAuth0 = userAuth0.user
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: auth0Payload.sub }
+      where: { authProviderId: userAuth0.sub }
     });
 
 
     if (!user) {
       user = await this.usersRepository.findOne({
-        where: { email: userFront.email }
+        where: { email: userAuth0.email }
       });
 
       if (user) {
-        user.authProviderId = auth0Payload.sub;
+        user.authProviderId = userAuth0.sub;
 
-        if (userFront.picture) user.urlImage = userFront.picture;
-        if (userFront.name && !user.name) user.name = userFront.name;
+        if (userAuth0.picture) user.urlImage = userAuth0.picture;
+        if (userAuth0.name && !user.name) user.name = userAuth0.name;
 
         user.isVerified = true;
 
@@ -112,8 +112,8 @@ export class AuthService {
     }
 
     if (!user) {
-      const baseUsername = userFront.nickname || userFront.email.split('@')[0];
-      let userName = userFront.nickname;
+      const baseUsername = userAuth0.nickname || userAuth0.email.split('@')[0];
+      let userName = userAuth0.nickname;
       let counter = 1;
 
       // Verificar que userName sea único
@@ -123,11 +123,11 @@ export class AuthService {
       }
 
       user = this.usersRepository.create({
-        email: userFront.email,
-        name: userFront.name || userFront.nickname,
+        email: userAuth0.email,
+        name: userAuth0.name || userAuth0.nickname,
         userName,
-        authProviderId: auth0Payload.sub,
-        urlImage: userFront.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        authProviderId: userAuth0.sub,
+        urlImage: userAuth0.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,
       });
@@ -149,4 +149,5 @@ export class AuthService {
 
     return { login: true, access_token: token, tranformedUser }
   }
+
 }

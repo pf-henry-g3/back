@@ -8,7 +8,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 @Injectable()
 export class PaymentService {
   private mp = new MercadoPagoConfig({
-    accessToken: "TEST-8369416514283842-110409-fdb31d3bc9dc8a824423c1db870d955f-796070948"
+    accessToken: process.env.MP_ACCESS_TOKEN!,
   });
   constructor(
     @InjectRepository(PaymentEntity)
@@ -18,9 +18,9 @@ export class PaymentService {
   async createDonacion(dto: CreatePaymentDto) {
     const preference = new Preference(this.mp);
 
-    
-    const externalReference = Date.now().toString(); 
-   
+
+    const externalReference = Date.now().toString();
+
 
     const res = await preference.create({
       body: {
@@ -41,17 +41,17 @@ export class PaymentService {
         // auto_return: 'approved',
         notification_url: 'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io/webhook',
 
-        
+
         external_reference: externalReference,
       },
     });
 
     await this.paymentRepo.save({
-      id: externalReference, 
+      id: externalReference,
       amount: dto.amount,
       paymentMethod: PaymentMethod.MP,
       transactionStatus: TransactionStatus.PENDING,
-      description: `Donación - pref:${res.id}`, 
+      description: `Donación - pref:${res.id}`,
     });
 
     return res.init_point;
@@ -65,7 +65,7 @@ export class PaymentService {
 
     const mpPayment = await new Payment(this.mp).get({ id: paymentId });
 
-    const prefId = mpPayment?.external_reference; 
+    const prefId = mpPayment?.external_reference;
     if (!prefId) return true;
 
     const current = await this.paymentRepo.findOne({ where: { id: prefId } });

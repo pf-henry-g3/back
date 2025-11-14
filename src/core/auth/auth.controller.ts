@@ -1,10 +1,13 @@
-import { Controller, Post, Body, HttpCode, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Req, UseGuards, Res, Get, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
+import type { Response } from 'express';
+import { SetAuthCookieInterceptor } from 'src/common/interceptor/set-auth-cookie.interceptor';
 import { commonResponse } from 'src/common/utils/common-response.constant';
+import { AuthGuard } from 'src/common/guards/Auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -36,6 +39,7 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(200)
+  @UseInterceptors(SetAuthCookieInterceptor)
   async signin(@Body() loginUserDto: LoginUserDto) {
     return commonResponse(
       'Inicio de sesion exitoso',
@@ -47,12 +51,29 @@ export class AuthController {
   @UseGuards(Auth0Guard) //El guard Verifica el token
   async auth0Callback(
     @Req() req: any,
-    @Body() userFront) {
+    @Body() userAuth) {
     return commonResponse(
       'Usuario registrado extisamente',
-      await this.authService.syncAuth0User(req.auth0User, userFront), //Sincorniza con el user de la db
+      await this.authService.syncAuth0User(req.auth0User, userAuth),
     );
   }
 
-  //SignOut ?
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
+
+    return commonResponse('Logout exitoso')
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard)
+  async getMe(@Req() req: any) {
+    console.log('✅ Usuario autenticado:', req.user.email);
+    return commonResponse('Usuario autenticado', { user: req.user });
+  }
 }
