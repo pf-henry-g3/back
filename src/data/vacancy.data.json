@@ -8,7 +8,8 @@
     "genresSeeder": [
       "Clásica",
       "Jazz"
-    ]
+    ],
+    "vacancyType": "User"
   },
   {
     "name": "Bajista con Experiencia en Giras",
@@ -19,7 +20,8 @@
     "genresSeeder": [
       "Rock",
       "Funk"
-    ]
+    ],
+    "vacancyType": "Band"
   },
   {
     "name": "Vocalista de Hip Hop/R&B",
@@ -30,7 +32,8 @@
     "genresSeeder": [
       "Electronic",
       "Hip Hop"
-    ]
+    ],
+    "vacancyType": "User"
   },
   {
     "name": "Guitarrista de Metal Rítmico",
@@ -40,7 +43,8 @@
     "vacancyuserName": "MetalScreamer",
     "genresSeeder": [
       "Metal"
-    ]
+    ],
+    "vacancyType": "Band"
   },
   {
     "name": "Baterista para Country",
@@ -50,6 +54,7 @@
     "vacancyuserName": "FiddlePlayer",
     "genresSeeder": [
       "Country"
-    ]
+    ],
+    "vacancyType": "Band"
   }
 ]

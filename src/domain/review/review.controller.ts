@@ -176,23 +176,4 @@ export class ReviewController {
       await this.reviewService.update(id, updateReviewDto),
     )
   }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id de la review eliminar de forma logica',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso eliminado sin retorno de datos',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard, ReviewOwnerGuard())
-  @HttpCode(204)
-  softDelete(
-    @Param('id') id: string
-  ) {
-    return this.reviewService.softDelete(id);
-  }
 }

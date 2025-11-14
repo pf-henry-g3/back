@@ -86,12 +86,4 @@ export class RoleService {
 
     return { transformedRoles, meta };
   }
-
-  async softDelete(id: string) {
-    const foundRole: Role | null = await this.roleRepository.findOneBy({ id });
-
-    if (!foundRole) throw new NotFoundException("Role no encontrado");
-
-    return await this.roleRepository.softDelete(id);
-  }
 }

@@ -1,58 +1,95 @@
-import { GenreResponseDto } from "src/common/dto/genre-response.dto";
-import { MusicalInstrumentResponseDto } from "src/common/dto/musical-instrument-response.dto";
-import { RoleResponseDto } from "src/common/dto/role-response.dto";
 import { EntityName } from "src/common/enums/entity-names.enum";
-import { BandResponseDto } from "src/domain/band/dto/band-response.dto";
-import { BandMemberResponseDto } from "src/domain/band/dto/bandMember-response.dto";
 import { Band } from "src/domain/band/entities/band.entity";
 import { BandMember } from "src/domain/band/entities/bandMember.entity";
 import { Genre } from "src/domain/genre/entities/genre.entity";
-import { ArtistInstrumentResponseDto } from "src/domain/musical-instrument/dto/artist-instrument-response.dto";
 import { AritstMusicalInstrument } from "src/domain/musical-instrument/entities/artist-musical-instrument.entity";
 import { MusicalInstrument } from "src/domain/musical-instrument/entities/musical-instrument.entity";
-import { ReviewResponseDto } from "src/domain/review/dto/review-response.dto";
 import { Review } from "src/domain/review/entities/review.entity";
 import { Role } from "src/domain/role/entities/role.entity";
-import { UserResponseDto } from "src/domain/user/dto/user-response.dto";
 import { User } from "src/domain/user/entities/user.entity";
-import { VacancyResponseDto } from "src/domain/vacancy/dto/vacancy-response.dto";
 import { Vacancy } from "src/domain/vacancy/entities/vacancy.entity";
+import { UserAdminResponseDto } from "../dto/user-response-admin.dto";
+import { BandAdminResponseDto } from "../dto/band-response-admin.dto";
+import { BandMemberAdminResponseDto } from "../dto/band-member-response-admin.dto";
+import { VacancyAdminResponseDto } from "../dto/vacancy-response-admin.dto";
+import { MusicalInstrumentAdminResponseDto } from "../dto/musical-instrument-response-admin.dto";
+import { RoleAdminResponseDto } from "../dto/role-response-admin.dto";
+import { GenreAdminResponseDto } from "../dto/genre-response-admin.dto";
+import { ReviewAdminResponseDto } from "../dto/review-response-admin.dto";
+import { ArtistInstrumentAdminResponseDto } from "../dto/artist-instrument-response-admin.dto";
 
 export const ADMIN_ENTITY_MAP = {
     [EntityName.USER]: {
         entity: User,
-        responseDto: UserResponseDto
+        responseDto: UserAdminResponseDto,
+        defaultRelations: ['roles', 'genres', 'vacancies', 'leaderOf', 'musicalInstruments', 'memberships'],
+        historyRelations: {
+            vacancies: { entity: Vacancy, relationField: 'owner' },
+            memberships: { entity: BandMember, relationField: 'user' },
+        },
     },
     [EntityName.BAND]: {
         entity: Band,
-        responseDto: BandResponseDto
+        responseDto: BandAdminResponseDto,
+        defaultRelations: ['leader', 'genres', 'bandMembers'],
+        historyRelations: {
+
+        },
     },
     [EntityName.BANDMEMBER]: {
         entity: BandMember,
-        responseDto: BandMemberResponseDto
+        responseDto: BandMemberAdminResponseDto,
+        defaultRelations: ['user', 'band'],
+        historyRelations: {
+
+        },
     },
     [EntityName.VACANCY]: {
         entity: Vacancy,
-        responseDto: VacancyResponseDto
+        responseDto: VacancyAdminResponseDto,
+        defaultRelations: ['genres', 'owner'],
+        historyRelations: {
+
+        },
     },
     [EntityName.INSTRUMENT]: {
         entity: MusicalInstrument,
-        responseDto: MusicalInstrumentResponseDto
+        responseDto: MusicalInstrumentAdminResponseDto,
+        defaultRelations: [],
+        historyRelations: {
+
+        },
     },
     [EntityName.ARTISTINSTRUMENT]: {
         entity: AritstMusicalInstrument,
-        responseDto: ArtistInstrumentResponseDto
+        responseDto: ArtistInstrumentAdminResponseDto,
+        defaultRelations: ['instrument', 'user'],
+        historyRelations: {
+
+        },
     },
     [EntityName.REVIEW]: {
         entity: Review,
-        responseDto: ReviewResponseDto
+        responseDto: ReviewAdminResponseDto,
+        defaultRelations: ['owner', 'receptor'],
+        historyRelations: {
+
+        },
     },
     [EntityName.ROL]: {
         entity: Role,
-        responseDto: RoleResponseDto
+        responseDto: RoleAdminResponseDto,
+        defaultRelations: [],
+        historyRelations: {
+
+        },
     },
     [EntityName.GENRE]: {
         entity: Genre,
-        responseDto: GenreResponseDto
+        responseDto: GenreAdminResponseDto,
+        defaultRelations: [],
+        historyRelations: {
+
+        },
     },
 }

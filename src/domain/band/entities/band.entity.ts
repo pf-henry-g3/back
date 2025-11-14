@@ -79,6 +79,19 @@ export class Band {
     })
     longitude: number;
 
+    //Columnas de moderacion
+    @Column({
+        default: false,
+        nullable: true,
+    })
+    isFlagged: boolean;
+
+    @Column({
+        type: 'text',
+        nullable: true,
+    })
+    moderationReason: string;
+
     @DeleteDateColumn({
         nullable: true,
     })

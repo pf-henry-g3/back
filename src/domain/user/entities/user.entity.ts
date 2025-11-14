@@ -108,6 +108,31 @@ export class User {
   })
   urlImage: string;
 
+  //Columnas de moderacion
+  @Column({
+    default: false,
+    nullable: true,
+  })
+  isFlagged: boolean;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  moderationReason: string;
+
+  @Column({
+    default: false,
+    nullable: true,
+  })
+  isBanned: boolean;
+
+  @Column({
+    type: 'text',
+    nullable: true,
+  })
+  reasonForBan: string;
+
   //Borrado logico
   @DeleteDateColumn({
     nullable: true,

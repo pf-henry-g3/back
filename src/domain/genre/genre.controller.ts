@@ -9,6 +9,9 @@ import { Roles } from 'src/common/decorators/role.decorator';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('genre')
+@ApiBearerAuth()
+@Roles(Role.Admin, Role.SuperAdmin)
+@UseGuards(AuthGuard, RolesGuard)
 export class GenreController {
   constructor(private readonly genreService: GenreService) { }
 
@@ -20,9 +23,6 @@ export class GenreController {
     status: 201,
     description: 'Creacion exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
   async create(
     @Body() createGenreDto: CreateGenreDto
@@ -50,9 +50,6 @@ export class GenreController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
@@ -93,9 +90,6 @@ export class GenreController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findByName(
     @Query('genreName') genreName: string,
@@ -111,25 +105,5 @@ export class GenreController {
       foundGenres.transformedGenres,
       foundGenres.meta,
     )
-  }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id del genero a eliminar de forma logica',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso eliminado sin retorno de datos',
-  })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @HttpCode(204)
-  softDelete(
-    @Param('id') id: string
-  ) {
-    return this.genreService.softDelete(id);
   }
 }

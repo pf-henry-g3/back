@@ -72,10 +72,10 @@ export class AuthService {
       roles: user.roles?.map(r => r.name)
     };
 
-    if (!user.isVerified) {
-      await this.userVerificationService.sendEmail(user.email);
-      throw new BadRequestException('Tu cuenta no está verificada. Te reenviamos un correo de verificación.');
-    }
+    // if (!user.isVerified) {
+    //   await this.userVerificationService.sendEmail(user.email);
+    //   throw new BadRequestException('Tu cuenta no está verificada. Te reenviamos un correo de verificación.');
+    // }
 
     const token = this.jwtService.sign(payload);
 
