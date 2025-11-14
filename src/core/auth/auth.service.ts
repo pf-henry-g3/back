@@ -5,11 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import bcrypt from 'node_modules/bcryptjs';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
-import { cookieConfig } from 'src/config/cookie.config';
-import { Response } from 'express';
+import { plainToInstance } from 'class-transformer';
+import { UserMinimalResponseDto } from 'src/common/dto/user-minimal-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +21,6 @@ export class AuthService {
 
   async signup(createUserDto: CreateUserDto) {
     const { confirmPassword, ...userData } = createUserDto
-    console.log(createUserDto.aboutMe);
 
     if (confirmPassword !== userData.password) throw new BadRequestException('Las contraseñas no coinciden');
 
@@ -41,9 +39,17 @@ export class AuthService {
     const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
     await this.usersRepository.save(newUser);
 
-    await this.userVerificationService.sendEmail(createUserDto.email);
+    try {
+      await this.userVerificationService.sendEmail(createUserDto.email);
+    } catch (err) {
+      // No bloquear el registro si el correo falla
+    }
 
-    return `Usuario ${userData.userName} creado exitosamente`;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, newUser, {
+      excludeExtraneousValues: true,
+    });
+
+    return tranformedUser;
   }
 
   async signin(loginUser: LoginUserDto) {
@@ -73,46 +79,41 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password, ...userWithoutPassword } = user;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
 
-    const data = { login: true, access_token: token, userWithoutPassword }
-
-    return commonResponse('Success Login. ', data)
+    return { login: true, access_token: token, tranformedUser }
   }
 
-  async syncAuth0User(userFront) {
-
-    console.log(userFront);
-
-    userFront = userFront.user
+  async syncAuth0User(auth0Payload: any, userAuth0) {
+    userAuth0 = userAuth0.user
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: userFront.sub }
+      where: { authProviderId: userAuth0.sub }
     });
 
 
     if (!user) {
       user = await this.usersRepository.findOne({
-        where: { email: userFront.email }
+        where: { email: userAuth0.email }
       });
 
       if (user) {
-        user.authProviderId = userFront.sub;
+        user.authProviderId = userAuth0.sub;
 
-        if (userFront.picture) user.urlImage = userFront.picture;
-        if (userFront.name && !user.name) user.name = userFront.name;
+        if (userAuth0.picture) user.urlImage = userAuth0.picture;
+        if (userAuth0.name && !user.name) user.name = userAuth0.name;
 
         user.isVerified = true;
 
         await this.usersRepository.save(user);
-        console.log(`Usuario ${user.email} vinculado con Auth0.`);
       }
     }
 
-    // Creo nuevo usuario desde Auth0
     if (!user) {
-      const baseUsername = userFront.nickname || userFront.email.split('@')[0];
-      let userName = userFront.nickname;
+      const baseUsername = userAuth0.nickname || userAuth0.email.split('@')[0];
+      let userName = userAuth0.nickname;
       let counter = 1;
 
       // Verificar que userName sea único
@@ -122,20 +123,18 @@ export class AuthService {
       }
 
       user = this.usersRepository.create({
-        email: userFront.email,
-        name: userFront.name || userFront.nickname,
+        email: userAuth0.email,
+        name: userAuth0.name || userAuth0.nickname,
         userName,
-        authProviderId: userFront.sub,
-        urlImage: userFront.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        authProviderId: userAuth0.sub,
+        urlImage: userAuth0.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,
       });
 
       await this.usersRepository.save(user);
-      console.log(`Nuevo usuario ${userFront.email} creado desde Auth0.`);
     }
 
-    // Generar mi propio JWT para mantener sesión
     const payload = {
       sub: user.id,
       email: user.email,
@@ -144,11 +143,11 @@ export class AuthService {
 
     const token = this.jwtService.sign(payload);
 
-    const { password, ...userWithoutPassword } = user;
+    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
 
-    const data = { login: true, access_token: token, userWithoutPassword }
-
-    return commonResponse('Autenticación exitosa con Auth0', data);
+    return { login: true, access_token: token, tranformedUser }
   }
 
 }

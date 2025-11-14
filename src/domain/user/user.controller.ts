@@ -2,15 +2,15 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile,
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '../../common/guards/Auth.guard';
 import { RolesGuard } from '../../common/guards/Role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 import { Role } from 'src/common/enums/roles.enum';
-import { SelfIdOrAdminGuard } from '../../common/guards/SelfIdOrAdmin.guard'
 import { UserVerificationService } from './userVerification.service';
-import { Request } from 'express';
-import { User } from './entities/user.entity';
+import { commonResponse } from 'src/common/utils/common-response.constant';
+import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
+import { SendMassEmailDto } from './dto/send-mass-email.dto';
 
 @Controller('user')
 export class UserController {
@@ -36,18 +36,24 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  // @ApiBearerAuth()
+  //@ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  // @UseGuards(AuthGuard, RolesGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findAll(
+  async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string
   ) {
-    if (page && limit) {
-      return this.userService.findAll(+page, +limit);
-    }
-    return this.userService.findAll();
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundUsers = await this.userService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Usuarios encontrados.',
+      foundUsers.transformedUsers,
+      foundUsers.meta,
+    )
   }
 
   @Get('verify')
@@ -75,14 +81,17 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  @ApiBearerAuth()
+  //@ApiBearerAuth()
   // @Roles(Role.Admin, Role.SuperAdmin)
-  // @UseGuards(AuthGuard, RolesGuard)
+  //@UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findOne(
+  async findOne(
     @Param('id') id: string
   ) {
-    return this.userService.findOne(id, { relations: ['genres'], throwIfNotFound: true });
+    return commonResponse(
+      'Usuario encontrado',
+      await this.userService.findOne(id, { relations: ['genres', 'roles'], throwIfNotFound: true }),
+    )
   }
 
   @Patch('photo/:userId')
@@ -149,12 +158,36 @@ export class UserController {
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(204)
   softDelete(
     @Param('id') id: string
   ) {
     return this.userService.softDelete(id);
+  }
+
+  @Post('admin/send-mass-email')
+  @ApiProperty({
+    description: 'Envío masivo de emails a todos los usuarios',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Emails enviados exitosamente',
+  })
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @HttpCode(200)
+  async sendMassEmail(
+    @Body() sendMassEmailDto: SendMassEmailDto
+  ) {
+    return commonResponse(
+      'Emails enviados',
+      await this.userVerificationService.sendMassEmail(
+        sendMassEmailDto.subject,
+        sendMassEmailDto.body
+      ),
+    );
   }
 }
 

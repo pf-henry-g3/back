@@ -56,6 +56,8 @@ export class VacancySearchStrategy extends BaseSearchStrategy<Vacancy> {
                 'vacancy.vacancyDescription',
                 'vacancy.isOpen',
                 'vacancy.urlImage',
+                'vacancy.country',
+                'vacancy.city',
                 'owner.id',
                 'owner.userName',
             ]);

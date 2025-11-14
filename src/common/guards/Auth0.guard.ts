@@ -28,35 +28,38 @@ export class Auth0Guard implements CanActivate {
             ? authHeader.slice(7).trim()
             : authHeader.trim();
 
-        console.log('🧠 TOKEN:', token.substring(0, 50) + '...');
-
-
         try {
             const decodedToken = jwt.decode(token, { complete: true });
             if (!decodedToken) {
                 throw new UnauthorizedException('Token inválido');
             }
 
-            // Obtener la clave pública de Auth0
             const key = await this.client.getSigningKey(decodedToken.header.kid);
-            console.log('🔐 signingKey obtenido OK');
             const signingKey = key.getPublicKey();
 
-            // Verificar el token con la clave pública
             const payload: any = jwt.verify(token, signingKey, {
                 audience: process.env.AUTH0_AUDIENCE,
                 issuer: `https://${process.env.AUTH0_DOMAIN}/`,
                 algorithms: ['RS256'],
             });
 
-            // Guardar payload de Auth0 en request
             request['auth0User'] = payload;
-            console.log('✅ Token verificado correctamente');
             return true;
 
-        } catch (error) {
-            console.error('Error verificando token Auth0:', error);
-            throw new UnauthorizedException('Token de Auth0 inválido o expirado.');
+        } catch (error: any) {
+            if (error.name === 'TokenExpiredError') {
+                throw new UnauthorizedException('Token de Auth0 expirado.');
+            }
+            if (error.name === 'JsonWebTokenError') {
+                throw new UnauthorizedException('Token de Auth0 inválido.');
+            }
+            if (error.message?.includes('audience')) {
+                throw new UnauthorizedException('Token de Auth0: audience no coincide. Verifica AUTH0_AUDIENCE.');
+            }
+            if (error.message?.includes('issuer')) {
+                throw new UnauthorizedException('Token de Auth0: issuer no coincide. Verifica AUTH0_DOMAIN.');
+            }
+            throw new UnauthorizedException(`Token de Auth0 inválido o expirado: ${error.message || error}`);
         }
 
     }

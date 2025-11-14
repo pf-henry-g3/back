@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
 import { ILike, Like, Repository } from 'typeorm';
 import { Pages } from 'src/common/enums/pages.enum';
+import { plainToInstance } from 'class-transformer';
+import { RoleResponseDto } from 'src/common/dto/role-response.dto';
 
 @Injectable()
 export class RoleService {
@@ -29,7 +31,11 @@ export class RoleService {
 
 
   async create(createRoleDto: CreateRoleDto) {
-    const foundRole = await this.roleRepository.findOneBy({ name: createRoleDto.name });
+    const foundRole = await this.roleRepository.findOne({
+      where: {
+        name: ILike(`%${createRoleDto.name}%`)
+      }
+    });
 
     if (foundRole) throw new BadRequestException('El rol ya existe');
 
@@ -37,28 +43,28 @@ export class RoleService {
 
     await this.roleRepository.save(newRole);
 
-    return `Rol ${createRoleDto.name} creado con exito`;
+    const transformedRole = plainToInstance(RoleResponseDto, newRole, {
+      excludeExtraneousValues: true,
+    })
+
+    return transformedRole;
   }
 
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
     let [roles, total] = await this.roleRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      relations: {
-        //users sin datos sensibles
-      }
     });
 
     if (!roles) throw new NotFoundException("Roles no encontrados");
 
-    return {
-      data: roles,
-      meta: {
-        total,
-        page,
-        limit,
-      }
-    };
+    const transformedRoles = plainToInstance(RoleResponseDto, roles, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta = { total, page, limit };
+
+    return { transformedRoles, meta };
   }
 
   async findRolByName(rolName: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -68,24 +74,24 @@ export class RoleService {
       where: {
         name: ILike(`%${rolName}%`),
       },
-      relations: {
-        //users sin datos sensibles
-      },
-    })
+    });
 
     if (!roles) throw new NotFoundException("Roles no encontrados");
 
-    return {
-      data: roles,
-      meta: {
-        total,
-        page,
-        limit,
-      }
-    }
+    const transformedRoles = plainToInstance(RoleResponseDto, roles, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta = { total, page, limit };
+
+    return { transformedRoles, meta };
   }
 
-  async remove(id: number) {
-    return `This action removes a #${id} role`;
+  async softDelete(id: string) {
+    const foundRole: Role | null = await this.roleRepository.findOneBy({ id });
+
+    if (!foundRole) throw new NotFoundException("Role no encontrado");
+
+    return await this.roleRepository.softDelete(id);
   }
 }

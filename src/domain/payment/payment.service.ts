@@ -18,6 +18,10 @@ export class PaymentService {
   async createDonacion(dto: CreatePaymentDto) {
     const preference = new Preference(this.mp);
 
+
+    const externalReference = Date.now().toString();
+
+
     const res = await preference.create({
       body: {
         items: [
@@ -30,28 +34,69 @@ export class PaymentService {
           },
         ],
         back_urls: {
-          success: `${process.env.FRONTEND_URL}/home`,
-          failure: `${process.env.FRONTEND_URL}/failure`,
-          pending: `${process.env.FRONTEND_URL}/home`
-
+          success: 'http://localhost:3000/home',
+          failure: 'http://localhost:3000/failure',
+          pending: 'http://localhost:3000/home',
         },
-        auto_return: undefined,
-        notification_url: `${process.env.FRONTEND_URL}/webhook`
-      },
+        // auto_return: 'approved',
+        notification_url: 'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io/webhook',
 
+
+        external_reference: externalReference,
+      },
     });
+
     await this.paymentRepo.save({
-      id: res.id,
+      id: externalReference,
       amount: dto.amount,
       paymentMethod: PaymentMethod.MP,
       transactionStatus: TransactionStatus.PENDING,
       description: `Donación - pref:${res.id}`,
     });
-    return res.init_point
+
+    return res.init_point;
   }
 
-  async reciveWebhook() {
+  async reciveWebhook(payload: any) {
+    if ((payload?.type || payload?.topic) !== 'payment') return true;
 
+    const paymentId = String(payload?.data?.id || payload?.id || '');
+    if (!paymentId) return true;
+
+    const mpPayment = await new Payment(this.mp).get({ id: paymentId });
+
+    const prefId = mpPayment?.external_reference;
+    if (!prefId) return true;
+
+    const current = await this.paymentRepo.findOne({ where: { id: prefId } });
+    if (!current) return true;
+    if (current.transactionStatus === TransactionStatus.APPROVED) return true;
+
+    const s = String(mpPayment?.status || '').toLowerCase();
+
+    if (s === 'approved') {
+      await this.paymentRepo.update(
+        { id: prefId },
+        {
+          transactionStatus: TransactionStatus.APPROVED,
+          description: `Donación - pref:${prefId} - pay:${paymentId}`,
+        },
+      );
+      return true;
+    }
+
+    if (['rejected', 'cancelled', 'canceled', 'refunded', 'charged_back'].includes(s)) {
+      await this.paymentRepo.update(
+        { id: prefId },
+        {
+          transactionStatus: TransactionStatus.FAILURE,
+          description: `Donación - pref:${prefId} - pay:${paymentId} - ${s}`,
+        },
+      );
+      return true;
+    }
+
+    return true;
   }
 
   async getAll() {

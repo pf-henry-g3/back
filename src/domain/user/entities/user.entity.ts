@@ -1,6 +1,8 @@
 import { Band } from "src/domain/band/entities/band.entity";
 import { BandMember } from "src/domain/band/entities/bandMember.entity";
 import { Genre } from "src/domain/genre/entities/genre.entity";
+import { AritstMusicalInstrument } from "src/domain/musical-instrument/entities/artist-musical-instrument.entity";
+import { Review } from "src/domain/review/entities/review.entity";
 import { Role } from "src/domain/role/entities/role.entity";
 import { Vacancy } from "src/domain/vacancy/entities/vacancy.entity";
 import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -106,6 +108,16 @@ export class User {
   })
   urlImage: string;
 
+  //Borrado logico
+  @DeleteDateColumn({
+    nullable: true,
+  })
+  deleteAt: Date | null;
+
+  //Verificacion del usuario
+  @Column({ default: false })
+  isVerified: boolean;
+
   //Relacion con Role (roles del usuario)
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable({ name: 'userRoles' })
@@ -126,23 +138,22 @@ export class User {
   @OneToMany(() => Band, (band) => band.leader)
   leaderOf: Band[];
 
-
   //Relacion con BandMembers
   @OneToMany(() => BandMember, (member) => member.user)
   memberships: BandMember[]
 
+  // Relación con Review (dadas)
+  @OneToMany(() => Review, (review) => review.owner)
+  reviewsGiven: Review[];
+
+  // Relación con Review (recibidas)
+  @OneToMany(() => Review, (review) => review.receptor)
+  reviewsReceived: Review[];
+
+  // Relacion con instrumentos
+  @OneToMany(() => AritstMusicalInstrument, (instrument) => instrument.user)
+  musicalInstruments: AritstMusicalInstrument[];
+
   //Relacion con SocialLinks
-  //Relacion con ArtistMusicalInstruments
-  //Relacion con Payment
-  //Relacion con Review
   //Relacion con Media
-
-  //Borrado logico
-  @DeleteDateColumn({
-    nullable: true,
-  })
-  deleteAt: Date | null;
-
-  @Column({ default: false })
-  isVerified: boolean;
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -76,8 +76,8 @@ export class BandController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  // @UseGuards(AuthGuard)
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
@@ -104,8 +104,8 @@ export class BandController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard)
   @HttpCode(200)
   async findOne(
     @Param('id') id: string
@@ -168,5 +168,24 @@ export class BandController {
       'Miembro agregado.',
       await this.bandsService.addOneMember(bandId, addMemberDto)
     );
+  }
+
+  @Delete(':id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la banda a eliminar de forma lógica',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Recurso eliminado sin retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, BandOwnerGuard())
+  @HttpCode(204)
+  async softDelete(
+    @Param('id', ParseUUIDPipe) id: string
+  ) {
+    await this.bandsService.softDelete(id);
   }
 }

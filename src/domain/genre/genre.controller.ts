@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, HttpCode } from '@nestjs/common';
 import { GenreService } from './genre.service';
 import { CreateGenreDto } from './dto/create-genre.dto';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
@@ -6,6 +6,7 @@ import { AuthGuard } from '../../common/guards/Auth.guard';
 import { RolesGuard } from '../../common/guards/Role.guard';
 import { Role } from 'src/common/enums/roles.enum';
 import { Roles } from 'src/common/decorators/role.decorator';
+import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('genre')
 export class GenreController {
@@ -20,13 +21,16 @@ export class GenreController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
-  create(
+  async create(
     @Body() createGenreDto: CreateGenreDto
   ) {
-    return this.genreService.create(createGenreDto);
+    return commonResponse(
+      'Genero creado exitosamente.',
+      await this.genreService.create(createGenreDto),
+    )
   }
 
   @Get()
@@ -47,17 +51,23 @@ export class GenreController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findAll(
+  async findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string
   ) {
-    if (page && limit) {
-      return this.genreService.findAll(+page, +limit);
-    }
-    return this.genreService.findAll();
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundGenres = await this.genreService.findAll(pageNum, limitNum);
+
+    return commonResponse(
+      'Generos encontrados.',
+      foundGenres.transformedGenres,
+      foundGenres.meta,
+    )
   }
 
   @Get('/by-name')
@@ -84,36 +94,42 @@ export class GenreController {
     description: 'Busqueda exitosa con retorno de datos.',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  findByName(
+  async findByName(
     @Query('genreName') genreName: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string) {
-    if (page && limit) {
-      return this.genreService.findRolByName(genreName, +page, +limit);
-    }
-    return this.genreService.findRolByName(genreName);
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundGenres = await this.genreService.findGenreByName(genreName, pageNum, limitNum);
+
+    return commonResponse(
+      'Generos encontrados.',
+      foundGenres.transformedGenres,
+      foundGenres.meta,
+    )
   }
 
   @Delete(':id')
   @ApiParam({
     name: 'id',
     required: true,
-    description: 'id de la vacante a eliminar de forma fisica',
+    description: 'id del genero a eliminar de forma logica',
   })
   @ApiResponse({
     status: 204,
     description: 'Recurso eliminado sin retorno de datos',
   })
   @ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(204)
-  remove(
+  softDelete(
     @Param('id') id: string
   ) {
-    return this.genreService.remove(+id);
+    return this.genreService.softDelete(id);
   }
 }

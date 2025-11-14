@@ -12,7 +12,6 @@ import { AbstractFileUploadService } from '../../core/file-upload/file-upload.ab
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserResponseDto } from './dto/user-response.dto';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -36,7 +35,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       relations: {
         genres: true,
         roles: true,
-        memberships: true,
+        memberships: { band: true },
+        leaderOf: true,
+        musicalInstruments: { instrument: true },
       },
     });
 
@@ -46,7 +47,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuarios encontrados', transformedUsers, { total, page, limit });
+    const meta = { total, page, limit };
+
+    return { transformedUsers, meta };
   }
 
   async findOne(
@@ -67,7 +70,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       excludeExtraneousValues: true,
     });
 
-    return commonResponse('Usuario encontrado', transformedUser);
+    return transformedUser;
   }
 
   async updateProfilePicture(file: Express.Multer.File, userId: string) {
@@ -254,43 +257,55 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     console.log('⏳ Precargando usuarios...');
 
     for (const userData of usersData) {
-      const existingUser = await this.usersRepository.findOne({
-        where: { email: userData.email },
-      });
-      if (existingUser) {
-        console.log(`⚠️ Usuario ${userData.email} ya existe, saltando...`);
-        continue;
+      try {
+        const existingUser = await this.usersRepository.findOne({
+          where: [
+            { email: userData.email },
+            { userName: userData.userName }
+          ],
+          withDeleted: true,
+        });
+        if (existingUser) {
+          console.log(`⚠️ Usuario ${userData.email} o ${userData.userName} ya existe, saltando...`);
+          continue;
+        }
+
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        const user = this.usersRepository.create({
+          email: userData.email,
+          password: hashedPassword,
+          userName: userData.userName,
+          birthDate: new Date(userData.birthDate),
+          name: userData.name,
+          aboutMe: userData.aboutMe,
+          averageRating: userData.averageRating,
+          city: userData.city,
+          country: userData.country,
+          address: userData.address,
+          latitude: userData.latitude,
+          longitude: userData.longitude,
+        });
+
+        const roles = await this.rolesRepository.find({
+          where: userData.rolesSeeder.map((roleName: string) => ({ name: roleName })),
+        });
+
+        const genres = await this.genresRepository.find({
+          where: userData.genresSeeder.map((genreName: string) => ({ name: genreName })),
+        });
+
+        user.roles = roles;
+        user.genres = genres;
+
+        await this.usersRepository.save(user);
+        console.log(`✅ Usuario ${user.email} creado con ${roles.length} roles y ${genres.length} géneros.`);
+      } catch (error: any) {
+        if (error.code === '23505' || error.message?.includes('duplicate key')) {
+          console.log(`⚠️ Usuario ${userData.email} o ${userData.userName} ya existe (error de constraint), saltando...`);
+          continue;
+        }
+        console.error(`❌ Error creando usuario ${userData.email}:`, error.message);
       }
-
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      const user = this.usersRepository.create({
-        email: userData.email,
-        password: hashedPassword,
-        userName: userData.userName,
-        birthDate: new Date(userData.birthDate),
-        name: userData.name,
-        aboutMe: userData.aboutMe,
-        averageRating: userData.averageRating,
-        city: userData.city,
-        country: userData.country,
-        address: userData.address,
-        latitude: userData.latitude,
-        longitude: userData.longitude,
-      });
-
-      const roles = await this.rolesRepository.find({
-        where: userData.rolesSeeder.map((roleName: string) => ({ name: roleName })),
-      });
-
-      const genres = await this.genresRepository.find({
-        where: userData.genresSeeder.map((genreName: string) => ({ name: genreName })),
-      });
-
-      user.roles = roles;
-      user.genres = genres;
-
-      await this.usersRepository.save(user);
-      console.log(`✅ Usuario ${user.email} creado con ${roles.length} roles y ${genres.length} géneros.`);
     }
 
     console.log('🎉 Precarga de usuarios completada.');

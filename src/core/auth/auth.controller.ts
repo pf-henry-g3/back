@@ -1,16 +1,21 @@
-import { Controller, Post, Body, HttpCode, Req, UseGuards, Res, Get } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, Req, UseGuards, Res, Get, UseInterceptors } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
+<<<<<<< HEAD
 import { cookieConfig } from 'src/config/cookie.config';
 import type { Response } from 'express';
 import { passportJwtSecret } from 'jwks-rsa';
 import { RESPONSE_PASSTHROUGH_METADATA } from '@nestjs/common/constants';
 import { PassThrough } from 'stream';
 import { commonResponse } from 'src/common/utils/common-response.constant';
+import { SetAuthCookieInterceptor } from 'src/common/interceptor/set-auth-cookie.interceptor';
 
+=======
+import { commonResponse } from 'src/common/utils/common-response.constant';
+>>>>>>> origin/dev
 
 @Controller('auth')
 export class AuthController {
@@ -25,8 +30,11 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(201)
-  signup(@Body() createUserDto: CreateUserDto) {
-    return this.authService.signup(createUserDto);
+  async signup(@Body() createUserDto: CreateUserDto) {
+    return commonResponse(
+      'Usuario registrado extisamente',
+      await this.authService.signup(createUserDto),
+    );
   }
 
 
@@ -39,33 +47,23 @@ export class AuthController {
     description: 'Creacion exitosa con retorno de datos.',
   })
   @HttpCode(200)
-  async signin(
-    @Body() loginUserDto: LoginUserDto,
-    @Res({ passthrough: true }) res: Response) {
-    const result = await this.authService.signin(loginUserDto);
-    const token = result.data.access_token
-
-    res.cookie('access_token', token, cookieConfig)
-
-    delete result.data.access_token;
-
-    return result
+  @UseInterceptors(SetAuthCookieInterceptor)
+  async signin(@Body() loginUserDto: LoginUserDto) {
+    return commonResponse(
+      'Inicio de sesion exitoso',
+      await this.authService.signin(loginUserDto)
+    );
   }
 
   @Post('auth0/callback')
   @UseGuards(Auth0Guard) //El guard Verifica el token
-  async syncAuth0User(
-    @Body() Auth0User,
-    @Res({ passthrough: true }) res: Response) {
-
-    const result = await this.authService.syncAuth0User(Auth0User); //Sincorniza con el user de la db
-    const token = result.data.access_token;
-    res.cookie('access_token', token, cookieConfig);
-
-    delete result.data.access_token;
-    console.log('result es: ', result);
-
-    return result
+  async auth0Callback(
+    @Req() req: any,
+    @Body() userAuth) {
+    return commonResponse(
+      'Usuario registrado extisamente',
+      await this.authService.syncAuth0User(req.auth0User, userAuth),
+    );
   }
 
   @Post('logout')
