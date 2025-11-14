@@ -4,18 +4,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiProperty, ApiResponse } from '@nestjs/swagger';
 import { Auth0Guard } from '../../common/guards/Auth0.guard';
-<<<<<<< HEAD
-import { cookieConfig } from 'src/config/cookie.config';
 import type { Response } from 'express';
-import { passportJwtSecret } from 'jwks-rsa';
-import { RESPONSE_PASSTHROUGH_METADATA } from '@nestjs/common/constants';
-import { PassThrough } from 'stream';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 import { SetAuthCookieInterceptor } from 'src/common/interceptor/set-auth-cookie.interceptor';
-
-=======
 import { commonResponse } from 'src/common/utils/common-response.constant';
->>>>>>> origin/dev
+import { AuthGuard } from 'src/common/guards/Auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -79,8 +71,9 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(Auth0Guard)
+  @UseGuards(AuthGuard)
   async getMe(@Req() req: any) {
-    commonResponse('Usuario autenticado', req.user)
+    console.log('✅ Usuario autenticado:', req.user.email);
+    return commonResponse('Usuario autenticado', { user: req.user });
   }
 }
