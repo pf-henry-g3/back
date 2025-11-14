@@ -84,12 +84,4 @@ export class GenreService {
 
     return { transformedGenres, meta }
   }
-
-  async softDelete(id: string) {
-    const foundGenre: Genre | null = await this.genreRepository.findOneBy({ id });
-
-    if (!foundGenre) throw new NotFoundException("Genero no encontrado");
-
-    return await this.genreRepository.softDelete(id);
-  }
 }

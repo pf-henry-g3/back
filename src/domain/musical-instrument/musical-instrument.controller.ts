@@ -9,6 +9,9 @@ import { RolesGuard } from 'src/common/guards/Role.guard';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('musical-instrument')
+@ApiBearerAuth()
+@Roles(Role.Admin, Role.SuperAdmin)
+@UseGuards(AuthGuard, RolesGuard)
 export class MusicalInstrumentController {
   constructor(private readonly musicalInstrumentService: MusicalInstrumentService) { }
 
@@ -20,9 +23,6 @@ export class MusicalInstrumentController {
     status: 201,
     description: 'Creacion exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
   async create(
     @Body() createMusicalInstrumentDto: CreateMusicalInstrumentDto
@@ -50,9 +50,6 @@ export class MusicalInstrumentController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
@@ -93,9 +90,6 @@ export class MusicalInstrumentController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findByName(
     @Query('genreName') genreName: string,
@@ -111,25 +105,5 @@ export class MusicalInstrumentController {
       foundIntruements.transformedInstruments,
       foundIntruements.meta,
     )
-  }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id del instrumento a eliminar de forma logica',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso eliminado sin retorno de datos',
-  })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @HttpCode(204)
-  softDelete(
-    @Param('id') id: string
-  ) {
-    return this.musicalInstrumentService.softDelete(id);
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 export class CreateVacancyDto {
     @ApiProperty({
         example: "Busqueda Guitarrista",
@@ -26,11 +26,29 @@ export class CreateVacancyDto {
     urlImage?: string
 
     @ApiProperty({
+        example: "Buenos Aires",
+        description: "Ciudad de la vacante",
+        required: false,
+    })
+    @IsString({ message: 'La ciudad debe ser un string' })
+    @IsOptional()
+    city?: string;
+
+    @ApiProperty({
+        example: "Argentina",
+        description: "País de la vacante"
+    })
+    @IsString({ message: 'El pais debe ser un string' })
+    @IsOptional()
+    country?: string;
+
+    @ApiProperty({
         example: "Evento",
         description: 'Para que es la vacante',
     })
     @IsString()
     @MaxLength(50)
+    @IsOptional()
     vacancyType?: string
 
     @ApiProperty({

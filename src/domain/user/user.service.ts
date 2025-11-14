@@ -11,7 +11,7 @@ import { FileUploadService } from '../../core/file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../../core/file-upload/file-upload.abstract.service';
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserPublicResponseDto } from './dto/users-public-response.dto';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -43,7 +43,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!users.length) throw new NotFoundException("Usuarios no encontrados");
 
-    const transformedUsers = plainToInstance(UserResponseDto, users, {
+    const transformedUsers = plainToInstance(UserPublicResponseDto, users, {
       excludeExtraneousValues: true,
     });
 
@@ -66,7 +66,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const transformedUser = plainToInstance(UserResponseDto, user, {
+    const transformedUser = plainToInstance(UserPublicResponseDto, user, {
       excludeExtraneousValues: true,
     });
 
@@ -90,7 +90,10 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       relations: {
         genres: true,
         roles: true,
-      }
+        memberships: { band: true },
+        leaderOf: true,
+        musicalInstruments: { instrument: true },
+      },
     });
 
     if (!user) {
@@ -168,90 +171,6 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     return `Usuario ${id} eliminado con exito`;
   }
-
-  //   async findAllIncludingDeleted(page: number = Pages.Pages, limit: number = Pages.Limit) {
-  //   let [users, total] = await this.usersRepository.findAndCount({
-  //     skip: (page - 1) * limit,
-  //     take: limit,
-  //     relations: {
-  //       genres: true,
-  //       memberships: true,
-  //     },
-  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-  //   });
-
-  //   if (!users) throw new NotFoundException("Usuarios no encontrados");
-
-  //   let usersWithOutPassword = users.map((user) => {
-  //     const { password, ...userWithOutPassword } = user;
-  //     return userWithOutPassword;
-  //   })
-
-  //   return {
-  //     meta: {
-  //       total,
-  //       page,
-  //       limit,
-  //     },
-  //     data: usersWithOutPassword,
-  //   };
-  // }
-
-  // async findAllDeletedUsers(page: number = Pages.Pages, limit: number = Pages.Limit) {
-  //   let [users, total] = await this.usersRepository.findAndCount({
-  //     skip: (page - 1) * limit,
-  //     take: limit,
-  //     relations: {
-  //       genres: true,
-  //       memberships: true,
-  //     },
-  //     where: { deleteAt: Not(IsNull()) },
-  //     withDeleted: true,
-  //   });
-
-  //   if (!users) throw new NotFoundException("Usuarios eliminados no encontrados");
-  //   if (!users.length) throw new NotFoundException("Sin usuarios eliminados");
-
-  //   let usersWithOutPassword = users.map((user) => {
-  //     const { password, ...userWithOutPassword } = user;
-  //     return userWithOutPassword;
-  //   })
-
-  //   return {
-  //     meta: {
-  //       total,
-  //       page,
-  //       limit,
-  //     },
-  //     data: usersWithOutPassword,
-  //   };
-  // }
-
-  // async findOneDeletedUser(id: string) {
-  //   const user = await this.usersRepository.findOne({
-  //     where: {
-  //       id,
-  //       deleteAt: Not(IsNull()),
-  //     },
-  //     relations: {
-  //       genres: true,
-  //       roles: true
-  //       //bandas
-  //       //reviews
-  //       //instrumentos
-  //       //media
-  //       //pagos
-  //       //socialLinks
-  //     },
-  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-  //   });
-
-  //   if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
-
-  //   const { password, ...userWithOutPassword } = user;
-
-  //   return userWithOutPassword;
-  // }
 
   async seedUsers() {
     console.log('⏳ Precargando usuarios...');

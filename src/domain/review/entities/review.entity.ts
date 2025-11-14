@@ -49,6 +49,19 @@ export class Review {
     })
     urlImage: string;
 
+    //Columnas de moderacion
+    @Column({
+        default: false,
+        nullable: true,
+    })
+    isFlagged: boolean;
+
+    @Column({
+        type: 'text',
+        nullable: true,
+    })
+    moderationReason: string;
+
     //Borrado logico
     @DeleteDateColumn({
         nullable: true,

@@ -69,12 +69,4 @@ export class MusicalInstrumentService {
 
     return { transformedInstruments, meta }
   }
-
-  async softDelete(id: string) {
-    const foundInstrument: MusicalInstrument | null = await this.instrumentsRepository.findOneBy({ id });
-
-    if (!foundInstrument) throw new NotFoundException("Instrumento no encontrado");
-
-    return await this.instrumentsRepository.softDelete(id);
-  }
 }
