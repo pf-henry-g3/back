@@ -8,6 +8,8 @@ import bcrypt from 'node_modules/bcryptjs';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
+import { cookieConfig } from 'src/config/cookie.config';
+import { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +54,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('Credenciales invalidas');
 
     if (!user.password)
-      throw new BadRequestException('Este usuario usa autenticación externa. Iniciá sesión con Google o Auth0.');
+      throw new BadRequestException('Este usuario utiliza autenticación externa. Iniciá sesión con Google.');
 
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
@@ -78,14 +80,14 @@ export class AuthService {
     return commonResponse('Success Login. ', data)
   }
 
-  async syncAuth0User(auth0Payload: any, userFront) {
+  async syncAuth0User(userFront) {
 
-    console.log(auth0Payload, userFront);
+    console.log(userFront);
 
     userFront = userFront.user
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: auth0Payload.sub }
+      where: { authProviderId: userFront.sub }
     });
 
 
@@ -95,7 +97,7 @@ export class AuthService {
       });
 
       if (user) {
-        user.authProviderId = auth0Payload.sub;
+        user.authProviderId = userFront.sub;
 
         if (userFront.picture) user.urlImage = userFront.picture;
         if (userFront.name && !user.name) user.name = userFront.name;
@@ -123,7 +125,7 @@ export class AuthService {
         email: userFront.email,
         name: userFront.name || userFront.nickname,
         userName,
-        authProviderId: auth0Payload.sub,
+        authProviderId: userFront.sub,
         urlImage: userFront.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,

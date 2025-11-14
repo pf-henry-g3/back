@@ -1,11 +1,9 @@
+// src/common/config/cookie.config.ts
 export const cookieConfig = {
-    httpOnly: true, // JavaScript no puede leer la cookie
-    secure: process.env.NODE_ENV === 'production', // Solo envía por HTTPS en producción
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' as
-        | boolean
-        | 'lax'
-        | 'strict'
-        | 'none',  // Permite cookies en localhost (desarrollo). 'none' para cross-domain en producción
-    maxAge: 7 * 24 * 60 * 60 * 1000,  // Cuánto tiempo vive la cookie (7 días en ms
-    path: '/',  // En qué rutas está disponible
+    httpOnly: true,
+    secure: false,  // false en desarrollo local (HTTP)
+    sameSite: 'lax' as const,  // 👈 'lax' es más permisivo
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+    domain: 'localhost',  // 👈 AGREGAR ESTO: permite compartir entre puertos
 };

@@ -54,18 +54,18 @@ export class AuthController {
 
   @Post('auth0/callback')
   @UseGuards(Auth0Guard) //El guard Verifica el token
-  async auth0Callback(
-    @Req() req: any,
-    @Body() userFront,
+  async syncAuth0User(
+    @Body() Auth0User,
     @Res({ passthrough: true }) res: Response) {
 
-    const result = await this.authService.syncAuth0User(req.auth0User, userFront); //Sincorniza con el user de la db
+    const result = await this.authService.syncAuth0User(Auth0User); //Sincorniza con el user de la db
     const token = result.data.access_token;
     res.cookie('access_token', token, cookieConfig);
 
     delete result.data.access_token;
-    return result
+    console.log('result es: ', result);
 
+    return result
   }
 
   @Post('logout')
@@ -85,5 +85,4 @@ export class AuthController {
   async getMe(@Req() req: any) {
     commonResponse('Usuario autenticado', req.user)
   }
-
 }

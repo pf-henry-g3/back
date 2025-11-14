@@ -1,3 +1,4 @@
+// src/modules/auth/guards/auth.guard.ts
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
@@ -8,38 +9,49 @@ export class AuthGuard implements CanActivate {
     constructor(
         private readonly jwtService: JwtService,
         private readonly usersService: UserService
-
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest();
 
-        const authHeader = request.headers.authorization;
+        let token: string | undefined;
 
-        if (!authHeader) throw new UnauthorizedException('Token de autenticación no proporcionado.');
+        token = request.cookies?.access_token;
 
-        console.log(authHeader);
-
-        const token = authHeader.startsWith('Bearer ')
-            ? authHeader.slice(7).trim()
-            : authHeader.trim();
-
-        const secret = process.env.JWT_SECRET;
-
-        try {
-            const { sub: userId } = this.jwtService.verify(token, { secret });
-
-            const userWithRoles = await this.usersService.findOne(userId, { relations: ['roles'] });
-
-            if (!userWithRoles.success) throw new UnauthorizedException('Usuario no encontrado o token inválido.');
-
-            request['user'] = userWithRoles.data;
-
-        } catch (error) {
-            console.log(error);
-            throw new UnauthorizedException('Token inválido o expirado.');
+        if (!token) {
+            const authHeader = request.headers.authorization;
+            if (authHeader && authHeader.startsWith('Bearer ')) {
+                token = authHeader.slice(7).trim();
+            }
         }
 
-        return true;
+        // 3️⃣ Si no hay token en ninguno de los dos lados
+        if (!token) {
+            throw new UnauthorizedException('Token de autenticación no proporcionado.');
+        }
+
+        try {
+            // 4️⃣ Verificar el token
+            const { sub: userId } = this.jwtService.verify(token, {
+                secret: process.env.JWT_SECRET
+            });
+
+            // 5️⃣ Buscar usuario en DB
+            const userWithRoles = await this.usersService.findOne(userId, {
+                relations: ['roles']
+            });
+
+            if (!userWithRoles) {
+                throw new UnauthorizedException('Usuario no encontrado o token inválido.');
+            }
+
+            // 6️⃣ Agregar usuario al request
+            request['user'] = userWithRoles;
+            return true;
+
+        } catch (error) {
+            console.log('Error verificando token:', error.message);
+            throw new UnauthorizedException('Token inválido o expirado.');
+        }
     }
 }
