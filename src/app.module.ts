@@ -19,6 +19,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './config/mailer.config';
 import { EventModule } from './domain/event/event.module';
 import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
+import { AdminModule } from './domain/admin/admin.module';
 
 
 @Module({
@@ -57,6 +58,7 @@ import { MusicalInstrumentModule } from './domain/musical-instrument/musical-ins
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    AdminModule,
   ]
 
 })
