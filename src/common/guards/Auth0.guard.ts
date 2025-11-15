@@ -24,15 +24,6 @@ export class Auth0Guard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest();
 
-        // ESTO ES SOLO PARA PROBAR SI EL DEPLOY PERMITE QUE NUESTRA APP REDIRECCIONE A RUTAS EXTERNAS. ELIMINAR TODO EL TRY LUEGO
-        try {
-            console.log("🌐 Probar acceso al JWKS...");
-            const r = await axios.get(`https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`);
-            console.log("JWKS recibido:", r.data.keys.length, "claves");
-        } catch (err) {
-            console.error("❌ NO se pudo acceder al JWKS:", err.message);
-        }
-
         console.log('\n=== 🔐 Auth0Guard Debug ===');
         console.log('📍 URL:', request.url);
         console.log('📨 Headers:', JSON.stringify(request.headers, null, 2));
