@@ -10,7 +10,7 @@ import { SeederModule } from './core/seeder/seeder.module';
 import { FileUploadModule } from './core/file-upload/file-upload.module';
 import { SearchModule } from './core/search/search.module';
 
-import { PaymentModule } from './domain/payment/payment.module';
+import { PaymentModule } from './core/payment/payment.module';
 
 import { AuthModule } from './core/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';

@@ -44,7 +44,7 @@ export class UserResponseDto {
 
     @Expose()
     @Type(() => BandMinimalResponseDto)
-    leaderOf: BandMinimalResponseDto;
+    leaderOf: BandMinimalResponseDto[];
 
     @Expose()
     @Type(() => BandMemberResponseDto)
