@@ -34,6 +34,7 @@ async function bootstrap() {
   // CORS: conexión entre front y back (http local y https en despliegue)
   const allowedOrigins = [
     process.env.FRONTEND_URL,
+    process.env.BACKEND_URL
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
   app.enableCors({
