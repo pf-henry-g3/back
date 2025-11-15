@@ -98,14 +98,27 @@ export class AdminController {
 
     if (!relationConfig) throw new NotFoundException(`Relación histórica ${relationName} no definida.`);
 
-    return this.adminService.findHistoricalRelations(
-      relationConfig.entity,
-      relationConfig.relationField,
+    const result = await this.adminService.findHistoricalRelations(
+      relationConfig,
       id,
       deleted,
       pageNum,
       limitNum,
     )
+
+    const ResponseDtoClass = relationConfig.responseDto as ClassConstructor<any>;
+
+    const transformedData = plainToInstance(
+      ResponseDtoClass,
+      result.data,
+      { excludeExtraneousValues: true }
+    );
+
+    return commonResponse(
+      'Historial encontrado',
+      transformedData,
+      result.meta,
+    );
   }
 
   @Delete('soft-delete/:entityType/:id')
@@ -125,7 +138,7 @@ export class AdminController {
   async newAdmin(
     @Param('id') id: string,
   ) {
-    const newAdmin = await this.adminService.newUserAdmin(id, Role.Admin);
+    const newAdmin = await this.adminService.newAdmin(id, Role.Admin);
 
     return commonResponse(
       'Nuevo admin agregado',

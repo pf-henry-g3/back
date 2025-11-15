@@ -34,12 +34,12 @@ export class PaymentService {
           },
         ],
         back_urls: {
-          success: 'http://localhost:3000/home',
-          failure: 'http://localhost:3000/failure',
-          pending: 'http://localhost:3000/home',
+          success: `${process.env.FRONTEND_URL}/home`,
+          failure: `${process.env.FRONTEND_URL}/failure`,
+          pending: `${process.env.FRONTEND_URL}/home`,
         },
         // auto_return: 'approved',
-        notification_url: 'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io/webhook',
+        notification_url: `${process.env.FRONTEND_URL}/webhook`,
 
 
         external_reference: externalReference,

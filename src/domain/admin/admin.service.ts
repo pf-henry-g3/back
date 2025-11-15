@@ -6,6 +6,12 @@ import { Role } from '../role/entities/role.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
 
+interface HistoricalRelationConfig {
+  entity: EntityTarget<any>;
+  relationField: string;
+  isManyToMany?: boolean;
+}
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -31,6 +37,7 @@ export class AdminService {
     if (!data.length && !withDeleted) {
       throw new NotFoundException(`Entidad no encontrados.`)
     }
+
 
     return { meta: { total, page, limit }, data };
   }
@@ -58,16 +65,37 @@ export class AdminService {
   }
 
   async findHistoricalRelations<T extends ObjectLiteral>(
-    relatedEntityClass: EntityTarget<T>,
-    relationField: string,
+    config: HistoricalRelationConfig,
     parentEntityId: string,
     withDeleted: boolean = false,
-    page: number = 1,
-    limit: number = 10,
+    page: number = Pages.Pages,
+    limit: number = Pages.Limit,
   ) {
-    const repository = this.entityManager.getRepository(relatedEntityClass);
+    const { entity, relationField, isManyToMany } = config;
+    const repository = this.entityManager.getRepository(entity);
     const skip = (page - 1) * limit;
 
+    if (isManyToMany) {
+      const qb = repository.createQueryBuilder('child')
+        .innerJoinAndSelect(`child.${relationField}`, 'parent')
+        .where('parent.id = :parentId', { parentId: parentEntityId })
+
+        // 🟢 CLAVE: Añadir SELECT explícito para los campos básicos
+        // Selecciona todos los campos de la entidad 'child'
+        .select(['child', 'parent'])
+
+        .skip(skip)
+        .take(limit);
+
+      if (withDeleted) {
+        qb.withDeleted();
+      }
+
+      const [data, total] = await qb.getManyAndCount();
+      return { meta: { total, page, limit }, data };
+    }
+
+    // 2. MANEJO DE RELACIONES ONE-TO-MANY (1:N) / FK Directo (Lógica Original)
     const [data, total] = await repository.findAndCount({
       where: {
         [relationField]: { id: parentEntityId }
@@ -80,7 +108,7 @@ export class AdminService {
     return { meta: { total, page, limit }, data };
   }
 
-  async newUserAdmin(id: string, rolName: string) {
+  async newAdmin(id: string, rolName: string) {
     const usersRepository = this.entityManager.getRepository(User);
     const rolesRepository = this.entityManager.getRepository(Role);
 

@@ -17,6 +17,9 @@ import { RoleAdminResponseDto } from "../dto/role-response-admin.dto";
 import { GenreAdminResponseDto } from "../dto/genre-response-admin.dto";
 import { ReviewAdminResponseDto } from "../dto/review-response-admin.dto";
 import { ArtistInstrumentAdminResponseDto } from "../dto/artist-instrument-response-admin.dto";
+import { UserMinimalResponseDto } from "src/common/dto/user-minimal-response.dto";
+import { BandMinimalResponseDto } from "src/common/dto/band-minimal-response.dto";
+import { VacancyMinimalResponseDto } from "src/common/dto/vacancy-minimal-response.dto";
 
 export const ADMIN_ENTITY_MAP = {
     [EntityName.USER]: {
@@ -24,8 +27,14 @@ export const ADMIN_ENTITY_MAP = {
         responseDto: UserAdminResponseDto,
         defaultRelations: ['roles', 'genres', 'vacancies', 'leaderOf', 'musicalInstruments', 'memberships'],
         historyRelations: {
-            vacancies: { entity: Vacancy, relationField: 'owner' },
-            memberships: { entity: BandMember, relationField: 'user' },
+            vacancies: { entity: Vacancy, relationField: 'owner', responseDto: VacancyMinimalResponseDto },
+            memberships: { entity: BandMember, relationField: 'user', responseDto: BandAdminResponseDto },
+            reviewsGiven: { entity: Review, relationField: 'owner', responseDto: ReviewAdminResponseDto },
+            reviewsReceived: { entity: Review, relationField: 'receptor', responseDto: ReviewAdminResponseDto },
+            leaderOf: { entity: Band, relationField: 'leader', responseDto: BandMinimalResponseDto },
+            musicalInstruments: { entity: AritstMusicalInstrument, relationField: 'user', responseDto: ArtistInstrumentAdminResponseDto },
+            genres: { entity: Genre, relationField: 'users', isManyToMany: true, responseDto: GenreAdminResponseDto },
+            roles: { entity: Role, relationField: 'users', isManyToMany: true, responseDto: RoleAdminResponseDto },
         },
     },
     [EntityName.BAND]: {
@@ -33,63 +42,62 @@ export const ADMIN_ENTITY_MAP = {
         responseDto: BandAdminResponseDto,
         defaultRelations: ['leader', 'genres', 'bandMembers'],
         historyRelations: {
-
+            bandMembers: { entity: BandMember, relationField: 'band', responseDto: BandMemberAdminResponseDto },
+            genres: { entity: Genre, relationField: 'bands', isManyToMany: true, responseDto: GenreAdminResponseDto },
         },
     },
     [EntityName.BANDMEMBER]: {
         entity: BandMember,
         responseDto: BandMemberAdminResponseDto,
         defaultRelations: ['user', 'band'],
-        historyRelations: {
-
-        },
+        historyRelations: {},
     },
     [EntityName.VACANCY]: {
         entity: Vacancy,
         responseDto: VacancyAdminResponseDto,
-        defaultRelations: ['genres', 'owner'],
+        defaultRelations: ['genres', 'owner', 'instruments'],
         historyRelations: {
-
+            genres: { entity: Genre, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
+            instruments: { entity: MusicalInstrument, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
         },
     },
     [EntityName.INSTRUMENT]: {
         entity: MusicalInstrument,
         responseDto: MusicalInstrumentAdminResponseDto,
-        defaultRelations: [],
+        defaultRelations: ['artistMusicalInstrument', 'vacancies'],
         historyRelations: {
-
+            artistMusicalInstrument: { entity: AritstMusicalInstrument, relationField: 'user', responseDto: UserMinimalResponseDto },
+            vacancies: { entity: Vacancy, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
         },
     },
     [EntityName.ARTISTINSTRUMENT]: {
         entity: AritstMusicalInstrument,
         responseDto: ArtistInstrumentAdminResponseDto,
         defaultRelations: ['instrument', 'user'],
-        historyRelations: {
-
-        },
+        historyRelations: {},
     },
     [EntityName.REVIEW]: {
         entity: Review,
         responseDto: ReviewAdminResponseDto,
         defaultRelations: ['owner', 'receptor'],
-        historyRelations: {
-
-        },
+        historyRelations: {},
     },
     [EntityName.ROL]: {
         entity: Role,
         responseDto: RoleAdminResponseDto,
-        defaultRelations: [],
+        defaultRelations: ['users'],
         historyRelations: {
-
+            users: { entity: User, relationField: 'roles', isManyToMany: true, responseDto: UserMinimalResponseDto },
         },
     },
     [EntityName.GENRE]: {
         entity: Genre,
         responseDto: GenreAdminResponseDto,
-        defaultRelations: [],
+        defaultRelations: ['users', 'bands', 'vacancies'],
         historyRelations: {
-
+            users: { entity: User, relationField: 'genres', isManyToMany: true, responseDto: UserMinimalResponseDto },
+            bands: { entity: Band, relationField: 'genres', isManyToMany: true, responseDto: BandMinimalResponseDto },
+            vacancies: { entity: Vacancy, relationField: 'genres', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
         },
     },
 }
