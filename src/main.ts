@@ -33,15 +33,6 @@ async function bootstrap() {
 
   // CORS: conexión entre front y back (http local y https en despliegue)
   const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3013',
-    'https://syncroapp.us.auth0.com',
-    'http://sincro.72.61.129.102.sslip.io',
-    'https://sincro.72.61.129.102.sslip.io',
-    'http://72.61.129.102.sslip.io',
-    'https://72.61.129.102.sslip.io',
-    process.env.FRONTEND_URL_DEPLOY,
     process.env.FRONTEND_URL,
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
