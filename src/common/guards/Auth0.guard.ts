@@ -3,6 +3,8 @@ import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from
 import { Request } from "express";
 import jwksClient, { JwksClient } from "jwks-rsa";
 import jwt from "jsonwebtoken";
+import axios from "axios";
+
 
 @Injectable()
 export class Auth0Guard implements CanActivate {
