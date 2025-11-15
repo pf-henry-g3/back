@@ -33,8 +33,10 @@ async function bootstrap() {
 
   // CORS: conexión entre front y back (http local y https en despliegue)
   const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    process.env.BACKEND_URL
+    process.env.FRONTEND_URL || 'https://front-one-gray.vercel.app',
+    process.env.BACKEND_URL,
+    'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app/',
+    'https://back-rk1f.onrender.com/'
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
   app.enableCors({
