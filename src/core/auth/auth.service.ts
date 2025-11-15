@@ -87,8 +87,6 @@ export class AuthService {
   }
 
   async syncAuth0User(auth0Payload: any, userAuth0Data: any) {
-    console.log('🔍 syncAuth0User - auth0Payload:', auth0Payload);
-    console.log('🔍 syncAuth0User - userAuth0Data:', userAuth0Data);
 
     const auth0User = userAuth0Data?.user || userAuth0Data;
 
