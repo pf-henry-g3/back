@@ -47,12 +47,21 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // permitir SSR/healthchecks sin origin
       if (!origin) return callback(null, true);
+
       const normalized = origin.replace(/\/$/, '');
+
+      // 1. Loggea el Origen entrante y la lista para comparar
+      console.log(`[CORS DEBUG] Origin: ${origin}`);
+      console.log(`[CORS DEBUG] Normalized: ${normalized}`);
+      console.log(`[CORS DEBUG] Allowed: ${allowedOrigins.join(', ')}`);
+
       if (allowedOrigins.includes(normalized)) {
         return callback(null, true);
       }
+
+      // 2. Loggea el error para ver si la variable de entorno tiene un problema
+      console.error(`[CORS ERROR] BLOCKED: Origin ${origin} NOT found in allowed list.`);
       return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
