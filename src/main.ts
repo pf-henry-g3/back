@@ -36,7 +36,8 @@ async function bootstrap() {
     process.env.FRONTEND_URL || 'https://front-one-gray.vercel.app',
     process.env.BACKEND_URL,
     'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app/',
-    'https://back-rk1f.onrender.com/'
+    'https://back-rk1f.onrender.com/',
+    'https://back-rk1f.onrender.com/auth/auth0/callback'
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
   app.enableCors({
