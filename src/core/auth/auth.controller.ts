@@ -48,7 +48,8 @@ export class AuthController {
   }
 
   @Post('auth0/callback')
-  @UseGuards(Auth0Guard) //El guard Verifica el token
+  @UseGuards(Auth0Guard) //El guard Verifica el token  
+  @UseInterceptors(SetAuthCookieInterceptor)
   async auth0Callback(
     @Req() req: any,
     @Body() userAuth) {
