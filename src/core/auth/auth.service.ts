@@ -86,24 +86,37 @@ export class AuthService {
     return { login: true, access_token: token, tranformedUser }
   }
 
-  async syncAuth0User(auth0Payload: any, userAuth0) {
-    userAuth0 = userAuth0.user
+  async syncAuth0User(auth0Payload: any, userAuth0Data: any) {
+    console.log('🔍 syncAuth0User - auth0Payload:', auth0Payload);
+    console.log('🔍 syncAuth0User - userAuth0Data:', userAuth0Data);
+
+    const auth0User = userAuth0Data?.user || userAuth0Data;
+
+    if (!auth0User) {
+      throw new BadRequestException('No se recibieron datos del usuario de Auth0');
+    }
+
+    console.log('👤 Datos del usuario de Auth0:', auth0User);
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: userAuth0.sub }
+      where: { authProviderId: auth0User.sub },
+      relations: ['roles']
     });
 
-
     if (!user) {
+      console.log('🔍 Usuario no encontrado por authProviderId, buscando por email...');
+
       user = await this.usersRepository.findOne({
-        where: { email: userAuth0.email }
+        where: { email: auth0User.email },
+        relations: ['roles']
       });
 
       if (user) {
-        user.authProviderId = userAuth0.sub;
+        console.log('✅ Usuario encontrado por email, vinculando con Auth0...');
+        user.authProviderId = auth0User.sub;
 
-        if (userAuth0.picture) user.urlImage = userAuth0.picture;
-        if (userAuth0.name && !user.name) user.name = userAuth0.name;
+        if (auth0User.picture) user.urlImage = auth0User.picture;
+        if (auth0User.name && !user.name) user.name = auth0User.name;
 
         user.isVerified = true;
 
@@ -112,27 +125,31 @@ export class AuthService {
     }
 
     if (!user) {
-      const baseUsername = userAuth0.nickname || userAuth0.email.split('@')[0];
-      let userName = userAuth0.nickname;
+      console.log('🆕 Creando nuevo usuario desde Auth0...');
+
+      const baseUsername = auth0User.nickname || auth0User.email.split('@')[0];
+      let userName = baseUsername;
       let counter = 1;
 
-      // Verificar que userName sea único
       while (await this.usersRepository.findOne({ where: { userName } })) {
-        userName = `${baseUsername}${counter}`; //agrega numero despues del username existente
+        userName = `${baseUsername}${counter}`;
         counter++;
       }
 
       user = this.usersRepository.create({
-        email: userAuth0.email,
-        name: userAuth0.name || userAuth0.nickname,
+        email: auth0User.email,
+        name: auth0User.name || auth0User.nickname,
         userName,
-        authProviderId: userAuth0.sub,
-        urlImage: userAuth0.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        authProviderId: auth0User.sub,
+        urlImage: auth0User.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,
       });
 
-      await this.usersRepository.save(user);
+      user = await this.usersRepository.save(user);
+      console.log('✅ Usuario creado:', user.email);
+    } else {
+      console.log('✅ Usuario ya existía:', user.email);
     }
 
     const payload = {
@@ -142,12 +159,16 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(payload);
+    console.log('🎟️ Token generado para el usuario');
 
-    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+    const transformedUser = plainToInstance(UserMinimalResponseDto, user, {
       excludeExtraneousValues: true,
-    })
+    });
 
-    return { login: true, access_token: token, tranformedUser }
+    return {
+      login: true,
+      access_token: token,
+      tranformedUser: transformedUser
+    };
   }
-
 }
