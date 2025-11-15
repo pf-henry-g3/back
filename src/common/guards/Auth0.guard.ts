@@ -25,7 +25,6 @@ export class Auth0Guard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request: Request = context.switchToHttp().getRequest();
 
-
         console.log('\n=== 🔐 Auth0Guard Debug ===');
         console.log('📍 URL:', request.url);
         console.log('📨 Headers:', JSON.stringify(request.headers, null, 2));
