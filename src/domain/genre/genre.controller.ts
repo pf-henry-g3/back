@@ -9,13 +9,14 @@ import { Roles } from 'src/common/decorators/role.decorator';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('genre')
-@ApiBearerAuth()
-@Roles(Role.Admin, Role.SuperAdmin)
-@UseGuards(AuthGuard, RolesGuard)
+
 export class GenreController {
   constructor(private readonly genreService: GenreService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @ApiProperty({
     description: 'Creacion de un nuevo genero',
   })

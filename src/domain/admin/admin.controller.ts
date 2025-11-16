@@ -8,6 +8,7 @@ import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { EntityName } from 'src/common/enums/entity-names.enum';
 import { Role } from 'src/common/enums/roles.enum';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -121,18 +122,6 @@ export class AdminController {
     );
   }
 
-  @Delete('soft-delete/:entityType/:id')
-  softDelete(
-    @Param('entityType') entityType: EntityName,
-    @Param('id') id: string,
-  ) {
-    const mapping = ADMIN_ENTITY_MAP[entityType];
-
-    if (!mapping) throw new NotFoundException(`Entidad ${entityType} no encontrada`);
-
-    return this.adminService.softDeleteEntity(mapping.entity, id);
-  }
-
   //protegido con superAdmin
   @Patch('/:id')
   async newAdmin(
@@ -144,6 +133,31 @@ export class AdminController {
       'Nuevo admin agregado',
       newAdmin,
     )
+  }
+
+  @Patch('ban/:id')
+  async banUser(
+    @Param('id') id: string,
+    @Body() reason: BanUserDto,
+  ) {
+    const banedUser = await this.adminService.banUser(id, reason);
+
+    return commonResponse(
+      'Usuario baneado exitosamente',
+      banedUser,
+    )
+  }
+
+  @Delete('soft-delete/:entityType/:id')
+  softDelete(
+    @Param('entityType') entityType: EntityName,
+    @Param('id') id: string,
+  ) {
+    const mapping = ADMIN_ENTITY_MAP[entityType];
+
+    if (!mapping) throw new NotFoundException(`Entidad ${entityType} no encontrada`);
+
+    return this.adminService.softDeleteEntity(mapping.entity, id);
   }
 
   //protegido con superAdmin

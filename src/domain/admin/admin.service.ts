@@ -5,6 +5,7 @@ import { EntityManager, EntityTarget, FindOneOptions, ObjectLiteral } from 'type
 import { Role } from '../role/entities/role.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 interface HistoricalRelationConfig {
   entity: EntityTarget<any>;
@@ -133,6 +134,22 @@ export class AdminService {
     await usersRepository.save(user);
 
     return plainToInstance(UserAdminResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
+  }
+
+  async banUser(id: string, banUserdto: BanUserDto) {
+    const usersRepository = this.entityManager.getRepository(User);
+    const foundUser: User | null = await usersRepository.findOneBy({ id });
+
+    if (!foundUser) throw new NotFoundException('Usuario no encontrado.');
+
+    foundUser.isBanned = true;
+    foundUser.reasonForBan = banUserdto.reason;
+
+    await usersRepository.save(foundUser);
+
+    return plainToInstance(UserAdminResponseDto, usersRepository, {
       excludeExtraneousValues: true,
     })
   }
