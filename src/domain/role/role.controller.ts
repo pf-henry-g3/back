@@ -9,13 +9,13 @@ import { Roles } from 'src/common/decorators/role.decorator';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('role')
-@ApiBearerAuth()
-@Roles(Role.Admin, Role.SuperAdmin)
-@UseGuards(AuthGuard, RolesGuard)
 export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @ApiProperty({
     description: 'Creacion de un nuevo rol',
   })
