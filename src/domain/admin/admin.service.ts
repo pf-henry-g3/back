@@ -6,6 +6,7 @@ import { Role } from '../role/entities/role.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
 import { BanUserDto } from './dto/ban-user.dto';
+import { MailerService } from '@nestjs-modules/mailer';
 
 interface HistoricalRelationConfig {
   entity: EntityTarget<any>;
@@ -17,6 +18,7 @@ interface HistoricalRelationConfig {
 export class AdminService {
   constructor(
     private readonly entityManager: EntityManager,
+    private readonly mailerService: MailerService
   ) { }
   async findEntites<T extends ObjectLiteral>(
     entityClass: EntityTarget<T>,
@@ -109,6 +111,72 @@ export class AdminService {
     return { meta: { total, page, limit }, data };
   }
 
+  async sendMassEmail(subject: string, body: string) {
+    const usersRepository = await this.entityManager.getRepository(User);
+
+    const users: User[] | null = await usersRepository.find({
+      select: ['email', 'name'],
+    });
+
+    if (users.length === 0) {
+      throw new NotFoundException('No hay usuarios para enviar el email');
+    }
+
+    const results = {
+      total: users.length,
+      sent: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
+    const escapeHtml = (text: string) => {
+      const map: { [key: string]: string } = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      };
+      return text.replace(/[&<>"']/g, (m) => map[m]);
+    };
+
+    const safeSubject = escapeHtml(subject);
+    const safeBody = escapeHtml(body).replace(/\n/g, '<br>');
+
+    for (const user of users) {
+      try {
+        await this.mailerService.sendMail({
+          to: user.email,
+          subject: safeSubject,
+          html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #333; margin-bottom: 20px;">${safeSubject}</h2>
+                    <div style="color: #666; line-height: 1.6; margin-bottom: 20px;">
+                      ${safeBody}
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
+                    <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                        Este es un mensaje automático de Syncro. Por favor no respondas a este correo.
+                    </p>
+                  </div>
+                    `,
+        });
+        results.sent++;
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push(`Error enviando a ${user.email}: ${error.message}`);
+      }
+    }
+
+    return {
+      message: `Emails enviados: ${results.sent} de ${results.total}`,
+      total: results.total,
+      sent: results.sent,
+      failed: results.failed,
+      errors: results.errors,
+    };
+  }
+
   async newAdmin(id: string, rolName: string) {
     const usersRepository = this.entityManager.getRepository(User);
     const rolesRepository = this.entityManager.getRepository(Role);
@@ -148,6 +216,7 @@ export class AdminService {
     foundUser.reasonForBan = banUserdto.reason;
 
     await usersRepository.save(foundUser);
+    await usersRepository.softDelete(id);
 
     return plainToInstance(UserAdminResponseDto, usersRepository, {
       excludeExtraneousValues: true,

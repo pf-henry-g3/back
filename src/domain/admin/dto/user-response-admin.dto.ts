@@ -13,4 +13,10 @@ export class UserAdminResponseDto extends UserResponseDto {
 
     @Expose()
     moderationReason: string;
+
+    @Expose()
+    isBanned: string;
+
+    @Expose()
+    reasonForBan: string;
 }
