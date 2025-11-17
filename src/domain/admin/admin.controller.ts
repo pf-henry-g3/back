@@ -218,7 +218,7 @@ export class AdminController {
     );
   }
 
-  @Post('admin/send-mass-email')
+  @Post('send-mass-email')
   @ApiProperty({
     description: 'Envío masivo de emails a todos los usuarios',
   })
