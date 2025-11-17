@@ -10,10 +10,6 @@ export class Auth0Guard implements CanActivate {
     private client: JwksClient;
 
     constructor() {
-        console.log('🔧 Auth0Guard inicializado');
-        console.log('🔧 AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
-        console.log('🔧 AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
-
         this.client = jwksClient({
             jwksUri: `${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
             cache: true,
@@ -23,6 +19,11 @@ export class Auth0Guard implements CanActivate {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+
+        console.log('🔧 Auth0Guard inicializado');
+        console.log('🔧 AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
+        console.log('🔧 AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
+
         const request: Request = context.switchToHttp().getRequest();
 
         console.log('\n=== 🔐 Auth0Guard Debug ===');
