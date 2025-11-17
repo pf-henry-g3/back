@@ -15,7 +15,7 @@ export class Auth0Guard implements CanActivate {
         console.log('🔧 AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
 
         this.client = jwksClient({
-            jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+            jwksUri: `${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
             cache: true,
             rateLimit: true,
             jwksRequestsPerMinute: 5,
