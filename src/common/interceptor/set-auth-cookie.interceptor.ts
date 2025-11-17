@@ -25,7 +25,8 @@ export class SetAuthCookieInterceptor implements NestInterceptor {
                     console.log('✅ Cookie enviada');
                     console.log('=======================');
 
-                    delete response.data.access_token; // opcional
+                    // NO eliminar el token de la respuesta para que el frontend pueda guardarlo en localStorage
+                    // delete response.data.access_token; // Comentado para permitir que el frontend guarde el token
                 }
             })
         );

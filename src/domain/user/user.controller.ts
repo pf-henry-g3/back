@@ -10,7 +10,6 @@ import { Role } from 'src/common/enums/roles.enum';
 import { UserVerificationService } from './userVerification.service';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
-import { SendMassEmailDto } from './dto/send-mass-email.dto';
 
 @Controller('user')
 export class UserController {
@@ -36,18 +35,23 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  //@ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
-  //@UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
-    @Query('limit') limit?: string
+    @Query('limit') limit?: string,
+    @Req() req?: any
   ) {
     const pageNum = page ? +page : undefined;
     const limitNum = limit ? +limit : undefined;
 
-    const foundUsers = await this.userService.findAll(pageNum, limitNum);
+    // Si el usuario está autenticado y es admin, usar DTO de admin
+    let forAdmin = false;
+    if (req?.user) {
+      const userRoles = req.user.roles?.map((r: any) => r.name) || [];
+      forAdmin = userRoles.includes(Role.Admin) || userRoles.includes(Role.SuperAdmin);
+    }
+
+    const foundUsers = await this.userService.findAll(pageNum, limitNum, forAdmin);
 
     return commonResponse(
       'Usuarios encontrados.',
@@ -81,9 +85,8 @@ export class UserController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos',
   })
-  //@ApiBearerAuth()
-  // @Roles(Role.Admin, Role.SuperAdmin)
-  //@UseGuards(AuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   async findOne(
     @Param('id') id: string
@@ -142,9 +145,10 @@ export class UserController {
   @HttpCode(200)
   update(
     @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: any
   ) {
-    return this.userService.update(id, updateUserDto);
+    return this.userService.update(id, updateUserDto, req.user);
   }
 
   @Delete(':id')
@@ -166,49 +170,51 @@ export class UserController {
     return this.userService.softDelete(id);
   }
 
-  @Post('admin/send-mass-email')
-  @ApiProperty({
-    description: 'Envío masivo de emails a todos los usuarios',
+  @Patch('ban/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario a banear',
   })
   @ApiResponse({
     status: 200,
-    description: 'Emails enviados exitosamente',
+    description: 'Usuario baneado exitosamente',
   })
   @ApiBearerAuth()
   @Roles(Role.Admin, Role.SuperAdmin)
   @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
-  async sendMassEmail(
-    @Body() sendMassEmailDto: SendMassEmailDto
+  banUser(
+    @Param('id') id: string,
+    @Body('reason') reason?: string
   ) {
     return commonResponse(
-      'Emails enviados',
-      await this.userVerificationService.sendMassEmail(
-        sendMassEmailDto.subject,
-        sendMassEmailDto.body
-      ),
+      'Usuario baneado exitosamente',
+      this.userService.banUser(id, reason)
     );
   }
+
+  @Patch('unban/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario a desbanear',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario desbaneado exitosamente',
+  })
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
+  @HttpCode(200)
+  unbanUser(
+    @Param('id') id: string
+  ) {
+    return commonResponse(
+      'Usuario desbaneado exitosamente',
+      this.userService.unbanUser(id)
+    );
+  }
+
 }
-
-//Rutas de Admin o Super Admin
-
-// @Get('deleted')
-// findAllIncludingDeleted(@Query('page') page?: string, @Query('limit') limit?: string) {
-//   if (page && limit) {
-//     return this.userService.findAllIncludingDeleted(+page, +limit);
-//   }
-//   return this.userService.findAllIncludingDeleted();
-// }
-
-// @Get('deleted/only-deleted')
-// findAllDeletedUsers(@Query('page') page?: string, @Query('limit') limit?: string) {
-//   if (page && limit) {
-//     return this.userService.findAllDeletedUsers(+page, +limit);
-//   }
-//   return this.userService.findAllDeletedUsers();
-// }
-
-// @Get('delete/:id')
-// findOneDeletedUser(@Param('id') id: string) {
-//   return this.userService.findOneDeletedUser(id);

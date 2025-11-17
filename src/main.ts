@@ -35,9 +35,14 @@ async function bootstrap() {
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'https://front-one-gray.vercel.app',
     process.env.BACKEND_URL,
-    'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app/',
-    'https://back-rk1f.onrender.com/',
-    'https://back-rk1f.onrender.com/auth/auth0/callback'
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app',
+    'https://back-rk1f.onrender.com',
+    'https://back-rk1f.onrender.com/auth/auth0/callback',
+    // Dominios de producción sslip.io
+    'https://sincro.72.61.129.102.sslip.io',
+    'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io',
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
   app.enableCors({
@@ -50,6 +55,12 @@ async function bootstrap() {
       console.log(`[CORS DEBUG] Origin: ${origin}`);
       console.log(`[CORS DEBUG] Normalized: ${normalized}`);
       console.log(`[CORS DEBUG] Allowed: ${allowedOrigins.join(', ')}`);
+
+      // Permitir dominios sslip.io (para desarrollo/producción)
+      if (normalized.includes('.sslip.io')) {
+        console.log(`[CORS DEBUG] Allowing sslip.io domain: ${normalized}`);
+        return callback(null, true);
+      }
 
       if (allowedOrigins.includes(normalized)) {
         return callback(null, true);

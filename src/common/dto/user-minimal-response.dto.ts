@@ -1,4 +1,5 @@
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
+import { RoleResponseDto } from "./role-response.dto";
 
 export class UserMinimalResponseDto {
     @Expose()
@@ -15,4 +16,8 @@ export class UserMinimalResponseDto {
 
     @Expose()
     averageRating: number;
+
+    @Expose()
+    @Type(() => RoleResponseDto)
+    roles?: RoleResponseDto[];
 }

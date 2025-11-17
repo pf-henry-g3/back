@@ -1,19 +1,54 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Body, Patch, Param, Delete, Query, NotFoundException, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { User } from '../user/entities/user.entity';
-import { Band } from '../band/entities/band.entity';
-import { Vacancy } from '../vacancy/entities/vacancy.entity';
 import { ADMIN_ENTITY_MAP } from './constants/entity-map.constant';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { EntityName } from 'src/common/enums/entity-names.enum';
 import { Role } from 'src/common/enums/roles.enum';
+import { BanUserDto } from './dto/ban-user.dto';
+import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { SendMassEmailDto } from '../user/dto/send-mass-email.dto';
+import { AuthGuard } from 'src/common/guards/Auth.guard';
+import { RolesGuard } from 'src/common/guards/Role.guard';
+import { Roles } from 'src/common/decorators/role.decorator';
 
+// @ApiBearerAuth()
+// @Roles(Role.Admin, Role.SuperAdmin)
+// @UseGuards(AuthGuard, RolesGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) { }
 
   @Get('entities/:entityType')
+  @ApiParam({
+    name: 'entityType',
+    required: true,
+    description: 'Tipo de entidad consultada, siempre en plural y minusculas: users, bands, vacancies, genres, roles, reviews, bandMembers, artistInstruments',
+    example: 'users'
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página actual para paginación',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados por página',
+    example: '10',
+  })
+  @ApiQuery({
+    name: 'deleted',
+    required: false,
+    description: 'Si es true retorna entidades borradas de forma logica',
+    example: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @HttpCode(200)
   async findAll(
     @Param('entityType') entityType: EntityName,
     @Query('page') page?: string,
@@ -30,8 +65,11 @@ export class AdminController {
 
     const mappedRelations = mapping.defaultRelations || [];
 
+    // Para usuarios, siempre incluir los que tienen soft delete (para poder ver y desbanear usuarios baneados anteriormente)
+    const includeDeleted = entityType === EntityName.USER ? true : deleted;
+
     //llamamos al servicio generico
-    const result = await this.adminService.findEntites(mapping.entity, pageNum, limitNum, deleted, { relations: mappedRelations });
+    const result = await this.adminService.findEntites(mapping.entity, pageNum, limitNum, includeDeleted, { relations: mappedRelations });
 
     //evitamos que typescript piense que le pasamos un constructor invalido
     const ResponseDtoClass = mapping.responseDto as ClassConstructor<any>;
@@ -51,6 +89,28 @@ export class AdminController {
   }
 
   @Get('entities/:entityType/:id')
+  @ApiParam({
+    name: 'entityType',
+    required: true,
+    description: 'Tipo de entidad consultada, siempre en plural y minusculas: users, bands, vacancies, genres, roles, reviews, bandMembers, artistInstruments',
+    example: 'users'
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID de la entidad a consultar',
+  })
+  @ApiQuery({
+    name: 'deleted',
+    required: false,
+    description: 'Si es true retorna entidades borradas de forma logica',
+    example: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @HttpCode(200)
   async findOne(
     @Param('entityType') entityType: EntityName,
     @Param('id') id: string,
@@ -79,6 +139,46 @@ export class AdminController {
   }
 
   @Get('history/:entityType/:id/:relationName')
+  @ApiParam({
+    name: 'entityType',
+    required: true,
+    description: 'Tipo de entidad consultada, siempre en plural y minusculas: users, bands, vacancies, genres, roles, reviews, bandMembers, artistInstruments',
+    example: 'users'
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID de la entidad especifica a consultar',
+  })
+  @ApiParam({
+    name: 'relationName',
+    required: true,
+    description: 'nombre de la relacion: users[leaderOf, memberships, vacancies, musicalInstruments, roles, genres] bands[bandMembers, genres] vacancies[genres, musicalInstruments] instruments[artistMusicalInstrument, vacancies] roles[users] genres[users, bands, vacancies]',
+    example: 'genres'
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página actual para paginación',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados por página',
+    example: '10',
+  })
+  @ApiQuery({
+    name: 'deleted',
+    required: false,
+    description: 'Si es true retorna entidades borradas de forma logica',
+    example: false,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos',
+  })
+  @HttpCode(200)
   async findHistory(
     @Param('entityType') entityType: EntityName,
     @Param('id') id: string,
@@ -121,7 +221,113 @@ export class AdminController {
     );
   }
 
+  @Post('send-mass-email')
+  @ApiProperty({
+    description: 'Envío masivo de emails a todos los usuarios',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Emails enviados exitosamente',
+  })
+  @HttpCode(200)
+  async sendMassEmail(
+    @Body() sendMassEmailDto: SendMassEmailDto
+  ) {
+    return commonResponse(
+      'Emails enviados',
+      await this.adminService.sendMassEmail(
+        sendMassEmailDto.subject,
+        sendMassEmailDto.body
+      ),
+    );
+  }
+
+  //protegido con superAdmin
+  @Patch('/:id')
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a hacer Admin',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Actualizacion exitosa con retorno de datos',
+  })
+  async newAdmin(
+    @Param('id') id: string,
+  ) {
+    const newAdmin = await this.adminService.newAdmin(id, Role.Admin);
+
+    return commonResponse(
+      'Nuevo admin agregado',
+      newAdmin,
+    )
+  }
+
+  @Patch('ban/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a banear',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario baneado exitosamente',
+  })
+  @HttpCode(200)
+  async banUser(
+    @Param('id') id: string,
+    @Body() reason: BanUserDto,
+  ) {
+    const banedUser = await this.adminService.banUser(id, reason);
+
+    return commonResponse(
+      'Usuario baneado exitosamente',
+      banedUser,
+    )
+  }
+
+  @Patch('unban/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a desbanear',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario desbaneado exitosamente',
+  })
+  @HttpCode(200)
+  async unbanUser(
+    @Param('id') id: string,
+  ) {
+    const unbannedUser = await this.adminService.unbanUser(id);
+
+    return commonResponse(
+      'Usuario desbaneado exitosamente',
+      unbannedUser,
+    )
+  }
+
   @Delete('soft-delete/:entityType/:id')
+  @ApiParam({
+    name: 'entityType',
+    required: true,
+    description: 'Tipo de entidad consultada, siempre en plural y minusculas: users, bands, vacancies, genres, roles, reviews, bandMembers, artistInstruments',
+    example: 'users'
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a hacer Admin',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Recurso eliminado de forma logica sin retorno de datos',
+  })
+  @HttpCode(204)
   softDelete(
     @Param('entityType') entityType: EntityName,
     @Param('id') id: string,
@@ -134,20 +340,25 @@ export class AdminController {
   }
 
   //protegido con superAdmin
-  @Patch('/:id')
-  async newAdmin(
-    @Param('id') id: string,
-  ) {
-    const newAdmin = await this.adminService.newAdmin(id, Role.Admin);
-
-    return commonResponse(
-      'Nuevo admin agregado',
-      newAdmin,
-    )
-  }
-
-  //protegido con superAdmin
   @Delete('hard-delete/:entityType/:id')
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
+  @ApiParam({
+    name: 'entityType',
+    required: true,
+    description: 'Tipo de entidad consultada, siempre en plural y minusculas: users, bands, vacancies, genres, roles, reviews, bandMembers, artistInstruments',
+    example: 'users'
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a hacer Admin',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Recurso eliminado de forma logica sin retorno de datos',
+  })
+  @HttpCode(204)
   hardDelete(
     @Param('entityType') entityType: EntityName,
     @Param('id') id: string,

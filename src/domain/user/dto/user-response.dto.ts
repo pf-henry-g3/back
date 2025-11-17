@@ -39,6 +39,9 @@ export class UserResponseDto {
     isVerified: boolean;
 
     @Expose()
+    isBanned: boolean;
+
+    @Expose()
     @Type(() => GenreResponseDto)
     genres: GenreResponseDto[];
 
