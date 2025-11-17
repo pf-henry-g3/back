@@ -13,6 +13,9 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @ApiProperty({
     description: 'Creacion de un nuevo rol',
   })
@@ -20,9 +23,6 @@ export class RoleController {
     status: 201,
     description: 'Creacion exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(201)
   create(
     @Body() createRoleDto: CreateRoleDto
@@ -47,9 +47,6 @@ export class RoleController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findAll(
     @Query('page') page?: string,
@@ -90,9 +87,6 @@ export class RoleController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findByName(
     @Query('rolName') rolName: string,
@@ -108,25 +102,5 @@ export class RoleController {
       foundRoles.transformedRoles,
       foundRoles.meta,
     )
-  }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id del rol a eliminar de forma logica',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso eliminado sin retorno de datos',
-  })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @HttpCode(204)
-  softDelete(
-    @Param('id') id: string
-  ) {
-    return this.roleService.softDelete(id);
   }
 }

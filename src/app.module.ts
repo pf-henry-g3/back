@@ -10,13 +10,16 @@ import { SeederModule } from './core/seeder/seeder.module';
 import { FileUploadModule } from './core/file-upload/file-upload.module';
 import { SearchModule } from './core/search/search.module';
 
-import { PaymentModule } from './domain/payment/payment.module';
+import { PaymentModule } from './core/payment/payment.module';
 
 import { AuthModule } from './core/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ReviewModule } from './domain/review/review.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConfig } from './config/mailer.config';
+import { EventModule } from './domain/event/event.module';
+import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
+import { AdminModule } from './domain/admin/admin.module';
 
 
 @Module({
@@ -42,6 +45,8 @@ import { mailerConfig } from './config/mailer.config';
     SearchModule,
     PaymentModule,
     ReviewModule,
+    EventModule,
+    MusicalInstrumentModule,
 
     AuthModule,
     JwtModule.registerAsync({
@@ -53,6 +58,7 @@ import { mailerConfig } from './config/mailer.config';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    AdminModule,
   ]
 
 })

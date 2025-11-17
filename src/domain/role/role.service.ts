@@ -31,7 +31,11 @@ export class RoleService {
 
 
   async create(createRoleDto: CreateRoleDto) {
-    const foundRole = await this.roleRepository.findOneBy({ name: createRoleDto.name });
+    const foundRole = await this.roleRepository.findOne({
+      where: {
+        name: ILike(`%${createRoleDto.name}%`)
+      }
+    });
 
     if (foundRole) throw new BadRequestException('El rol ya existe');
 
@@ -81,13 +85,5 @@ export class RoleService {
     const meta = { total, page, limit };
 
     return { transformedRoles, meta };
-  }
-
-  async softDelete(id: string) {
-    const foundRole: Role | null = await this.roleRepository.findOneBy({ id });
-
-    if (!foundRole) throw new NotFoundException("Role no encontrado");
-
-    return await this.roleRepository.softDelete(id);
   }
 }

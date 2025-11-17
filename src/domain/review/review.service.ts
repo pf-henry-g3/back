@@ -122,14 +122,4 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     const meta = { total, page, limit };
     return { tranformedReviews, meta };
   }
-
-  async softDelete(id: string) {
-    const review = await this.reviewsRepository.findOneBy({ id });
-
-    if (!review) throw new NotFoundException('Review no encontrada');
-
-    await this.reviewsRepository.softDelete(id);
-
-    return `Review ${id} eliminada con exito`;
-  }
 }

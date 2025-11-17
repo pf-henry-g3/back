@@ -1,0 +1,16 @@
+export enum EntityName {
+    USER = 'users',
+    BAND = 'bands',
+    BANDMEMBER = 'bandMembers',
+    VACANCY = 'vacancies',
+    REVIEW = 'reviews',
+    ROL = 'roles',
+    GENRE = 'genres',
+    INSTRUMENT = 'instruments',
+    ARTISTINSTRUMENT = 'artistInstruments',
+    // EVENT = 'events',
+    // MEDIA = 'media',
+    // SOCIALLINK = 'socialLinks',
+    // NOTIFICATION = 'notifications',
+    // APPLICATION = 'applications',
+}

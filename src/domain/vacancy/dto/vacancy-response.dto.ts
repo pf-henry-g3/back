@@ -1,4 +1,4 @@
-import { Exclude, Expose, Type } from "class-transformer"
+import { Expose, Type } from "class-transformer"
 import { GenreResponseDto } from "src/common/dto/genre-response.dto"
 import { UserMinimalResponseDto } from "src/common/dto/user-minimal-response.dto"
 
@@ -26,7 +26,4 @@ export class VacancyResponseDto {
     @Expose()
     @Type(() => UserMinimalResponseDto)
     owner: UserMinimalResponseDto;
-
-    @Exclude()
-    deletedAt: Date;
 }

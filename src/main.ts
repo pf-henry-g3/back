@@ -3,12 +3,15 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule); //Traemos a la aplicacion de nest
 
-  app.use(morgan('dev'))
+  app.use(morgan('dev'));
+  app.use(cookieParser());
+
 
   const swaggerDoc = new DocumentBuilder()
     .setTitle('PI-BACKEND')
@@ -30,26 +33,41 @@ async function bootstrap() {
 
   // CORS: conexión entre front y back (http local y https en despliegue)
   const allowedOrigins = [
+    process.env.FRONTEND_URL || 'https://front-one-gray.vercel.app',
+    process.env.BACKEND_URL,
     'http://localhost:3000',
     'http://localhost:3001',
-    'http://localhost:3013',
-    'https://syncroapp.us.auth0.com',
-    'http://sincro.72.61.129.102.sslip.io',
+    'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app',
+    'https://back-rk1f.onrender.com',
+    'https://back-rk1f.onrender.com/auth/auth0/callback',
+    // Dominios de producción sslip.io
     'https://sincro.72.61.129.102.sslip.io',
-    'http://72.61.129.102.sslip.io',
-    'https://72.61.129.102.sslip.io',
-    process.env.FRONTEND_URL_DEPLOY,
-    process.env.FRONTEND_URL,
+    'https://z44wwk4ocgc4c0ws8kkow8s8.72.61.129.102.sslip.io',
   ].filter(Boolean).map((o) => o!.replace(/\/$/, ''));
 
   app.enableCors({
     origin: (origin, callback) => {
-      // permitir SSR/healthchecks sin origin
       if (!origin) return callback(null, true);
+
       const normalized = origin.replace(/\/$/, '');
+
+      // 1. Loggea el Origen entrante y la lista para comparar
+      console.log(`[CORS DEBUG] Origin: ${origin}`);
+      console.log(`[CORS DEBUG] Normalized: ${normalized}`);
+      console.log(`[CORS DEBUG] Allowed: ${allowedOrigins.join(', ')}`);
+
+      // Permitir dominios sslip.io (para desarrollo/producción)
+      if (normalized.includes('.sslip.io')) {
+        console.log(`[CORS DEBUG] Allowing sslip.io domain: ${normalized}`);
+        return callback(null, true);
+      }
+
       if (allowedOrigins.includes(normalized)) {
         return callback(null, true);
       }
+
+      // 2. Loggea el error para ver si la variable de entorno tiene un problema
+      console.error(`[CORS ERROR] BLOCKED: Origin ${origin} NOT found in allowed list.`);
       return callback(new Error('Not allowed by CORS'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Band } from "./band.entity";
 import { User } from "src/domain/user/entities/user.entity";
 
@@ -18,7 +18,7 @@ export class BandMember {
     @Column({ type: 'date' })
     entryDate: Date;
 
-    @Column({
+    @DeleteDateColumn({
         type: 'date',
         nullable: true,
     })

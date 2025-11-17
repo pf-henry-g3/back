@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../domain/user/entities/user.entity';
 import bcrypt from 'node_modules/bcryptjs';
-import { commonResponse } from 'src/common/utils/common-response.constant';
 import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
 import { plainToInstance } from 'class-transformer';
@@ -56,16 +55,30 @@ export class AuthService {
   async signin(loginUser: LoginUserDto) {
     if (!loginUser.email || !loginUser.password) throw new BadRequestException('Email y contraseña obligatorios');
 
-    const user = await this.usersRepository.findOneBy({ email: loginUser.email });
+    const user = await this.usersRepository.findOne({
+      where: { email: loginUser.email },
+      relations: ['roles']
+    });
 
-    if (!user) throw new BadRequestException('Credenciales invalidas');
+    // Por seguridad, no revelamos si el usuario existe o no
+    // Pero verificamos condiciones específicas antes de decir "credenciales inválidas"
+    if (!user) {
+      throw new BadRequestException('Credenciales invalidas');
+    }
 
-    if (!user.password)
-      throw new BadRequestException('Este usuario usa autenticación externa. Iniciá sesión con Google o Auth0.');
+    if (user.isBanned) {
+      throw new BadRequestException('Tu cuenta ha sido baneada. Contacta con un administrador.');
+    }
+
+    if (!user.password) {
+      throw new BadRequestException('Este usuario utiliza autenticación externa. Iniciá sesión con Google.');
+    }
 
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
-    if (!isPasswordValid) throw new BadRequestException('Credenciales invalidas.');
+    if (!isPasswordValid) {
+      throw new BadRequestException('Credenciales invalidas');
+    }
 
     const payload = {
       sub: user.id, // "sub" es el estándar para el ID del usuario
@@ -74,7 +87,8 @@ export class AuthService {
     };
 
     // if (!user.isVerified) {
-    //   throw new BadRequestException('Tu cuenta aún no está verificada.');
+    //   await this.userVerificationService.sendEmail(user.email);
+    //   throw new BadRequestException('Tu cuenta no está verificada. Te reenviamos un correo de verificación.');
     // }
 
     const token = this.jwtService.sign(payload);
@@ -86,53 +100,71 @@ export class AuthService {
     return { login: true, access_token: token, tranformedUser }
   }
 
-  async syncAuth0User(auth0Payload: any, userFront) {
-    userFront = userFront.user
+  async syncAuth0User(auth0Payload: any, userAuth0Data: any) {
+
+    const auth0User = userAuth0Data?.user || userAuth0Data;
+
+    if (!auth0User) {
+      throw new BadRequestException('No se recibieron datos del usuario de Auth0');
+    }
+
+    console.log('👤 Datos del usuario de Auth0:', auth0User);
 
     let user = await this.usersRepository.findOne({
-      where: { authProviderId: auth0Payload.sub }
+      where: { authProviderId: auth0User.sub },
+      relations: ['roles']
     });
 
-
     if (!user) {
+      console.log('🔍 Usuario no encontrado por authProviderId, buscando por email...');
+
       user = await this.usersRepository.findOne({
-        where: { email: userFront.email }
+        where: { email: auth0User.email },
+        relations: ['roles']
       });
+    }
 
-      if (user) {
-        user.authProviderId = auth0Payload.sub;
+    if (user && user.isBanned) {
+      throw new BadRequestException('Tu cuenta ha sido baneada. Contacta con un administrador.');
+    }
 
-        if (userFront.picture) user.urlImage = userFront.picture;
-        if (userFront.name && !user.name) user.name = userFront.name;
+    if (user) {
+      console.log('✅ Usuario encontrado por email, vinculando con Auth0...');
+      user.authProviderId = auth0User.sub;
 
-        user.isVerified = true;
+      if (auth0User.picture) user.urlImage = auth0User.picture;
+      if (auth0User.name && !user.name) user.name = auth0User.name;
 
-        await this.usersRepository.save(user);
-      }
+      user.isVerified = true;
+
+      await this.usersRepository.save(user);
+      console.log('✅ Usuario ya existía:', user.email);
     }
 
     if (!user) {
-      const baseUsername = userFront.nickname || userFront.email.split('@')[0];
-      let userName = userFront.nickname;
+      console.log('🆕 Creando nuevo usuario desde Auth0...');
+
+      const baseUsername = auth0User.nickname || auth0User.email.split('@')[0];
+      let userName = baseUsername;
       let counter = 1;
 
-      // Verificar que userName sea único
       while (await this.usersRepository.findOne({ where: { userName } })) {
-        userName = `${baseUsername}${counter}`; //agrega numero despues del username existente
+        userName = `${baseUsername}${counter}`;
         counter++;
       }
 
       user = this.usersRepository.create({
-        email: userFront.email,
-        name: userFront.name || userFront.nickname,
+        email: auth0User.email,
+        name: auth0User.name || auth0User.nickname,
         userName,
-        authProviderId: auth0Payload.sub,
-        urlImage: userFront.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
+        authProviderId: auth0User.sub,
+        urlImage: auth0User.picture || 'https://res.cloudinary.com/dgxzi3eu0/image/upload/v1761796743/NoPorfilePicture_cwzyg6.jpg',
         password: null,
         isVerified: true,
       });
 
-      await this.usersRepository.save(user);
+      user = await this.usersRepository.save(user);
+      console.log('✅ Usuario creado:', user.email);
     }
 
     const payload = {
@@ -142,11 +174,31 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(payload);
+    console.log('🎟️ Token generado para el usuario');
 
-    const tranformedUser = plainToInstance(UserMinimalResponseDto, user, {
+    const transformedUser = plainToInstance(UserMinimalResponseDto, user, {
       excludeExtraneousValues: true,
-    })
+    });
 
-    return { login: true, access_token: token, tranformedUser }
+    return {
+      login: true,
+      access_token: token,
+      tranformedUser: transformedUser
+    };
+  }
+
+  async getUserWithRoles(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles']
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 }

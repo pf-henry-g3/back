@@ -1,6 +1,5 @@
 import { Expose, Transform, Type } from 'class-transformer';
 import { UserMinimalResponseDto } from 'src/common/dto/user-minimal-response.dto';
-import { isDate } from 'class-validator';
 import { BandMinimalResponseDto } from 'src/common/dto/band-minimal-response.dto';
 
 export class BandMemberResponseDto {
@@ -20,11 +19,6 @@ export class BandMemberResponseDto {
     entryDate: Date;
 
     @Expose()
-    @Transform(({ value }) =>
-        isDate(value)
-            ? value !== null
-            : null
-    )
+    @Type(() => Date)
     departureDate: Date | null;
-
 }

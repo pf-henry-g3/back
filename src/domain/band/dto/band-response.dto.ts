@@ -32,15 +32,6 @@ export class BandResponseDto {
     @Expose()
     country: string;
 
-    @Exclude()
-    latitude: number;
-
-    @Exclude()
-    longitude: number;
-
-    @Exclude()
-    deleteAt: Date;
-
     @Expose()
     @Type(() => GenreResponseDto)
     genres: GenreResponseDto[];

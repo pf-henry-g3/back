@@ -6,8 +6,6 @@ import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@ne
 import { AuthGuard } from '../../common/guards/Auth.guard';
 import { User } from '../user/entities/user.entity';
 import { commonResponse } from 'src/common/utils/common-response.constant';
-import { Role } from 'src/common/enums/roles.enum';
-import { Roles } from 'src/common/decorators/role.decorator';
 import { VacancyOwnerGuard } from 'src/common/factories/OwnerOrAdmin.factory';
 
 @Controller('vacancy')

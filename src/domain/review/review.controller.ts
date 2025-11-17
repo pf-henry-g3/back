@@ -99,8 +99,6 @@ export class ReviewController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard)
   @HttpCode(200)
   async findAll(
     @Req() req,
@@ -175,24 +173,5 @@ export class ReviewController {
       'Datos Actualizados',
       await this.reviewService.update(id, updateReviewDto),
     )
-  }
-
-  @Delete(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id de la review eliminar de forma logica',
-  })
-  @ApiResponse({
-    status: 204,
-    description: 'Recurso eliminado sin retorno de datos',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard, ReviewOwnerGuard())
-  @HttpCode(204)
-  softDelete(
-    @Param('id') id: string
-  ) {
-    return this.reviewService.softDelete(id);
   }
 }

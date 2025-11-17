@@ -11,7 +11,8 @@ import { FileUploadService } from '../../core/file-upload/file-upload.service';
 import { AbstractFileUploadService } from '../../core/file-upload/file-upload.abstract.service';
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
-import { UserResponseDto } from './dto/user-response.dto';
+import { UserPublicResponseDto } from './dto/users-public-response.dto';
+import { UserAdminResponseDto } from './dto/user-admin-response.dto';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -28,7 +29,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
 
-  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit, forAdmin: boolean = false) {
     let [users, total] = await this.usersRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
@@ -36,12 +37,15 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
         genres: true,
         roles: true,
         memberships: { band: true },
+        leaderOf: true,
+        musicalInstruments: { instrument: true },
       },
     });
 
     if (!users.length) throw new NotFoundException("Usuarios no encontrados");
 
-    const transformedUsers = plainToInstance(UserResponseDto, users, {
+    const DtoClass = forAdmin ? UserAdminResponseDto : UserPublicResponseDto;
+    const transformedUsers = plainToInstance(DtoClass, users, {
       excludeExtraneousValues: true,
     });
 
@@ -64,7 +68,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const transformedUser = plainToInstance(UserResponseDto, user, {
+    const transformedUser = plainToInstance(UserPublicResponseDto, user, {
       excludeExtraneousValues: true,
     });
 
@@ -82,13 +86,16 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return this.uploadImage(file, userId);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto, requestingUser?: User) {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
         genres: true,
         roles: true,
-      }
+        memberships: { band: true },
+        leaderOf: true,
+        musicalInstruments: { instrument: true },
+      },
     });
 
     if (!user) {
@@ -97,6 +104,19 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     //Si el DTO tiene nuevos roles
     if (updateUserDto.newRoles && updateUserDto.newRoles.length > 0) {
+      // Verificar si se intenta asignar Admin o SuperAdmin
+      const adminRoles = ['Admin', 'SuperAdmin'];
+      const tryingToAssignAdmin = updateUserDto.newRoles.some(role => adminRoles.includes(role));
+      
+      if (tryingToAssignAdmin && requestingUser) {
+        const requestingUserRoles = requestingUser.roles?.map(r => r.name) || [];
+        const isSuperAdmin = requestingUserRoles.includes('SuperAdmin');
+        
+        if (!isSuperAdmin) {
+          throw new BadRequestException('Solo los SuperAdmin pueden asignar roles de Admin o SuperAdmin');
+        }
+      }
+
       const foundRoles = await this.rolesRepository.find({
         where: updateUserDto.newRoles?.map((name) => ({ name })) //Buscamos todos los roles recibidos en la tabla roles
       });
@@ -167,89 +187,37 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return `Usuario ${id} eliminado con exito`;
   }
 
-  //   async findAllIncludingDeleted(page: number = Pages.Pages, limit: number = Pages.Limit) {
-  //   let [users, total] = await this.usersRepository.findAndCount({
-  //     skip: (page - 1) * limit,
-  //     take: limit,
-  //     relations: {
-  //       genres: true,
-  //       memberships: true,
-  //     },
-  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-  //   });
+  async banUser(id: string, reason?: string) {
+    const user = await this.usersRepository.findOneBy({ id });
 
-  //   if (!users) throw new NotFoundException("Usuarios no encontrados");
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
 
-  //   let usersWithOutPassword = users.map((user) => {
-  //     const { password, ...userWithOutPassword } = user;
-  //     return userWithOutPassword;
-  //   })
+    user.isBanned = true;
+    if (reason) {
+      user.reasonForBan = reason;
+    }
 
-  //   return {
-  //     meta: {
-  //       total,
-  //       page,
-  //       limit,
-  //     },
-  //     data: usersWithOutPassword,
-  //   };
-  // }
+    await this.usersRepository.save(user);
 
-  // async findAllDeletedUsers(page: number = Pages.Pages, limit: number = Pages.Limit) {
-  //   let [users, total] = await this.usersRepository.findAndCount({
-  //     skip: (page - 1) * limit,
-  //     take: limit,
-  //     relations: {
-  //       genres: true,
-  //       memberships: true,
-  //     },
-  //     where: { deleteAt: Not(IsNull()) },
-  //     withDeleted: true,
-  //   });
+    return `Usuario ${id} baneado con exito`;
+  }
 
-  //   if (!users) throw new NotFoundException("Usuarios eliminados no encontrados");
-  //   if (!users.length) throw new NotFoundException("Sin usuarios eliminados");
+  async unbanUser(id: string) {
+    const user = await this.usersRepository.findOneBy({ id });
 
-  //   let usersWithOutPassword = users.map((user) => {
-  //     const { password, ...userWithOutPassword } = user;
-  //     return userWithOutPassword;
-  //   })
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
 
-  //   return {
-  //     meta: {
-  //       total,
-  //       page,
-  //       limit,
-  //     },
-  //     data: usersWithOutPassword,
-  //   };
-  // }
+    user.isBanned = false;
+    user.reasonForBan = null;
 
-  // async findOneDeletedUser(id: string) {
-  //   const user = await this.usersRepository.findOne({
-  //     where: {
-  //       id,
-  //       deleteAt: Not(IsNull()),
-  //     },
-  //     relations: {
-  //       genres: true,
-  //       roles: true
-  //       //bandas
-  //       //reviews
-  //       //instrumentos
-  //       //media
-  //       //pagos
-  //       //socialLinks
-  //     },
-  //     withDeleted: true, //incluye a los eliminados TypeORM los elimina de la consulta automaticamente
-  //   });
+    await this.usersRepository.save(user);
 
-  //   if (!user) throw new NotFoundException('Usuario no encontrado entre los usuarios eliminados');
-
-  //   const { password, ...userWithOutPassword } = user;
-
-  //   return userWithOutPassword;
-  // }
+    return `Usuario ${id} desbaneado con exito`;
+  }
 
   async seedUsers() {
     console.log('⏳ Precargando usuarios...');

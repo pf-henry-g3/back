@@ -31,6 +31,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
   async create(createVacancyDto: CreateVacancyDto, user: User) {
     //Buscamos los generos de la DB que coincidan con los recibidos
+
     const genres = await this.genresRepository.find({
       where: createVacancyDto.genres.map(name => ({ name })),
     });
@@ -110,9 +111,11 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
   async seederVacancies(): Promise<void> {
     console.log('⏳ Precargando vacantes...');
     for (const vacancyData of vacancysData) {
+
       const existingVacancy = await this.vacancyRepository.findOne({
         where: { name: vacancyData.name }
       });
+
       if (existingVacancy) {
         console.log(`⚠️ Vacante ${vacancyData.name} ya existe, saltando...`);
         continue;
@@ -120,6 +123,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       const user = await this.usersRepository.findOne({
         where: { userName: vacancyData.vacancyuserName }
       });
+
       if (!user) {
         console.log(`⚠️ Usuario con nombre ${vacancyData.vacancyuserName} no encontrado, saltando vacante ${vacancyData.name}...`);
         continue;
