@@ -9,7 +9,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
 import { plainToInstance } from 'class-transformer';
 import { UserMinimalResponseDto } from 'src/common/dto/user-minimal-response.dto';
-import { UserService } from 'src/domain/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -186,5 +185,20 @@ export class AuthService {
       access_token: token,
       tranformedUser: transformedUser
     };
+  }
+
+  async getUserWithRoles(userId: string) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles']
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    return plainToInstance(UserMinimalResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 }
