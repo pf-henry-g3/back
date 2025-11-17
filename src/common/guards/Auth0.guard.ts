@@ -66,11 +66,11 @@ export class Auth0Guard implements CanActivate {
             // 3️⃣ Verificar el token
             console.log('🔍 Verificando token con:');
             console.log('  - audience:', process.env.AUTH0_AUDIENCE);
-            console.log('  - issuer:', `https://${process.env.AUTH0_DOMAIN}/`);
+            console.log('  - issuer:', `${process.env.AUTH0_DOMAIN}/`);
 
             const payload: any = jwt.verify(token, signingKey, {
                 audience: process.env.AUTH0_AUDIENCE,
-                issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+                issuer: `${process.env.AUTH0_DOMAIN}/`,
                 algorithms: ['RS256'],
             });
 
