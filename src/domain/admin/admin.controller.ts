@@ -65,8 +65,11 @@ export class AdminController {
 
     const mappedRelations = mapping.defaultRelations || [];
 
+    // Para usuarios, siempre incluir los que tienen soft delete (para poder ver y desbanear usuarios baneados anteriormente)
+    const includeDeleted = entityType === EntityName.USER ? true : deleted;
+
     //llamamos al servicio generico
-    const result = await this.adminService.findEntites(mapping.entity, pageNum, limitNum, deleted, { relations: mappedRelations });
+    const result = await this.adminService.findEntites(mapping.entity, pageNum, limitNum, includeDeleted, { relations: mappedRelations });
 
     //evitamos que typescript piense que le pasamos un constructor invalido
     const ResponseDtoClass = mapping.responseDto as ClassConstructor<any>;
@@ -267,13 +270,13 @@ export class AdminController {
   @ApiParam({
     name: 'id',
     required: true,
-    description: 'ID del usuario a hacer Admin',
+    description: 'ID del usuario a banear',
   })
   @ApiResponse({
-    status: 204,
-    description: 'Actualizacion exitosa sin retorno de datos',
+    status: 200,
+    description: 'Usuario baneado exitosamente',
   })
-  @HttpCode(204)
+  @HttpCode(200)
   async banUser(
     @Param('id') id: string,
     @Body() reason: BanUserDto,
@@ -281,8 +284,30 @@ export class AdminController {
     const banedUser = await this.adminService.banUser(id, reason);
 
     return commonResponse(
-      'Usuario baneado exitosamente y borrado de forma logica del sistema',
+      'Usuario baneado exitosamente',
       banedUser,
+    )
+  }
+
+  @Patch('unban/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del usuario a desbanear',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Usuario desbaneado exitosamente',
+  })
+  @HttpCode(200)
+  async unbanUser(
+    @Param('id') id: string,
+  ) {
+    const unbannedUser = await this.adminService.unbanUser(id);
+
+    return commonResponse(
+      'Usuario desbaneado exitosamente',
+      unbannedUser,
     )
   }
 

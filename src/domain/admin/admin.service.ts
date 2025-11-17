@@ -216,9 +216,34 @@ export class AdminService {
     foundUser.reasonForBan = banUserdto.reason;
 
     await usersRepository.save(foundUser);
-    await usersRepository.softDelete(id);
+    // NO hacer softDelete - solo cambiar el estado isBanned
 
-    return plainToInstance(UserAdminResponseDto, usersRepository, {
+    return plainToInstance(UserAdminResponseDto, foundUser, {
+      excludeExtraneousValues: true,
+    })
+  }
+
+  async unbanUser(id: string) {
+    const usersRepository = this.entityManager.getRepository(User);
+    // Buscar el usuario incluso si tiene soft delete
+    const foundUser: User | null = await usersRepository.findOne({
+      where: { id },
+      withDeleted: true
+    });
+
+    if (!foundUser) throw new NotFoundException('Usuario no encontrado.');
+
+    foundUser.isBanned = false;
+    foundUser.reasonForBan = null;
+
+    // Si el usuario tenía soft delete, restaurarlo
+    if (foundUser.deleteAt) {
+      await usersRepository.restore(id);
+    }
+
+    await usersRepository.save(foundUser);
+
+    return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,
     })
   }

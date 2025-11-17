@@ -10,7 +10,6 @@ import { Role } from 'src/common/enums/roles.enum';
 import { UserVerificationService } from './userVerification.service';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
-import { SendMassEmailDto } from './dto/send-mass-email.dto';
 
 @Controller('user')
 export class UserController {
@@ -221,27 +220,4 @@ export class UserController {
     );
   }
 
-  @Post('admin/send-mass-email')
-  @ApiProperty({
-    description: 'Envío masivo de emails a todos los usuarios',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Emails enviados exitosamente',
-  })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
-  @HttpCode(200)
-  async sendMassEmail(
-    @Body() sendMassEmailDto: SendMassEmailDto
-  ) {
-    return commonResponse(
-      'Emails enviados',
-      await this.userVerificationService.sendMassEmail(
-        sendMassEmailDto.subject,
-        sendMassEmailDto.body
-      ),
-    );
-  }
 }
