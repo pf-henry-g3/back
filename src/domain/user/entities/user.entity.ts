@@ -1,5 +1,6 @@
 import { Band } from "src/domain/band/entities/band.entity";
 import { BandMember } from "src/domain/band/entities/bandMember.entity";
+import { Event } from "src/domain/event/entities/event.entity";
 import { Genre } from "src/domain/genre/entities/genre.entity";
 import { AritstMusicalInstrument } from "src/domain/musical-instrument/entities/artist-musical-instrument.entity";
 import { Review } from "src/domain/review/entities/review.entity";
@@ -178,6 +179,11 @@ export class User {
   // Relacion con instrumentos
   @OneToMany(() => AritstMusicalInstrument, (instrument) => instrument.user)
   musicalInstruments: AritstMusicalInstrument[];
+
+
+
+  @OneToMany(() => Event, (event) => event.owner)
+  events: Event[];
 
   //Relacion con SocialLinks
   //Relacion con Media
