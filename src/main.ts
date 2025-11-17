@@ -35,6 +35,8 @@ async function bootstrap() {
   const allowedOrigins = [
     process.env.FRONTEND_URL || 'https://front-one-gray.vercel.app',
     process.env.BACKEND_URL,
+    'http://localhost:3000',
+    'http://localhost:3001',
     'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app/',
     'https://back-rk1f.onrender.com/',
     'https://back-rk1f.onrender.com/auth/auth0/callback'

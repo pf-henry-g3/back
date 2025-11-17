@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserVerificationService } from 'src/domain/user/userVerification.service';
 import { plainToInstance } from 'class-transformer';
 import { UserMinimalResponseDto } from 'src/common/dto/user-minimal-response.dto';
+import { UserService } from 'src/domain/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -55,16 +56,30 @@ export class AuthService {
   async signin(loginUser: LoginUserDto) {
     if (!loginUser.email || !loginUser.password) throw new BadRequestException('Email y contraseña obligatorios');
 
-    const user = await this.usersRepository.findOneBy({ email: loginUser.email });
+    const user = await this.usersRepository.findOne({
+      where: { email: loginUser.email },
+      relations: ['roles']
+    });
 
-    if (!user) throw new BadRequestException('Credenciales invalidas');
+    // Por seguridad, no revelamos si el usuario existe o no
+    // Pero verificamos condiciones específicas antes de decir "credenciales inválidas"
+    if (!user) {
+      throw new BadRequestException('Credenciales invalidas');
+    }
 
-    if (!user.password)
+    if (user.isBanned) {
+      throw new BadRequestException('Tu cuenta ha sido baneada. Contacta con un administrador.');
+    }
+
+    if (!user.password) {
       throw new BadRequestException('Este usuario utiliza autenticación externa. Iniciá sesión con Google.');
+    }
 
     const isPasswordValid = await bcrypt.compare(loginUser.password, user.password);
 
-    if (!isPasswordValid) throw new BadRequestException('Credenciales invalidas.');
+    if (!isPasswordValid) {
+      throw new BadRequestException('Credenciales invalidas');
+    }
 
     const payload = {
       sub: user.id, // "sub" es el estándar para el ID del usuario
@@ -108,18 +123,23 @@ export class AuthService {
         where: { email: auth0User.email },
         relations: ['roles']
       });
+    }
 
-      if (user) {
-        console.log('✅ Usuario encontrado por email, vinculando con Auth0...');
-        user.authProviderId = auth0User.sub;
+    if (user && user.isBanned) {
+      throw new BadRequestException('Tu cuenta ha sido baneada. Contacta con un administrador.');
+    }
 
-        if (auth0User.picture) user.urlImage = auth0User.picture;
-        if (auth0User.name && !user.name) user.name = auth0User.name;
+    if (user) {
+      console.log('✅ Usuario encontrado por email, vinculando con Auth0...');
+      user.authProviderId = auth0User.sub;
 
-        user.isVerified = true;
+      if (auth0User.picture) user.urlImage = auth0User.picture;
+      if (auth0User.name && !user.name) user.name = auth0User.name;
 
-        await this.usersRepository.save(user);
-      }
+      user.isVerified = true;
+
+      await this.usersRepository.save(user);
+      console.log('✅ Usuario ya existía:', user.email);
     }
 
     if (!user) {
@@ -146,8 +166,6 @@ export class AuthService {
 
       user = await this.usersRepository.save(user);
       console.log('✅ Usuario creado:', user.email);
-    } else {
-      console.log('✅ Usuario ya existía:', user.email);
     }
 
     const payload = {

@@ -131,7 +131,7 @@ export class User {
     type: 'text',
     nullable: true,
   })
-  reasonForBan: string;
+  reasonForBan: string | null;
 
   //Borrado logico
   @DeleteDateColumn({

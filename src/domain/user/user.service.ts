@@ -12,6 +12,7 @@ import { AbstractFileUploadService } from '../../core/file-upload/file-upload.ab
 import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserPublicResponseDto } from './dto/users-public-response.dto';
+import { UserAdminResponseDto } from './dto/user-admin-response.dto';
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -28,7 +29,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
 
-  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
+  async findAll(page: number = Pages.Pages, limit: number = Pages.Limit, forAdmin: boolean = false) {
     let [users, total] = await this.usersRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
@@ -43,7 +44,8 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!users.length) throw new NotFoundException("Usuarios no encontrados");
 
-    const transformedUsers = plainToInstance(UserPublicResponseDto, users, {
+    const DtoClass = forAdmin ? UserAdminResponseDto : UserPublicResponseDto;
+    const transformedUsers = plainToInstance(DtoClass, users, {
       excludeExtraneousValues: true,
     });
 
@@ -84,7 +86,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return this.uploadImage(file, userId);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(id: string, updateUserDto: UpdateUserDto, requestingUser?: User) {
     const user = await this.usersRepository.findOne({
       where: { id },
       relations: {
@@ -102,6 +104,19 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     //Si el DTO tiene nuevos roles
     if (updateUserDto.newRoles && updateUserDto.newRoles.length > 0) {
+      // Verificar si se intenta asignar Admin o SuperAdmin
+      const adminRoles = ['Admin', 'SuperAdmin'];
+      const tryingToAssignAdmin = updateUserDto.newRoles.some(role => adminRoles.includes(role));
+      
+      if (tryingToAssignAdmin && requestingUser) {
+        const requestingUserRoles = requestingUser.roles?.map(r => r.name) || [];
+        const isSuperAdmin = requestingUserRoles.includes('SuperAdmin');
+        
+        if (!isSuperAdmin) {
+          throw new BadRequestException('Solo los SuperAdmin pueden asignar roles de Admin o SuperAdmin');
+        }
+      }
+
       const foundRoles = await this.rolesRepository.find({
         where: updateUserDto.newRoles?.map((name) => ({ name })) //Buscamos todos los roles recibidos en la tabla roles
       });
@@ -170,6 +185,38 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     await this.usersRepository.softDelete(id);
 
     return `Usuario ${id} eliminado con exito`;
+  }
+
+  async banUser(id: string, reason?: string) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    user.isBanned = true;
+    if (reason) {
+      user.reasonForBan = reason;
+    }
+
+    await this.usersRepository.save(user);
+
+    return `Usuario ${id} baneado con exito`;
+  }
+
+  async unbanUser(id: string) {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    user.isBanned = false;
+    user.reasonForBan = null;
+
+    await this.usersRepository.save(user);
+
+    return `Usuario ${id} desbaneado con exito`;
   }
 
   async seedUsers() {
