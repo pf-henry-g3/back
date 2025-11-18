@@ -75,8 +75,7 @@ export class AuthController {
   @UseGuards(AuthGuard)
   async getMe(@Req() req: any) {
     console.log('✅ Usuario autenticado:', req.user.email);
-    // Asegurar que el usuario tenga las relaciones de roles cargadas
-    const user = await this.authService.getUserWithRoles(req.user.id);
+    const user = await this.authService.getLoguedUser(req.user.id);
     return commonResponse('Usuario autenticado', { user });
   }
 }

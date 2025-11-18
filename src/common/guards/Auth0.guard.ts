@@ -43,6 +43,7 @@ export class Auth0Guard implements CanActivate {
             ? authHeader.slice(7).trim()
             : authHeader.trim();
 
+
         console.log('🎟️ Token extraído (primeros 50 chars):', token.substring(0, 50) + '...');
 
         try {
