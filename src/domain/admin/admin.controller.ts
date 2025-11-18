@@ -7,7 +7,7 @@ import { EntityName } from 'src/common/enums/entity-names.enum';
 import { Role } from 'src/common/enums/roles.enum';
 import { BanUserDto } from './dto/ban-user.dto';
 import { ApiBearerAuth, ApiParam, ApiProperty, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { SendMassEmailDto } from '../user/dto/send-mass-email.dto';
+import { SendMassEmailDto } from './dto/send-mass-email.dto';
 import { AuthGuard } from 'src/common/guards/Auth.guard';
 import { RolesGuard } from 'src/common/guards/Role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';

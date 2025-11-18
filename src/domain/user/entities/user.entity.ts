@@ -177,11 +177,15 @@ export class User {
   reviewsReceived: Review[];
 
   // Relacion con instrumentos
-  @OneToMany(() => AritstMusicalInstrument, (instrument) => instrument.user)
+  @OneToMany(() => AritstMusicalInstrument, (instrument) => instrument.user,
+    {
+      cascade: ['insert'],
+      onDelete: 'CASCADE',
+      eager: false,
+    })
   musicalInstruments: AritstMusicalInstrument[];
 
-
-
+  //Relacion con eventos
   @OneToMany(() => Event, (event) => event.owner)
   events: Event[];
 

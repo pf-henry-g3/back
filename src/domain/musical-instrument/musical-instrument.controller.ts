@@ -9,13 +9,13 @@ import { RolesGuard } from 'src/common/guards/Role.guard';
 import { commonResponse } from 'src/common/utils/common-response.constant';
 
 @Controller('musical-instrument')
-@ApiBearerAuth()
-@Roles(Role.Admin, Role.SuperAdmin)
-@UseGuards(AuthGuard, RolesGuard)
 export class MusicalInstrumentController {
   constructor(private readonly musicalInstrumentService: MusicalInstrumentService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @Roles(Role.Admin, Role.SuperAdmin)
+  @UseGuards(AuthGuard, RolesGuard)
   @ApiProperty({
     description: 'Creacion de un nuevo instrumento',
   })

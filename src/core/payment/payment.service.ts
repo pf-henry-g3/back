@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import mercadopago, { MercadoPagoConfig, Payment, Preference } from "mercadopago"
+import { MercadoPagoConfig, Payment, Preference } from "mercadopago"
 import { PaymentEntity, PaymentMethod, TransactionStatus } from './entities/payment.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
