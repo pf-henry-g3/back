@@ -10,12 +10,8 @@ export class Auth0Guard implements CanActivate {
     private client: JwksClient;
 
     constructor() {
-        console.log('🔧 Auth0Guard inicializado');
-        console.log('🔧 AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
-        console.log('🔧 AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
-
         this.client = jwksClient({
-            jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
+            jwksUri: `${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
             cache: true,
             rateLimit: true,
             jwksRequestsPerMinute: 5,
@@ -23,6 +19,11 @@ export class Auth0Guard implements CanActivate {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+
+        console.log('🔧 Auth0Guard inicializado');
+        console.log('🔧 AUTH0_DOMAIN:', process.env.AUTH0_DOMAIN);
+        console.log('🔧 AUTH0_AUDIENCE:', process.env.AUTH0_AUDIENCE);
+
         const request: Request = context.switchToHttp().getRequest();
 
         console.log('\n=== 🔐 Auth0Guard Debug ===');
@@ -65,11 +66,11 @@ export class Auth0Guard implements CanActivate {
             // 3️⃣ Verificar el token
             console.log('🔍 Verificando token con:');
             console.log('  - audience:', process.env.AUTH0_AUDIENCE);
-            console.log('  - issuer:', `https://${process.env.AUTH0_DOMAIN}/`);
+            console.log('  - issuer:', `${process.env.AUTH0_DOMAIN}/`);
 
             const payload: any = jwt.verify(token, signingKey, {
                 audience: process.env.AUTH0_AUDIENCE,
-                issuer: `https://${process.env.AUTH0_DOMAIN}/`,
+                issuer: `${process.env.AUTH0_DOMAIN}/`,
                 algorithms: ['RS256'],
             });
 
