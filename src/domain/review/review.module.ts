@@ -6,9 +6,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { FileUploadModule } from 'src/core/file-upload/file-upload.module';
 import { User } from '../user/entities/user.entity';
 import { Review } from './entities/review.entity';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   imports: [
+    AdminModule,
     TypeOrmModule.forFeature([User, Review]),
     UserModule,
     FileUploadModule,

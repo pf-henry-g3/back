@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, FileTypeValidator, Get, HttpCode, MaxFileSizeValidator, NotFoundException, Param, ParseFilePipe, ParseUUIDPipe, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { BandsService } from './band.service';
 import { CreateBandDto } from './dto/create-band.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -34,28 +34,6 @@ export class BandController {
     return commonResponse(
       'Banda Creada',
       await this.bandsService.create(createBandDto, user)
-    )
-  }
-
-  @Patch(':id')
-  @ApiParam({
-    name: 'id',
-    required: true,
-    description: 'id de la banda a actualizar sus datos',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Recurso actualizado con retorno de datos',
-  })
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard, BandOwnerGuard())
-  @HttpCode(200)
-  async update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() updatebandDto: UpdateBandDto) {
-    return commonResponse(
-      'Datos actualizados',
-      await this.bandsService.update(id, updatebandDto)
     )
   }
 
@@ -147,6 +125,28 @@ export class BandController {
     return this.bandsService.updateProfilePicture(file, bandId);
   }
 
+  @Patch(':id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la banda a actualizar sus datos',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso actualizado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, BandOwnerGuard())
+  @HttpCode(200)
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updatebandDto: UpdateBandDto) {
+    return commonResponse(
+      'Datos actualizados',
+      await this.bandsService.update(id, updatebandDto)
+    )
+  }
+
   @Post('addMember/:id')
   @ApiProperty({
     description: 'Agregar un nuevo miembro a la banda',
@@ -166,6 +166,70 @@ export class BandController {
       'Miembro agregado.',
       await this.bandsService.addOneMember(bandId, addMemberDto)
     );
+  }
+
+  @Patch('changeLeader/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID de la banda a actualizar',
+  })
+  @ApiQuery({
+    name: 'newLeaderUserName',
+    required: true,
+    description: 'Username del nuevo lider',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Actualizacion exitosa con retorno de datos.',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, BandOwnerGuard())
+  @HttpCode(200)
+  async changeLeader(
+    @Param('id', ParseUUIDPipe) bandId: string,
+    @Query('newLeaderUserName') newLeaderUserName: string,
+    @Req() req,
+  ) {
+    const user = req.user as User;
+
+    return commonResponse(
+      'Nuevo lider actualizado.',
+      await this.bandsService.changeLeader(user.id, bandId, newLeaderUserName)
+    )
+
+  }
+
+  @Delete('genres/:id/:genreName')
+  @ApiParam({
+    name: 'genreName',
+    required: true,
+    description: 'Nombre unico del genero a eliminar',
+    example: 'Rock'
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la banda a modificar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Banda actualizada con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, BandOwnerGuard())
+  async removeManytoMany(
+    @Param('genreName') genreName: string,
+    @Param('id') id: string,
+  ) {
+    if (!genreName) {
+      throw new NotFoundException(`Se requiere el parámetro 'genreName' para eliminar la relación.`);
+    }
+
+    return commonResponse(
+      'Banda actualizado correctamente',
+      await this.bandsService.removeManyToManyRelation(id, genreName)
+    )
   }
 
   @Delete(':id')

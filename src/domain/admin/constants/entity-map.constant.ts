@@ -28,7 +28,7 @@ export const ADMIN_ENTITY_MAP = {
         defaultRelations: ['roles', 'genres', 'vacancies', 'leaderOf', 'musicalInstruments', 'memberships'],
         historyRelations: {
             vacancies: { entity: Vacancy, relationField: 'owner', responseDto: VacancyMinimalResponseDto },
-            memberships: { entity: BandMember, relationField: 'user', responseDto: BandAdminResponseDto },
+            memberships: { entity: BandMember, relationField: 'user', responseDto: BandMemberAdminResponseDto },
             reviewsGiven: { entity: Review, relationField: 'owner', responseDto: ReviewAdminResponseDto },
             reviewsReceived: { entity: Review, relationField: 'receptor', responseDto: ReviewAdminResponseDto },
             leaderOf: { entity: Band, relationField: 'leader', responseDto: BandMinimalResponseDto },

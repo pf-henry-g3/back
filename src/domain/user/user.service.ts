@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Genre } from '../genre/entities/genre.entity';
 import * as bcrypt from 'bcryptjs';
 import usersData from '../../data/users.data.json';
@@ -13,6 +13,17 @@ import { Pages } from 'src/common/enums/pages.enum';
 import { plainToInstance } from 'class-transformer';
 import { UserPublicResponseDto } from './dto/users-public-response.dto';
 import { UserAdminResponseDto } from './dto/user-admin-response.dto';
+import { AritstMusicalInstrument } from '../musical-instrument/entities/artist-musical-instrument.entity';
+import { BandMember } from '../band/entities/bandMember.entity';
+import { Band } from '../band/entities/band.entity';
+import { MusicalInstrument } from '../musical-instrument/entities/musical-instrument.entity';
+import { AddInstrumentsDto } from './dto/add-instruments.dto';
+
+
+type UserRelationName = 'roles' | 'genres';
+type UserRelationEntity = Role | Genre;
+type EntityRepository = Repository<any>;
+
 
 @Injectable()
 export class UserService extends AbstractFileUploadService<User> { //Extiende al metodo abstracto de subida de archivos
@@ -25,6 +36,20 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
+
+    @InjectRepository(AritstMusicalInstrument)
+    private readonly artistMusicalInstrumentsRepository: Repository<AritstMusicalInstrument>,
+
+    @InjectRepository(MusicalInstrument)
+    private readonly musicalInstrumentsRepository: Repository<MusicalInstrument>,
+
+    @InjectRepository(Band)
+    private readonly bandsRepository: Repository<Band>,
+
+    @InjectRepository(BandMember)
+    private readonly bandMembersRepository: Repository<BandMember>,
+
+    private readonly entityManage: EntityManager,
 
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
@@ -107,11 +132,11 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
       // Verificar si se intenta asignar Admin o SuperAdmin
       const adminRoles = ['Admin', 'SuperAdmin'];
       const tryingToAssignAdmin = updateUserDto.newRoles.some(role => adminRoles.includes(role));
-      
+
       if (tryingToAssignAdmin && requestingUser) {
         const requestingUserRoles = requestingUser.roles?.map(r => r.name) || [];
         const isSuperAdmin = requestingUserRoles.includes('SuperAdmin');
-        
+
         if (!isSuperAdmin) {
           throw new BadRequestException('Solo los SuperAdmin pueden asignar roles de Admin o SuperAdmin');
         }
@@ -172,7 +197,11 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     Object.assign(user, updateUserDto);
 
     //Guardar cambios en la base de datos
-    return await this.usersRepository.save(user);
+    await this.usersRepository.save(user);
+
+    return plainToInstance(UserPublicResponseDto, user, {
+      excludeExtraneousValues: true
+    })
   }
 
   async softDelete(id: string) {
@@ -201,7 +230,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     await this.usersRepository.save(user);
 
-    return `Usuario ${id} baneado con exito`;
+    return plainToInstance(UserPublicResponseDto, user, {
+      excludeExtraneousValues: true
+    });
   }
 
   async unbanUser(id: string) {
@@ -216,7 +247,150 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     await this.usersRepository.save(user);
 
-    return `Usuario ${id} desbaneado con exito`;
+    return plainToInstance(UserPublicResponseDto, user, {
+      excludeExtraneousValues: true
+    });
+  }
+
+  async removeManyToManyRelation(userId: string, relationName: UserRelationName, itemName: string) {
+    let relatedRepo: EntityRepository;
+    let relationProperty: 'roles' | 'genres';
+
+    if (relationName === 'roles') {
+      relatedRepo = this.rolesRepository;
+      relationProperty = 'roles';
+    } else if (relationName === 'genres') {
+      relatedRepo = this.genresRepository;
+      relationProperty = 'genres';
+    } else {
+      throw new Error('Relacion no soportada por este metodo');
+    }
+
+    const foundUser: User | null = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: [relationName],
+    })
+
+    if (!foundUser) throw new NotFoundException('Usuario no encontrado');
+
+    const itemToRemove = await relatedRepo.findOneBy({ name: itemName }) as any;
+
+    if (!itemToRemove) throw new NotFoundException(`${relationName} ${itemName} no encontrado`);
+
+    const updatedCollection = foundUser[relationProperty].filter(
+      (item: any) => item.id !== itemToRemove.id
+    );
+
+    (foundUser as any)[relationProperty] = updatedCollection;
+
+    await this.usersRepository.save(foundUser);
+
+    return plainToInstance(UserPublicResponseDto, foundUser, {
+      excludeExtraneousValues: true
+    });
+  }
+
+  async addInstruments(id: string, addInstrumentsDto: AddInstrumentsDto) {
+    const foundUser: User | null = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['musicalInstruments', 'musicalInstruments.instrument'],
+    });
+
+    if (!foundUser) throw new NotFoundException('Usuario no encontrado');
+
+    const instrumentNames = addInstrumentsDto.newInstruments.map(item => item.name);
+
+    const foundInstrumentsEntities = await this.musicalInstrumentsRepository.find({
+      where: instrumentNames.map((name) => ({ name }))
+    });
+
+    if (foundInstrumentsEntities.length !== instrumentNames.length) {
+      const foundNamesSet = new Set(foundInstrumentsEntities.map(instrument => instrument.name));
+      const notFoundNames = instrumentNames.filter(name => !foundNamesSet.has(name));
+      throw new BadRequestException(`Algunos instrumentos agregados no existen. Instrumentos inválidos: ${notFoundNames.join(', ')}`);
+    }
+
+    const existingInstrumentIds = new Set(
+      foundUser.musicalInstruments.map(ami => ami.instrument.id)
+    );
+
+    const instrumentsToCreate: AritstMusicalInstrument[] = [];
+    const createdInstrumentIds = new Set();
+
+    for (const instrumentData of addInstrumentsDto.newInstruments) {
+
+      // Buscar la entidad completa (MusicalInstrument)
+      const instrumentEntity = foundInstrumentsEntities.find(e => e.name === instrumentData.name);
+
+      // Validar si es un instrumento nuevo para el usuario y no duplicado en el input
+      if (
+        instrumentEntity &&
+        !existingInstrumentIds.has(instrumentEntity.id) &&
+        !createdInstrumentIds.has(instrumentEntity.id)
+      ) {
+
+        // CREAR INSTANCIA DE LA TABLA INTERMEDIA (ArtistMusicalInstrument)
+        const newArtistInstrument = new AritstMusicalInstrument();
+
+        newArtistInstrument.user = foundUser;
+        newArtistInstrument.instrument = instrumentEntity;
+        newArtistInstrument.level = instrumentData.level;
+
+        instrumentsToCreate.push(newArtistInstrument);
+        createdInstrumentIds.add(instrumentEntity.id);
+      }
+    }
+
+    if (instrumentsToCreate.length === 0) throw new BadRequestException("Los instrumentos proporcionados ya están asignados o son duplicados en el listado.");
+
+    // 7. ASIGNAR y GUARDAR
+
+    // Merge de los objetos existentes con los nuevos objetos de la tabla intermedia
+    foundUser.musicalInstruments = [
+      ...foundUser.musicalInstruments,
+      ...instrumentsToCreate
+    ];
+
+    // Al guardar el User, TypeORM insertará las nuevas filas en AritstMusicalInstrument
+    const savedUser = await this.usersRepository.save(foundUser);
+
+    // Retornar la respuesta
+    return plainToInstance(UserPublicResponseDto, savedUser, {
+      excludeExtraneousValues: true
+    });
+  }
+
+  async removeMusicalInstrument(id: string, instrumentName: string) {
+    const foundInstrument: MusicalInstrument | null = await this.musicalInstrumentsRepository.findOne({
+      where: { name: instrumentName },
+    });
+
+    if (!foundInstrument) throw new NotFoundException('Instrumento no encontrado');
+
+    const deleteResult = await this.artistMusicalInstrumentsRepository.softDelete({
+      user: { id },
+      instrument: { id: foundInstrument.id },
+    });
+
+
+    if (deleteResult.affected === 0) throw new NotFoundException('El usuario no tiene ese instrumento');
+
+    return 'Instrumento eliminado correctamente'
+  }
+
+  async leaveABand(id: string, bandName: string) {
+    const foundBand: Band | null = await this.bandsRepository.findOneBy({ bandName });
+
+    if (!foundBand) throw new NotFoundException('Banda no encontrada');
+
+    const deleteResult = await this.bandMembersRepository.softDelete({
+      user: { id },
+      band: foundBand
+    });
+
+    if (deleteResult.affected === 0) throw new NotFoundException('El usuario no es miembro de esta banda');
+
+    return 'Saliste de la banda correctamente'
   }
 
   async seedUsers() {

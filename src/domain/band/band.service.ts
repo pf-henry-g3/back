@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Band } from './entities/band.entity';
@@ -175,7 +175,6 @@ export class BandsService extends AbstractFileUploadService<Band> {
     }
 
     async addOneMember(bandId: string, addMemberDto: AddMemberDto) {
-        //Por ahora se agregarán miembors de la banda de a uno con este endpoint
         const band: Band | null = await this.bandsRepository.findOne({
             where: { id: bandId },
             relations: {
@@ -215,6 +214,60 @@ export class BandsService extends AbstractFileUploadService<Band> {
         return transformedBand;
     }
 
+    async changeLeader(currentLeaderId: string, bandId: string, newLeaderUsername: string) {
+        const newLeader = await this.usersRepository.findOneBy({ userName: newLeaderUsername });
+
+        if (!newLeader) throw new NotFoundException('Nuevo líder no encontrado.');
+
+        const updateResult = await this.bandsRepository.update(
+            {
+                id: bandId,
+                leader: { id: currentLeaderId }, // 👈 CLAVE: Validación de permiso en el WHERE
+            },
+            {
+                leader: newLeader, // 👈 Se asigna el objeto User (TypeORM maneja el leaderId)
+            }
+        );
+
+        if (updateResult.affected === 0) {
+            const bandExists = await this.bandsRepository.exists({ where: { id: bandId } });
+
+            if (!bandExists) {
+                throw new NotFoundException('Banda no encontrada.');
+            } else {
+                throw new ForbiddenException('No se pudo completar la transferencia de liderazgo. Verifique su rol.');
+            }
+        }
+
+        return plainToInstance(BandResponseDto, updateResult, {
+            excludeExtraneousValues: true,
+        })
+    }
+
+    async removeManyToManyRelation(id: string, genreName: string) {
+        const foundBand: Band | null = await this.bandsRepository.findOne({
+            where: { id },
+            relations: ['genres'],
+        });
+
+        if (!foundBand) throw new NotFoundException('Banda no encontrada');
+
+        const genreToRemove: Genre | null = await this.genresRepository.findOneBy({ name: genreName });
+
+        if (!genreToRemove) throw new NotFoundException('Genre no encontrado');
+
+        const updatedGenres = foundBand['genres'].filter(
+            (genre: Genre) => genre.id !== genreToRemove.id
+        );
+
+        foundBand['genres'] = updatedGenres;
+
+        await this.bandsRepository.save(foundBand);
+
+        return plainToInstance(BandResponseDto, foundBand, {
+            excludeExtraneousValues: true,
+        });
+    }
     async softDelete(id: string) {
         const band = await this.bandsRepository.findOneBy({ id });
 
