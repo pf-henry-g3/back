@@ -11,6 +11,7 @@ import { CreateBandDto } from '../band/dto/create-band.dto';
 import { plainToInstance } from 'class-transformer';
 import { ReviewResponseDto } from './dto/review-response.dto';
 import { Pages } from 'src/common/enums/pages.enum';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ReviewService extends AbstractFileUploadService<Review> { //Extiende al metodo abstracto de subida de archivos
@@ -20,6 +21,8 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
 
     @InjectRepository(Review)
     private readonly reviewsRepository: Repository<Review>,
+
+    private readonly userService: UserService,
 
     fileUploadService: FileUploadService,
   ) { super(fileUploadService, reviewsRepository) }
@@ -38,6 +41,8 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     });
 
     await this.reviewsRepository.save(newReview);
+
+    await this.userService.updateRating(newReview.receptor.id);
 
     const tranformedReview = plainToInstance(ReviewResponseDto, newReview, {
       excludeExtraneousValues: true,

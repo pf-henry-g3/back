@@ -124,6 +124,27 @@ export class VacancyController {
     return this.vacancyService.updateProfilePicture(file, vacancyId);
   }
 
+  @Patch('closeVacancy/:id')
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la vacante a cerrar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso actualizado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, VacancyOwnerGuard())
+  @HttpCode(204)
+  async closeVacancy(
+    @Param('id') id: string
+  ) {
+    return commonResponse(
+      'Vacante cerrada exitosamente',
+      await this.vacancyService.closeVacancie(id)
+    );
+  }
+
   @Delete(':id')
   @ApiParam({
     name: 'id',

@@ -9,7 +9,8 @@
       "Clásica",
       "Jazz"
     ],
-    "vacancyType": "User"
+    "ownerType": "User",
+    "vacancyType": "Piano"
   },
   {
     "name": "Bajista con Experiencia en Giras",
@@ -21,7 +22,8 @@
       "Rock",
       "Funk"
     ],
-    "vacancyType": "Band"
+    "ownerType": "Band",
+    "vacancyType": "Bajo"
   },
   {
     "name": "Vocalista de Hip Hop/R&B",
@@ -33,7 +35,8 @@
       "Electronic",
       "Hip Hop"
     ],
-    "vacancyType": "User"
+    "ownerType": "User",
+    "vacancyType": "Vocalista"
   },
   {
     "name": "Guitarrista de Metal Rítmico",
@@ -44,7 +47,8 @@
     "genresSeeder": [
       "Metal"
     ],
-    "vacancyType": "Band"
+    "ownerType": "Band",
+    "vacancyType": "Guitarra"
   },
   {
     "name": "Baterista para Country",
@@ -55,6 +59,7 @@
     "genresSeeder": [
       "Country"
     ],
-    "vacancyType": "Band"
+    "ownerType": "Band",
+    "vacancyType": "Batería"
   }
 ]

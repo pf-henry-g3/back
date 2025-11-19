@@ -43,11 +43,7 @@ export class UserVerificationService {
         const payload = { email: user.email };
         const token = this.jwtService.sign(payload, { expiresIn: '1d' });
 
-        const base =
-            (process.env.BACKEND_URL ||
-                `http://localhost:${process.env.PORT ?? 3013}`
-            ).replace(/\/+$/, '');
-        const verifyLink = `${base}/user/verify?token=${token}`;
+        const verifyLink = `${process.env.FRONTEND_URL}/verified?token=${token}`;
 
         const emailDto: TransactionalEmailDto = {
             to: user.email,

@@ -211,7 +211,7 @@ export class AdminService {
       mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
       mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderacion y mantenimiento!',
       buttonText: 'Ver panel de admin',
-      actionUrl: `${process.env.FRONTEND_URL}/admin`,
+      actionUrl: `${process.env.FRONTEND_URL}/dashboard/admin`,
 
       appName: 'Syncro',
       year: new Date().getFullYear(),
@@ -285,7 +285,7 @@ export class AdminService {
       mainTitle: '¡Felicitaciones!',
       mainMessage: `Tu cuenta fue restaurada con exito, lamentamos mucho las molestias ocasionadas`,
       buttonText: 'Ver mi perfil',
-      actionUrl: `${process.env.FRONTEND_URL}/porfile`,
+      actionUrl: `${process.env.FRONTEND_URL}/dashboard/profile`,
 
       appName: 'Syncro',
       year: new Date().getFullYear(),
