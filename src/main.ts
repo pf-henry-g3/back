@@ -41,7 +41,7 @@ async function bootstrap() {
     'https://front-y9i50hto7-pf-henry-g3s-projects.vercel.app',
     'https://back-rk1f.onrender.com',
     'https://back-rk1f.onrender.com/auth/auth0/callback',
-    'https://syncro-app.vercel.app/',
+    'https://syncro-app.vercel.app',
     'https://syncro-app.vercel.app/auth/auth0/callback',
     // Dominios de producción sslip.io
     'https://sincro.72.61.129.102.sslip.io',
