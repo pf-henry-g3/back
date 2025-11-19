@@ -20,6 +20,7 @@ import { MusicalInstrument } from '../musical-instrument/entities/musical-instru
 import { AddInstrumentsDto } from './dto/add-instruments.dto';
 import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
 import { MailerService } from 'src/core/mailer/mailer.service';
+import { Review } from '../review/entities/review.entity';
 
 
 type UserRelationName = 'roles' | 'genres';
@@ -50,6 +51,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     @InjectRepository(BandMember)
     private readonly bandMembersRepository: Repository<BandMember>,
+
+    @InjectRepository(Review)
+    private readonly reviewsRepository: Repository<Review>,
 
     private readonly entityManage: EntityManager,
 
@@ -97,7 +101,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const transformedUser = plainToInstance(UserPublicResponseDto, user, {
+    const transformedUser = plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
     });
 
@@ -206,6 +210,22 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return plainToInstance(UserPublicResponseDto, user, {
       excludeExtraneousValues: true
     })
+  }
+
+  async updateRating(userId: string) {
+    const { avg } = await this.reviewsRepository
+      .createQueryBuilder("review")
+      .select("AVG(review.score)", "avg")
+      .where("review.receptor = :userId", { userId })
+      .getRawOne();
+
+    const newRating = avg ? parseFloat(avg) : 0;
+
+    const roundedRating = Number(newRating.toFixed(1));
+
+    await this.usersRepository.update(userId, {
+      averageRating: roundedRating
+    });
   }
 
   async softDelete(id: string) {

@@ -119,6 +119,20 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     return this.uploadImage(file, vacancyId);
   }
 
+  async closeVacancie(vacancyId: string) {
+    const vacancy: Vacancy | null = await this.vacancyRepository.findOneBy({ id: vacancyId });
+
+    if (!vacancy) throw new NotFoundException('Vacante no encontrada');
+
+    vacancy.isOpen = false;
+
+    await this.vacancyRepository.save(vacancy);
+
+    return plainToInstance(VacancyResponseDto, vacancy, {
+      excludeExtraneousValues: true,
+    })
+  }
+
   async softDelete(id: string) {
     const foundVacancy: Vacancy | null = await this.vacancyRepository.findOneBy({ id });
 
