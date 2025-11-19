@@ -187,10 +187,10 @@ export class AuthService {
     };
   }
 
-  async getUserWithRoles(userId: string) {
+  async getLoguedUser(userId: string) {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
-      relations: ['roles']
+      relations: ['roles', 'leaderOf'],
     });
 
     if (!user) {
