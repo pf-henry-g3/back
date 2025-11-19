@@ -49,26 +49,6 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
     const savedVacancy = await this.vacancyRepository.save(newVacancy);
 
-    try {
-      const emailDto: TransactionalEmailDto = {
-        to: user.email,
-        name: user.name,
-        pageTitle: 'Creaste una vacante',
-        mainTitle: '¡Vacante registrada!',
-        mainMessage: '¡Gracias por anunciar que tienes una vacante, es hora de conectar con el talento que buscas!',
-        buttonText: 'Ver mis vacantes anunciadas',
-        actionUrl: `${process.env.FRONTEND_URL}/vacancy`,
-
-        appName: 'Syncro',
-        year: new Date().getFullYear(),
-        secondaryMessage: 'Si no registraste una vacante, podes ignorar este mensaje'
-      };
-
-      await this.mailerService.sendTransactionalEmail(emailDto);
-    } catch (error) {
-      console.error(`Error al enviar correo de vacante creada para ${user.email}:`, error);
-    }
-
     return savedVacancy;
   }
 
