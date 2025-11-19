@@ -50,7 +50,7 @@ export class Vacancy {
     @Column({
         type: 'varchar',
         length: 50,
-        nullable: false,
+        nullable: true,
     })
     vacancyType: string;
 
