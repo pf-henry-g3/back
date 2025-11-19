@@ -24,6 +24,9 @@ export class UserResponseDto {
     aboutMe: string;
 
     @Expose()
+    birthDay: Date;
+
+    @Expose()
     urlImage: string;
 
     @Expose()
