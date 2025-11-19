@@ -1,10 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
-import { UpdateVacancyDto } from './dto/update-vacancy.dto';
 import vacancysData from '../../data/vacancy.data.json';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Vacancy } from './entities/vacancy.entity';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../user/entities/user.entity';
 import { Pages } from 'src/common/enums/pages.enum';
 import { FileUploadService } from '../../core/file-upload/file-upload.service';
@@ -12,6 +11,8 @@ import { AbstractFileUploadService } from '../../core/file-upload/file-upload.ab
 import { Genre } from '../genre/entities/genre.entity';
 import { plainToInstance } from 'class-transformer';
 import { VacancyResponseDto } from './dto/vacancy-response.dto';
+import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
+import { MailerService } from 'src/core/mailer/mailer.service';
 
 @Injectable()
 export class VacancyService extends AbstractFileUploadService<Vacancy> {
@@ -24,6 +25,8 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
     @InjectRepository(Genre)
     private readonly genresRepository: Repository<Genre>,
+
+    private readonly mailerService: MailerService,
 
     fileUploadService: FileUploadService
   ) { super(fileUploadService, vacancyRepository) }
@@ -47,6 +50,22 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       owner: { id: user.id },
       genres,
     })
+
+    const emailDto: TransactionalEmailDto = {
+      to: user.email,
+      name: user.name,
+      pageTitle: 'Creaste una vacante',
+      mainTitle: '¡Vacante registrada!',
+      mainMessage: '¡Gracias por anunciar que tenes una vacante, es hora de contectar con el talento que buscas!',
+      buttonText: 'Ver mis vacantes anunciadas',
+      actionUrl: `${process.env.FRONTEND_URL}/vacancy`,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no registraste una vacante, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
 
     return await this.vacancyRepository.save(newVacancy);
   }

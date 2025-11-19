@@ -11,10 +11,10 @@ export const mailerConfig = (): MailerOptions => ({
         },
     },
     defaults: {
-        from: '"Syncro" <no-reply@syncro.com>',
+        from: process.env.SMTP_USER,
     },
     template: {
-        dir: join(__dirname, '..', 'common', 'mail-templates'),
+        dir: join(__dirname, '..', '..', 'common', 'mail-templates'),
         adapter: new HandlebarsAdapter(),
         options: {
             strict: true,

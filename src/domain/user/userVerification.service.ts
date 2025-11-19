@@ -1,16 +1,17 @@
-import { MailerService } from "@nestjs-modules/mailer";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "./entities/user.entity";
-import { Repository, IsNull } from "typeorm";
+import { Repository } from "typeorm";
+import { MailerService } from "src/core/mailer/mailer.service";
+import { TransactionalEmailDto } from "src/core/mailer/dto/transactional-mail.dto";
 
 @Injectable()
 export class UserVerificationService {
     constructor(
         @InjectRepository(User) private readonly usersRepository: Repository<User>,
         private readonly jwtService: JwtService,
-        private readonly mailerService: MailerService
+        private readonly mailerService: MailerService,
     ) { }
 
     async verifyEmail(token: string) {
@@ -48,17 +49,22 @@ export class UserVerificationService {
             ).replace(/\/+$/, '');
         const verifyLink = `${base}/user/verify?token=${token}`;
 
-        await this.mailerService.sendMail({
+        const emailDto: TransactionalEmailDto = {
             to: user.email,
-            subject: 'Verificá tu cuenta',
-            template: 'verifyEmail', // sin extensión
-            context: {
-                appName: 'Syncro',
-                name: user.name,
-                verificationUrl: verifyLink,
-                year: new Date().getFullYear(),
-            },
-        });
-        return { message: 'Correo de verificación reenviado correctamente' };
+            name: user.name,
+            pageTitle: 'Verificá tu cuenta',
+            mainTitle: '¡Cuenta creada!',
+            mainMessage: 'Gracias por registrarte en Syncro. Antes de comenzar, necesitamos que verifiques tu cuenta para garantizar la seguridad de tu información.',
+            buttonText: 'Verificar mi cuenta',
+            actionUrl: verifyLink,
+
+            appName: 'Syncro',
+            year: new Date().getFullYear(),
+            secondaryMessage: 'Si no creaste esta cuenta, podés ignorar este correo.'
+        };
+
+        await this.mailerService.sendTransactionalEmail(emailDto);
+
+        return { message: 'Correo de verificación enviado correctamente' };
     }
 }

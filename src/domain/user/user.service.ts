@@ -18,6 +18,8 @@ import { BandMember } from '../band/entities/bandMember.entity';
 import { Band } from '../band/entities/band.entity';
 import { MusicalInstrument } from '../musical-instrument/entities/musical-instrument.entity';
 import { AddInstrumentsDto } from './dto/add-instruments.dto';
+import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
+import { MailerService } from 'src/core/mailer/mailer.service';
 
 
 type UserRelationName = 'roles' | 'genres';
@@ -50,6 +52,8 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     private readonly bandMembersRepository: Repository<BandMember>,
 
     private readonly entityManage: EntityManager,
+
+    private readonly mailerService: MailerService,
 
     fileUploadService: FileUploadService
   ) { super(fileUploadService, usersRepository); }
@@ -378,17 +382,52 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return 'Instrumento eliminado correctamente'
   }
 
-  async leaveABand(id: string, bandName: string) {
-    const foundBand: Band | null = await this.bandsRepository.findOneBy({ bandName });
+  async leaveABand(user: User, bandName: string) {
+    const foundBand: Band | null = await this.bandsRepository.findOne({
+      where: { bandName },
+      relations: ['leader'],
+    });
 
     if (!foundBand) throw new NotFoundException('Banda no encontrada');
 
     const deleteResult = await this.bandMembersRepository.softDelete({
-      user: { id },
+      user: { id: user.id },
       band: foundBand
     });
 
     if (deleteResult.affected === 0) throw new NotFoundException('El usuario no es miembro de esta banda');
+
+    let emailDto: TransactionalEmailDto = {
+      to: user.email,
+      name: user.name,
+      pageTitle: `Has abandonado ${foundBand.bandName}`,
+      mainTitle: `¡Lamentamos mucho que te vayas!`,
+      mainMessage: `Has dejado de ser miembro de ${foundBand.bandName}, lamentamos mucho tu partida pero siempre hay mas proyectos de los cuales formar parte!`,
+      buttonText: 'Ver vacantes disponibles',
+      actionUrl: `${process.env.FRONTEND_URL}/home`,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
+
+    emailDto = {
+      to: foundBand.leader.email,
+      name: foundBand.leader.name,
+      pageTitle: `Un miembro de ${foundBand.bandName} se ha ido`,
+      mainTitle: `¡Lo lamentamos mucho!`,
+      mainMessage: `${user.userName} ha dejado de ser miembro de ${foundBand.bandName}, lamentamos mucho su partida pero siempre hay mas artistas ansiosos de tocar junto a ustedes!`,
+      buttonText: 'Ver artistas disponibles',
+      actionUrl: `${process.env.FRONTEND_URL}/home`,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
 
     return 'Saliste de la banda correctamente'
   }

@@ -16,7 +16,6 @@ import { AuthModule } from './core/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ReviewModule } from './domain/review/review.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { mailerConfig } from './config/mailer.config';
 import { EventModule } from './domain/event/event.module';
 import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
 import { AdminModule } from './domain/admin/admin.module';
@@ -33,9 +32,7 @@ import { AdminModule } from './domain/admin/admin.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
-    MailerModule.forRootAsync({
-      useFactory: mailerConfig,
-    }),
+    MailerModule,
     UserModule,
     VacancyModule,
     GenreModule,
