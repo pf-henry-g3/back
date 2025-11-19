@@ -33,6 +33,16 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     if (!userReciever) throw new NotFoundException('Usuario receptor no encontrado.');
     if (owner.id === userReciever.id) throw new BadRequestException('No podes dejar una review a vos mismo');
 
+    const existingReview = await this.reviewsRepository.findOne({
+      where: {
+        owner: { id: owner.id },
+        receptor: { id: userReciever.id }
+      },
+      select: ['id'],
+    });
+
+    if (existingReview) throw new BadRequestException('Ya hiciste una review a este usuario');
+
     const newReview: Review = this.reviewsRepository.create({
       ...createReviewDto,
       date: new Date(),
