@@ -1,3 +1,4 @@
+import { Application } from "src/domain/application/entities/application.entity";
 import { Band } from "src/domain/band/entities/band.entity";
 import { BandMember } from "src/domain/band/entities/bandMember.entity";
 import { Event } from "src/domain/event/entities/event.entity";
@@ -188,6 +189,10 @@ export class User {
   //Relacion con eventos
   @OneToMany(() => Event, (event) => event.owner)
   events: Event[];
+
+  //relacion con postulacion
+  @OneToMany(() => Application, (application) => application.applicantId)
+  applicationsAsApplicant: Application[];
 
   //Relacion con SocialLinks
   //Relacion con Media

@@ -1,7 +1,8 @@
+import { Application } from "src/domain/application/entities/application.entity";
 import { Genre } from "src/domain/genre/entities/genre.entity";
 import { MusicalInstrument } from "src/domain/musical-instrument/entities/musical-instrument.entity";
 import { User } from "src/domain/user/entities/user.entity";
-import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "vacancies" })
 export class Vacancy {
@@ -94,5 +95,10 @@ export class Vacancy {
     })
     @JoinColumn({ name: 'ownerId' })
     owner: User;
+
+
+    //relacion con postulaciones 
+    @OneToMany(() => Application, (application) => application.vacancyId)
+    applications: Application[];
 
 }
