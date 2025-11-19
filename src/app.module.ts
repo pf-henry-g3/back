@@ -20,6 +20,8 @@ import { EventModule } from './domain/event/event.module';
 import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
 import { AdminModule } from './domain/admin/admin.module';
 import { ApplicationModule } from './domain/application/application.module';
+import { NewsletterModule } from './core/newsletter/newsletter.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
@@ -33,6 +35,7 @@ import { ApplicationModule } from './domain/application/application.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => config.get('typeorm')!,
     }),
+    ScheduleModule.forRoot(),
     MailerModule,
     UserModule,
     VacancyModule,
@@ -58,6 +61,7 @@ import { ApplicationModule } from './domain/application/application.module';
       }),
     }),
     AdminModule,
+    NewsletterModule,
   ]
 
 })
