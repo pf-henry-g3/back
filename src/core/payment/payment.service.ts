@@ -39,7 +39,7 @@ export class PaymentService {
           pending: `${process.env.FRONTEND_URL}/home`,
         },
         // auto_return: 'approved',
-        notification_url: `${process.env.FRONTEND_URL}/webhook`,
+        notification_url: `${process.env.BACKEND_URL}/webhook`,
 
 
         external_reference: externalReference,
