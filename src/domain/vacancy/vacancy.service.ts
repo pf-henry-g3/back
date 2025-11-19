@@ -33,41 +33,43 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
 
   async create(createVacancyDto: CreateVacancyDto, user: User) {
-    //Buscamos los generos de la DB que coincidan con los recibidos
-
     const genres = await this.genresRepository.find({
       where: createVacancyDto.genres.map(name => ({ name })),
     });
 
-    // Validar que existan todos
     if (genres.length !== createVacancyDto.genres.length) {
       throw new BadRequestException('Uno o más géneros no existen en la base de datos.');
     }
 
-    //Crear la nueva vacante
     const newVacancy = this.vacancyRepository.create({
       ...createVacancyDto,
       owner: { id: user.id },
       genres,
     })
 
-    const emailDto: TransactionalEmailDto = {
-      to: user.email,
-      name: user.name,
-      pageTitle: 'Creaste una vacante',
-      mainTitle: '¡Vacante registrada!',
-      mainMessage: '¡Gracias por anunciar que tenes una vacante, es hora de contectar con el talento que buscas!',
-      buttonText: 'Ver mis vacantes anunciadas',
-      actionUrl: `${process.env.FRONTEND_URL}/vacancy`,
+    const savedVacancy = await this.vacancyRepository.save(newVacancy);
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no registraste una vacante, podes ignorar este mensaje'
-    };
+    try {
+      const emailDto: TransactionalEmailDto = {
+        to: user.email,
+        name: user.name,
+        pageTitle: 'Creaste una vacante',
+        mainTitle: '¡Vacante registrada!',
+        mainMessage: '¡Gracias por anunciar que tienes una vacante, es hora de conectar con el talento que buscas!',
+        buttonText: 'Ver mis vacantes anunciadas',
+        actionUrl: `${process.env.FRONTEND_URL}/vacancy`,
 
-    await this.mailerService.sendTransactionalEmail(emailDto);
+        appName: 'Syncro',
+        year: new Date().getFullYear(),
+        secondaryMessage: 'Si no registraste una vacante, podes ignorar este mensaje'
+      };
 
-    return await this.vacancyRepository.save(newVacancy);
+      await this.mailerService.sendTransactionalEmail(emailDto);
+    } catch (error) {
+      console.error(`Error al enviar correo de vacante creada para ${user.email}:`, error);
+    }
+
+    return savedVacancy;
   }
 
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {

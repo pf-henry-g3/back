@@ -38,7 +38,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
     ) { super(fileUploadService, bandsRepository) }
 
     async create(createBandDto: CreateBandDto, user: User) {
-        //Buscamos que la banda no exista
+        // Buscamos que la banda no exista
         const bandExisting: Band | null = await this.bandsRepository.findOneBy({
             bandName: createBandDto.bandName
         })
@@ -46,7 +46,7 @@ export class BandsService extends AbstractFileUploadService<Band> {
             throw new BadRequestException(`La banda ${createBandDto.bandName} ya existe.`)
         }
 
-        //Buscamos los generos de la DB que coincidan con los recibidos
+        // Buscamos los generos de la DB que coincidan con los recibidos
         const genres: Genre[] | null = await this.genresRepository.find({
             where: createBandDto.genres.map(name => ({ name })),
         });
@@ -79,21 +79,27 @@ export class BandsService extends AbstractFileUploadService<Band> {
             excludeExtraneousValues: true,
         })
 
-        const emailDto: TransactionalEmailDto = {
-            to: user.email,
-            name: user.name,
-            pageTitle: 'Registraste una banda',
-            mainTitle: '¡Banda registrada!',
-            mainMessage: '¡Gracias por registrar a tu banda, es hora de darse a conocer!',
-            buttonText: 'Ver mis bandas',
-            actionUrl: `${process.env.FRONTEND_URL}/mybands`,
+        try {
+            const emailDto: TransactionalEmailDto = {
+                to: user.email,
+                name: user.name,
+                pageTitle: 'Registraste una banda',
+                mainTitle: '¡Banda registrada!',
+                mainMessage: '¡Gracias por registrar a tu banda, es hora de darse a conocer!',
+                buttonText: 'Ver mis bandas',
+                actionUrl: `${process.env.FRONTEND_URL}/mybands`,
 
-            appName: 'Syncro',
-            year: new Date().getFullYear(),
-            secondaryMessage: 'Si no registraste a una banda, podes ignorar este mensaje'
-        };
+                appName: 'Syncro',
+                year: new Date().getFullYear(),
+                secondaryMessage: 'Si no registraste a una banda, podes ignorar este mensaje'
+            };
 
-        await this.mailerService.sendTransactionalEmail(emailDto);
+            await this.mailerService.sendTransactionalEmail(emailDto);
+
+        } catch (error) {
+            console.error(`Error al enviar correo de bienvenida para la banda ${newBand.bandName}:`, error);
+        }
+
 
         return transformedBand;
     }
@@ -260,10 +266,10 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const updateResult = await this.bandsRepository.update(
             {
                 id: bandId,
-                leader: { id: currentLeaderId }, // 👈 CLAVE: Validación de permiso en el WHERE
+                leader: { id: currentLeaderId },
             },
             {
-                leader: newLeader, // 👈 Se asigna el objeto User (TypeORM maneja el leaderId)
+                leader: newLeader,
             }
         );
 
@@ -277,21 +283,25 @@ export class BandsService extends AbstractFileUploadService<Band> {
             }
         }
 
-        const emailDto: TransactionalEmailDto = {
-            to: newLeader.email,
-            name: newLeader.name,
-            pageTitle: `Haz sido nombrado nuevo lider de una banda`,
-            mainTitle: '¡Felicitaciones!',
-            mainMessage: '¡Ahora tienes una nueva banda bajo tu direccion, sabemos que lograras grandes cosas!',
-            buttonText: 'Ver mis bandas',
-            actionUrl: `${process.env.FRONTEND_URL}/mybands`,
+        try {
+            const emailDto: TransactionalEmailDto = {
+                to: newLeader.email,
+                name: newLeader.name,
+                pageTitle: `Haz sido nombrado nuevo líder de una banda`,
+                mainTitle: '¡Felicitaciones!',
+                mainMessage: '¡Ahora tienes una nueva banda bajo tu dirección, sabemos que lograrás grandes cosas!',
+                buttonText: 'Ver mis bandas',
+                actionUrl: `${process.env.FRONTEND_URL}/mybands`,
 
-            appName: 'Syncro',
-            year: new Date().getFullYear(),
-            secondaryMessage: 'Si no te nombraron nuevo lider de una banda, podes ignorar este mensaje'
-        };
+                appName: 'Syncro',
+                year: new Date().getFullYear(),
+                secondaryMessage: 'Si no te nombraron nuevo líder de una banda, podes ignorar este mensaje'
+            };
 
-        await this.mailerService.sendTransactionalEmail(emailDto);
+            await this.mailerService.sendTransactionalEmail(emailDto);
+        } catch (error) {
+            console.error(`Error al enviar correo de nuevo líder a ${newLeader.userName}:`, error);
+        }
 
         return plainToInstance(BandResponseDto, updateResult, {
             excludeExtraneousValues: true,

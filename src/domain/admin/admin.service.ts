@@ -192,9 +192,7 @@ export class AdminService {
 
     const user: User | null = await usersRepository.findOne({
       where: { id },
-      relations: {
-        roles: true,
-      }
+      relations: { roles: true }
     });
 
     if (!user) throw new NotFoundException('Usuario no encontrado.');
@@ -204,21 +202,25 @@ export class AdminService {
 
     await usersRepository.save(user);
 
-    const emailDto: TransactionalEmailDto = {
-      to: user.email,
-      name: user.name,
-      pageTitle: 'Fuiste nombrado Admin',
-      mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
-      mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderacion y mantenimiento!',
-      buttonText: 'Ver panel de admin',
-      actionUrl: `${process.env.FRONTEND_URL}/dashboard/admin`,
+    try {
+      const emailDto: TransactionalEmailDto = {
+        to: user.email,
+        name: user.name,
+        pageTitle: 'Fuiste nombrado Admin',
+        mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
+        mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderación y mantenimiento!',
+        buttonText: 'Ver panel de admin',
+        actionUrl: `${process.env.FRONTEND_URL}/dashboard/admin`,
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
+        appName: 'Syncro',
+        year: new Date().getFullYear(),
+        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
+      };
 
-    await this.mailerService.sendTransactionalEmail(emailDto);
+      await this.mailerService.sendTransactionalEmail(emailDto);
+    } catch (error) {
+      console.error(`Error al enviar correo de nombramiento Admin a ${user.email}:`, error);
+    }
 
     return plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
@@ -235,23 +237,26 @@ export class AdminService {
     foundUser.reasonForBan = banUserdto.reason;
 
     await usersRepository.save(foundUser);
-    // NO hacer softDelete - solo cambiar el estado isBanned
 
-    const emailDto: TransactionalEmailDto = {
-      to: foundUser.email,
-      name: foundUser.name,
-      pageTitle: 'Tu cuenta fue eliminada',
-      mainTitle: '¡Lo sentimos!',
-      mainMessage: `Fuiste baneado de Syncro, ya no podras seguir usando nuestros servicios, lamentamos que esto haya ocurrido. \n Razon de expulsion: ${banUserdto.reason}`,
-      buttonText: '',
-      actionUrl: ``,
+    try {
+      const emailDto: TransactionalEmailDto = {
+        to: foundUser.email,
+        name: foundUser.name,
+        pageTitle: 'Tu cuenta fue eliminada',
+        mainTitle: '¡Lo sentimos!',
+        mainMessage: `Fuiste baneado de Syncro, ya no podrás seguir usando nuestros servicios. \n Razón de expulsión: ${banUserdto.reason}`,
+        buttonText: 'Contactar Soporte',
+        actionUrl: `${process.env.FRONTEND_URL}/home`,
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
+        appName: 'Syncro',
+        year: new Date().getFullYear(),
+        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
+      };
 
-    await this.mailerService.sendTransactionalEmail(emailDto);
+      await this.mailerService.sendTransactionalEmail(emailDto);
+    } catch (error) {
+      console.error(`Error al enviar correo de baneo a ${foundUser.email}:`, error);
+    }
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,
@@ -260,7 +265,6 @@ export class AdminService {
 
   async unbanUser(id: string) {
     const usersRepository = this.entityManager.getRepository(User);
-    // Buscar el usuario incluso si tiene soft delete
     const foundUser: User | null = await usersRepository.findOne({
       where: { id },
       withDeleted: true
@@ -271,28 +275,31 @@ export class AdminService {
     foundUser.isBanned = false;
     foundUser.reasonForBan = null;
 
-    // Si el usuario tenía soft delete, restaurarlo
     if (foundUser.deleteAt) {
       await usersRepository.restore(id);
     }
 
     await usersRepository.save(foundUser);
 
-    const emailDto: TransactionalEmailDto = {
-      to: foundUser.email,
-      name: foundUser.name,
-      pageTitle: 'Tu cuenta ha sido restaurada',
-      mainTitle: '¡Felicitaciones!',
-      mainMessage: `Tu cuenta fue restaurada con exito, lamentamos mucho las molestias ocasionadas`,
-      buttonText: 'Ver mi perfil',
-      actionUrl: `${process.env.FRONTEND_URL}/dashboard/profile`,
+    try {
+      const emailDto: TransactionalEmailDto = {
+        to: foundUser.email,
+        name: foundUser.name,
+        pageTitle: 'Tu cuenta ha sido restaurada',
+        mainTitle: '¡Felicitaciones!',
+        mainMessage: `Tu cuenta fue restaurada con éxito, lamentamos mucho las molestias ocasionadas.`,
+        buttonText: 'Ver mi perfil',
+        actionUrl: `${process.env.FRONTEND_URL}/dashboard/profile`,
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
+        appName: 'Syncro',
+        year: new Date().getFullYear(),
+        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
+      };
 
-    await this.mailerService.sendTransactionalEmail(emailDto);
+      await this.mailerService.sendTransactionalEmail(emailDto);
+    } catch (error) {
+      console.error(`Error al enviar correo de restauración de cuenta a ${foundUser.email}:`, error);
+    }
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,
