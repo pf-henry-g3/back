@@ -202,26 +202,6 @@ export class AdminService {
 
     await usersRepository.save(user);
 
-    try {
-      const emailDto: TransactionalEmailDto = {
-        to: user.email,
-        name: user.name,
-        pageTitle: 'Fuiste nombrado Admin',
-        mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
-        mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderación y mantenimiento!',
-        buttonText: 'Ver panel de admin',
-        actionUrl: `${process.env.FRONTEND_URL}/dashboard/admin`,
-
-        appName: 'Syncro',
-        year: new Date().getFullYear(),
-        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
-      };
-
-      await this.mailerService.sendTransactionalEmail(emailDto);
-    } catch (error) {
-      console.error(`Error al enviar correo de nombramiento Admin a ${user.email}:`, error);
-    }
-
     return plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
     })
@@ -238,29 +218,6 @@ export class AdminService {
 
     await usersRepository.save(foundUser);
 
-    try {
-      const emailDto: TransactionalEmailDto = {
-        to: foundUser.email,
-        name: foundUser.name,
-        pageTitle: 'Tu cuenta fue eliminada',
-        mainTitle: '¡Lo sentimos!',
-        mainMessage: `Fuiste baneado de Syncro, ya no podrás seguir usando nuestros servicios. \n Razón de expulsión: ${banUserdto.reason}`,
-        buttonText: 'Contactar Soporte',
-        actionUrl: `${process.env.FRONTEND_URL}/home`,
-
-        appName: 'Syncro',
-        year: new Date().getFullYear(),
-        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
-      };
-
-      await this.mailerService.sendTransactionalEmail(emailDto);
-    } catch (error) {
-      console.error(`Error al enviar correo de baneo a ${foundUser.email}:`, error);
-    }
-
-    return plainToInstance(UserAdminResponseDto, foundUser, {
-      excludeExtraneousValues: true,
-    })
   }
 
   async unbanUser(id: string) {
@@ -280,26 +237,6 @@ export class AdminService {
     }
 
     await usersRepository.save(foundUser);
-
-    try {
-      const emailDto: TransactionalEmailDto = {
-        to: foundUser.email,
-        name: foundUser.name,
-        pageTitle: 'Tu cuenta ha sido restaurada',
-        mainTitle: '¡Felicitaciones!',
-        mainMessage: `Tu cuenta fue restaurada con éxito, lamentamos mucho las molestias ocasionadas.`,
-        buttonText: 'Ver mi perfil',
-        actionUrl: `${process.env.FRONTEND_URL}/dashboard/profile`,
-
-        appName: 'Syncro',
-        year: new Date().getFullYear(),
-        secondaryMessage: 'Si no reconoces esta acción, podes ignorar este mensaje'
-      };
-
-      await this.mailerService.sendTransactionalEmail(emailDto);
-    } catch (error) {
-      console.error(`Error al enviar correo de restauración de cuenta a ${foundUser.email}:`, error);
-    }
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,

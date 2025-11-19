@@ -79,28 +79,6 @@ export class BandsService extends AbstractFileUploadService<Band> {
             excludeExtraneousValues: true,
         })
 
-        try {
-            const emailDto: TransactionalEmailDto = {
-                to: user.email,
-                name: user.name,
-                pageTitle: 'Registraste una banda',
-                mainTitle: '¡Banda registrada!',
-                mainMessage: '¡Gracias por registrar a tu banda, es hora de darse a conocer!',
-                buttonText: 'Ver mis bandas',
-                actionUrl: `${process.env.FRONTEND_URL}/mybands`,
-
-                appName: 'Syncro',
-                year: new Date().getFullYear(),
-                secondaryMessage: 'Si no registraste a una banda, podes ignorar este mensaje'
-            };
-
-            await this.mailerService.sendTransactionalEmail(emailDto);
-
-        } catch (error) {
-            console.error(`Error al enviar correo de bienvenida para la banda ${newBand.bandName}:`, error);
-        }
-
-
         return transformedBand;
     }
 
@@ -281,26 +259,6 @@ export class BandsService extends AbstractFileUploadService<Band> {
             } else {
                 throw new ForbiddenException('No se pudo completar la transferencia de liderazgo. Verifique su rol.');
             }
-        }
-
-        try {
-            const emailDto: TransactionalEmailDto = {
-                to: newLeader.email,
-                name: newLeader.name,
-                pageTitle: `Haz sido nombrado nuevo líder de una banda`,
-                mainTitle: '¡Felicitaciones!',
-                mainMessage: '¡Ahora tienes una nueva banda bajo tu dirección, sabemos que lograrás grandes cosas!',
-                buttonText: 'Ver mis bandas',
-                actionUrl: `${process.env.FRONTEND_URL}/mybands`,
-
-                appName: 'Syncro',
-                year: new Date().getFullYear(),
-                secondaryMessage: 'Si no te nombraron nuevo líder de una banda, podes ignorar este mensaje'
-            };
-
-            await this.mailerService.sendTransactionalEmail(emailDto);
-        } catch (error) {
-            console.error(`Error al enviar correo de nuevo líder a ${newLeader.userName}:`, error);
         }
 
         return plainToInstance(BandResponseDto, updateResult, {
