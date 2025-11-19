@@ -92,6 +92,28 @@ export class BandController {
     );
   }
 
+  @Get('bandOfUser/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la usuario dueño de bandas a buscar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos.',
+  })
+  //@ApiBearerAuth()
+  //@UseGuards(AuthGuard)
+  @HttpCode(200)
+  async findBandsByUser(
+    @Param('id') id: string
+  ) {
+    return commonResponse(
+      'Bandas encontradas.',
+      await this.bandsService.findBandsByUser(id)
+    );
+  }
+
   @Patch('photo/:bandId')
   @ApiParam({
     name: 'id',

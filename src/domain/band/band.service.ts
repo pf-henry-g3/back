@@ -184,6 +184,24 @@ export class BandsService extends AbstractFileUploadService<Band> {
         return transformedBand;
     }
 
+    async findBandsByUser(id: string) {
+        const userExisting: User | null = await this.usersRepository.findOne({
+            where: { id },
+            relations: {
+                leaderOf: true,
+                genres: true,
+            }
+        });
+
+        if (!userExisting) throw new NotFoundException('Usuario no encontrado');
+
+        const bandOfUser = plainToInstance(BandResponseDto, userExisting.leaderOf, {
+            excludeExtraneousValues: true,
+        })
+
+        return bandOfUser;
+    }
+
     async updateProfilePicture(file: Express.Multer.File, bandId: string) {
         const band: Band | null = await this.bandsRepository.findOneBy({ id: bandId });
 
