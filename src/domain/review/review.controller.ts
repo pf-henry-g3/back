@@ -39,7 +39,7 @@ export class ReviewController {
     )
   }
 
-  @Get('admin/all')
+  @Get()
   @ApiQuery({
     name: 'page',
     required: false,
@@ -56,9 +56,6 @@ export class ReviewController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  @ApiBearerAuth()
-  @Roles(Role.Admin, Role.SuperAdmin)
-  @UseGuards(AuthGuard, RolesGuard)
   @HttpCode(200)
   async findAllForAdmin(
     @Query('page') page?: string,

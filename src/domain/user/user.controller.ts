@@ -290,7 +290,7 @@ export class UserController {
   ) {
     const user = req.user as User;
 
-    return this.userService.leaveABand(user.id, bandName);
+    return this.userService.leaveABand(user, bandName);
   }
 
   @Delete(':id')

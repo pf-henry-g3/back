@@ -6,7 +6,9 @@ import { Role } from '../role/entities/role.entity';
 import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
 import { BanUserDto } from './dto/ban-user.dto';
-import { MailerService } from '@nestjs-modules/mailer';
+import { MailerService as MailerLibrary } from '@nestjs-modules/mailer';
+import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
+import { MailerService } from 'src/core/mailer/mailer.service';
 
 interface HistoricalRelationConfig {
   entity: EntityTarget<any>;
@@ -18,7 +20,8 @@ interface HistoricalRelationConfig {
 export class AdminService {
   constructor(
     private readonly entityManager: EntityManager,
-    private readonly mailerService: MailerService
+    private readonly mailerLibrary: MailerLibrary,
+    private readonly mailerService: MailerService,
   ) { }
   async findEntites<T extends ObjectLiteral>(
     entityClass: EntityTarget<T>,
@@ -145,7 +148,7 @@ export class AdminService {
 
     for (const user of users) {
       try {
-        await this.mailerService.sendMail({
+        await this.mailerLibrary.sendMail({
           to: user.email,
           subject: safeSubject,
           html: `
@@ -201,6 +204,22 @@ export class AdminService {
 
     await usersRepository.save(user);
 
+    const emailDto: TransactionalEmailDto = {
+      to: user.email,
+      name: user.name,
+      pageTitle: 'Fuiste nombrado Admin',
+      mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
+      mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderacion y mantenimiento!',
+      buttonText: 'Ver panel de admin',
+      actionUrl: `${process.env.FRONTEND_URL}/admin`,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
+
     return plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
     })
@@ -217,6 +236,22 @@ export class AdminService {
 
     await usersRepository.save(foundUser);
     // NO hacer softDelete - solo cambiar el estado isBanned
+
+    const emailDto: TransactionalEmailDto = {
+      to: foundUser.email,
+      name: foundUser.name,
+      pageTitle: 'Tu cuenta fue eliminada',
+      mainTitle: '¡Lo sentimos!',
+      mainMessage: `Fuiste baneado de Syncro, ya no podras seguir usando nuestros servicios, lamentamos que esto haya ocurrido. \n Razon de expulsion: ${banUserdto.reason}`,
+      buttonText: '',
+      actionUrl: ``,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,
@@ -242,6 +277,22 @@ export class AdminService {
     }
 
     await usersRepository.save(foundUser);
+
+    const emailDto: TransactionalEmailDto = {
+      to: foundUser.email,
+      name: foundUser.name,
+      pageTitle: 'Tu cuenta ha sido restaurada',
+      mainTitle: '¡Felicitaciones!',
+      mainMessage: `Tu cuenta fue restaurada con exito, lamentamos mucho las molestias ocasionadas`,
+      buttonText: 'Ver mi perfil',
+      actionUrl: `${process.env.FRONTEND_URL}/porfile`,
+
+      appName: 'Syncro',
+      year: new Date().getFullYear(),
+      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
+    };
+
+    await this.mailerService.sendTransactionalEmail(emailDto);
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,

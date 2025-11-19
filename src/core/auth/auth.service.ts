@@ -39,8 +39,8 @@ export class AuthService {
     const newUser = this.usersRepository.create({ ...userData, password: hashedPassword });
     await this.usersRepository.save(newUser);
 
+    const email = await this.userVerificationService.sendEmail(createUserDto.email);
     try {
-      await this.userVerificationService.sendEmail(createUserDto.email);
     } catch (err) {
       // No bloquear el registro si el correo falla
     }
@@ -49,7 +49,7 @@ export class AuthService {
       excludeExtraneousValues: true,
     });
 
-    return tranformedUser;
+    return { tranformedUser, email };
   }
 
   async signin(loginUser: LoginUserDto) {

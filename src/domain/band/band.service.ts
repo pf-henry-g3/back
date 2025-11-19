@@ -14,6 +14,8 @@ import { BandMember } from './entities/bandMember.entity';
 import { AddMemberDto } from './dto/add-member.dto';
 import { plainToInstance } from 'class-transformer';
 import { BandResponseDto } from './dto/band-response.dto';
+import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
+import { MailerService } from 'src/core/mailer/mailer.service';
 
 @Injectable()
 export class BandsService extends AbstractFileUploadService<Band> {
@@ -29,6 +31,8 @@ export class BandsService extends AbstractFileUploadService<Band> {
 
         @InjectRepository(BandMember)
         private readonly memberRepository: Repository<BandMember>,
+
+        private readonly mailerService: MailerService,
 
         fileUploadService: FileUploadService,
     ) { super(fileUploadService, bandsRepository) }
@@ -74,6 +78,22 @@ export class BandsService extends AbstractFileUploadService<Band> {
         const transformedBand = plainToInstance(BandResponseDto, newBand, {
             excludeExtraneousValues: true,
         })
+
+        const emailDto: TransactionalEmailDto = {
+            to: user.email,
+            name: user.name,
+            pageTitle: 'Registraste una banda',
+            mainTitle: '¡Banda registrada!',
+            mainMessage: '¡Gracias por registrar a tu banda, es hora de darse a conocer!',
+            buttonText: 'Ver mis bandas',
+            actionUrl: `${process.env.FRONTEND_URL}/mybands`,
+
+            appName: 'Syncro',
+            year: new Date().getFullYear(),
+            secondaryMessage: 'Si no registraste a una banda, podes ignorar este mensaje'
+        };
+
+        await this.mailerService.sendTransactionalEmail(emailDto);
 
         return transformedBand;
     }
@@ -238,6 +258,22 @@ export class BandsService extends AbstractFileUploadService<Band> {
                 throw new ForbiddenException('No se pudo completar la transferencia de liderazgo. Verifique su rol.');
             }
         }
+
+        const emailDto: TransactionalEmailDto = {
+            to: newLeader.email,
+            name: newLeader.name,
+            pageTitle: `Haz sido nombrado nuevo lider de una banda`,
+            mainTitle: '¡Felicitaciones!',
+            mainMessage: '¡Ahora tienes una nueva banda bajo tu direccion, sabemos que lograras grandes cosas!',
+            buttonText: 'Ver mis bandas',
+            actionUrl: `${process.env.FRONTEND_URL}/mybands`,
+
+            appName: 'Syncro',
+            year: new Date().getFullYear(),
+            secondaryMessage: 'Si no te nombraron nuevo lider de una banda, podes ignorar este mensaje'
+        };
+
+        await this.mailerService.sendTransactionalEmail(emailDto);
 
         return plainToInstance(BandResponseDto, updateResult, {
             excludeExtraneousValues: true,

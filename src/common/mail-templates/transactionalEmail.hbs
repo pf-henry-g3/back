@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Verificación de cuenta</title>
+    <title>{{pageTitle}}</title>
     <style>
+        /* Mantenemos exactamente los mismos estilos para consistencia */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #f6f8fa;
@@ -59,6 +60,7 @@
 
         .button {
             background-color: #007bff;
+            /* Color primario */
             color: #ffffff;
             text-decoration: none;
             padding: 14px 32px;
@@ -97,29 +99,30 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://res.cloudinary.com/dgxzi3eu0/image/upload/w_800/LOGO_cs74ae.png" alt="Encabezado Syncro">
+            <img src="https://res.cloudinary.com/dgxzi3eu0/image/upload/w_800/LOGO_cs74ae.png"
+                alt="Encabezado {{appName}}">
         </div>
 
         <div class="content">
             <h1>¡Hola {{name}}!</h1>
-            <p>Gracias por registrarte en <strong>{{appName}}</strong>. Estamos muy contentos de tenerte con nosotros.
-            </p>
 
-            <p>Antes de comenzar, necesitamos que verifiques tu cuenta para garantizar la seguridad de tu información.
-            </p>
+            <h2>{{mainTitle}}</h2>
+
+            <p>{{mainMessage}}</p>
 
             <div class="button-container">
-                <a class="button" href="{{verificationUrl}}">Verificar mi cuenta</a>
+                <a class="button" href="{{actionUrl}}">{{buttonText}}</a>
             </div>
 
+            {{#if secondaryMessage}}
             <p style="font-size: 13px; color: #777; margin-top: 25px;">
-                Si no creaste esta cuenta, podés ignorar este correo.
+                {{secondaryMessage}}
             </p>
+            {{/if}}
         </div>
 
         <div class="footer">
             © {{year}} {{appName}}. Todos los derechos reservados.<br>
-            <a href="https://front-one-gray.vercel.app/">Visitar sitio web</a>
         </div>
     </div>
 </body>

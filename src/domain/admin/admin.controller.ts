@@ -243,7 +243,7 @@ export class AdminController {
   }
 
   //protegido con superAdmin
-  @Patch('/:id')
+  @Patch('newAdmin/:id')
   // @Roles(Role.SuperAdmin)
   // @UseGuards(RolesGuard)
   @ApiParam({
