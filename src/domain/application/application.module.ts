@@ -4,11 +4,10 @@ import { ApplicationController } from './application.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Application } from './entities/application.entity';
 import { Vacancy } from '../vacancy/entities/vacancy.entity';
-import { User } from 'mercadopago';
-
+import { User } from '../user/entities/user.entity';
 @Module({
-   imports: [TypeOrmModule.forFeature([Application, Vacancy, User])],
+  imports: [TypeOrmModule.forFeature([Application, Vacancy, User])],
   controllers: [ApplicationController],
   providers: [ApplicationService],
 })
-export class ApplicationModule {}
+export class ApplicationModule { }
