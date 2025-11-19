@@ -127,4 +127,25 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     const meta = { total, page, limit };
     return { tranformedReviews, meta };
   }
+
+  async getOrderByScore(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    const [reviews, total] = await this.reviewsRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        owner: true,
+        receptor: true,
+      },
+      order: {
+        score: 'DESC',
+      },
+    });
+
+    const tranformedReviews = plainToInstance(ReviewResponseDto, reviews, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta = { total, page, limit };
+    return { tranformedReviews, meta };
+  }
 }
