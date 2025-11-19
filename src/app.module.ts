@@ -19,6 +19,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { EventModule } from './domain/event/event.module';
 import { MusicalInstrumentModule } from './domain/musical-instrument/musical-instrument.module';
 import { AdminModule } from './domain/admin/admin.module';
+import { ApplicationModule } from './domain/application/application.module';
 
 
 @Module({
@@ -44,6 +45,7 @@ import { AdminModule } from './domain/admin/admin.module';
     ReviewModule,
     EventModule,
     MusicalInstrumentModule,
+    ApplicationModule,
 
     AuthModule,
     JwtModule.registerAsync({
