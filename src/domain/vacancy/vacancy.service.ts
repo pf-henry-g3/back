@@ -80,7 +80,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
   }
 
   async getAllApplications(id: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
-    const applications = await this.applicationsRepository.findAndCount({
+    const [applications, total] = await this.applicationsRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
       where: {
@@ -93,9 +93,13 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
     if (!applications) throw new NotFoundException('No hay postulaciones para esa vacante');
 
-    return plainToInstance(ApplicationResponseDto, applications, {
+    const transformedApplications = plainToInstance(ApplicationResponseDto, applications, {
       excludeExtraneousValues: true,
-    })
+    });
+
+    const meta = { total, page, limit };
+
+    return { transformedApplications, meta };
   }
 
   async findOne(id: string) {

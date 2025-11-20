@@ -128,12 +128,12 @@ export class VacancyController {
     const pageNum = page ? +page : undefined;
     const limitNum = limit ? +limit : undefined;
 
-    const foundVacancies = await this.vacancyService.getAllApplications(id, pageNum, limitNum);
+    const foundApplications = await this.vacancyService.getAllApplications(id, pageNum, limitNum);
 
     return commonResponse(
-      'Vacantes encontradas.',
-      foundVacancies.transformedVacancies,
-      foundVacancies.meta,
+      'Postulaciones encontradas.',
+      foundApplications.transformedApplications,
+      foundApplications.meta,
     )
   }
 
