@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { Pages } from 'src/common/enums/pages.enum';
 import { EntityManager, EntityTarget, FindOneOptions, ObjectLiteral } from 'typeorm';
@@ -7,8 +7,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { MailerService as MailerLibrary } from '@nestjs-modules/mailer';
-import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
-import { MailerService } from 'src/core/mailer/mailer.service';
+import { Role as UserRole } from '../../common/enums/roles.enum';
 
 interface HistoricalRelationConfig {
   entity: EntityTarget<any>;
@@ -21,7 +20,6 @@ export class AdminService {
   constructor(
     private readonly entityManager: EntityManager,
     private readonly mailerLibrary: MailerLibrary,
-    private readonly mailerService: MailerService,
   ) { }
   async findEntites<T extends ObjectLiteral>(
     entityClass: EntityTarget<T>,
@@ -33,12 +31,16 @@ export class AdminService {
     const repository = this.entityManager.getRepository(entityClass);
     const skip = (page - 1) * limit;
 
+    // Debug para ver si es demora de la db
+    const start = Date.now();
+
     const [data, total] = await repository.findAndCount({
       ...options,
       skip,
       take: limit,
       withDeleted,
     });
+    console.log("DB TIME:", Date.now() - start);
 
     if (!data.length && !withDeleted) {
       throw new NotFoundException(`Entidad no encontrados.`)
@@ -192,9 +194,7 @@ export class AdminService {
 
     const user: User | null = await usersRepository.findOne({
       where: { id },
-      relations: {
-        roles: true,
-      }
+      relations: { roles: true }
     });
 
     if (!user) throw new NotFoundException('Usuario no encontrado.');
@@ -204,21 +204,28 @@ export class AdminService {
 
     await usersRepository.save(user);
 
-    const emailDto: TransactionalEmailDto = {
-      to: user.email,
-      name: user.name,
-      pageTitle: 'Fuiste nombrado Admin',
-      mainTitle: '¡Felicitaciones por unirte a nuestro equipo!',
-      mainMessage: '¡Fuiste nombrado admin para formar parte de nuestro valioso equipo de moderacion y mantenimiento!',
-      buttonText: 'Ver panel de admin',
-      actionUrl: `${process.env.FRONTEND_URL}/admin`,
+    return plainToInstance(UserAdminResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
+  }
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
+  async removeAdmin(adminId: string) {
+    const usersRepository = this.entityManager.getRepository(User);
 
-    await this.mailerService.sendTransactionalEmail(emailDto);
+    const user: User | null = await usersRepository.findOne({
+      where: { id: adminId },
+      relations: { roles: true }
+    });
+
+    if (!user) throw new NotFoundException('Usuario no encontrado.');
+
+    const updatedRoles = user.roles.filter((r) => r.name !== UserRole.Admin);
+
+    if (updatedRoles.length === user.roles.length) throw new BadRequestException('El usuario no es admin')
+
+    user.roles = updatedRoles;
+
+    await usersRepository.save(user);
 
     return plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
@@ -235,32 +242,11 @@ export class AdminService {
     foundUser.reasonForBan = banUserdto.reason;
 
     await usersRepository.save(foundUser);
-    // NO hacer softDelete - solo cambiar el estado isBanned
 
-    const emailDto: TransactionalEmailDto = {
-      to: foundUser.email,
-      name: foundUser.name,
-      pageTitle: 'Tu cuenta fue eliminada',
-      mainTitle: '¡Lo sentimos!',
-      mainMessage: `Fuiste baneado de Syncro, ya no podras seguir usando nuestros servicios, lamentamos que esto haya ocurrido. \n Razon de expulsion: ${banUserdto.reason}`,
-      buttonText: '',
-      actionUrl: ``,
-
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
-
-    await this.mailerService.sendTransactionalEmail(emailDto);
-
-    return plainToInstance(UserAdminResponseDto, foundUser, {
-      excludeExtraneousValues: true,
-    })
   }
 
   async unbanUser(id: string) {
     const usersRepository = this.entityManager.getRepository(User);
-    // Buscar el usuario incluso si tiene soft delete
     const foundUser: User | null = await usersRepository.findOne({
       where: { id },
       withDeleted: true
@@ -271,28 +257,11 @@ export class AdminService {
     foundUser.isBanned = false;
     foundUser.reasonForBan = null;
 
-    // Si el usuario tenía soft delete, restaurarlo
     if (foundUser.deleteAt) {
       await usersRepository.restore(id);
     }
 
     await usersRepository.save(foundUser);
-
-    const emailDto: TransactionalEmailDto = {
-      to: foundUser.email,
-      name: foundUser.name,
-      pageTitle: 'Tu cuenta ha sido restaurada',
-      mainTitle: '¡Felicitaciones!',
-      mainMessage: `Tu cuenta fue restaurada con exito, lamentamos mucho las molestias ocasionadas`,
-      buttonText: 'Ver mi perfil',
-      actionUrl: `${process.env.FRONTEND_URL}/porfile`,
-
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no reconoces esta accion, podes ignorar este mensaje'
-    };
-
-    await this.mailerService.sendTransactionalEmail(emailDto);
 
     return plainToInstance(UserAdminResponseDto, foundUser, {
       excludeExtraneousValues: true,

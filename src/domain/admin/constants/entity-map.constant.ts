@@ -25,7 +25,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.USER]: {
         entity: User,
         responseDto: UserAdminResponseDto,
-        defaultRelations: ['roles', 'genres', 'vacancies', 'leaderOf', 'musicalInstruments', 'memberships'],
+        defaultRelations: ['roles'],
         historyRelations: {
             vacancies: { entity: Vacancy, relationField: 'owner', responseDto: VacancyMinimalResponseDto },
             memberships: { entity: BandMember, relationField: 'user', responseDto: BandMemberAdminResponseDto },
@@ -40,7 +40,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.BAND]: {
         entity: Band,
         responseDto: BandAdminResponseDto,
-        defaultRelations: ['leader', 'genres', 'bandMembers'],
+        defaultRelations: ['leader', 'bandMembers'],
         historyRelations: {
             bandMembers: { entity: BandMember, relationField: 'band', responseDto: BandMemberAdminResponseDto },
             genres: { entity: Genre, relationField: 'bands', isManyToMany: true, responseDto: GenreAdminResponseDto },
@@ -55,7 +55,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.VACANCY]: {
         entity: Vacancy,
         responseDto: VacancyAdminResponseDto,
-        defaultRelations: ['genres', 'owner', 'instruments'],
+        defaultRelations: ['owner'],
         historyRelations: {
             genres: { entity: Genre, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
             instruments: { entity: MusicalInstrument, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
@@ -64,7 +64,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.INSTRUMENT]: {
         entity: MusicalInstrument,
         responseDto: MusicalInstrumentAdminResponseDto,
-        defaultRelations: ['artistMusicalInstrument', 'vacancies'],
+        defaultRelations: [],
         historyRelations: {
             artistMusicalInstrument: { entity: AritstMusicalInstrument, relationField: 'user', responseDto: UserMinimalResponseDto },
             vacancies: { entity: Vacancy, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },

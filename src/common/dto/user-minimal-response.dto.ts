@@ -12,6 +12,9 @@ export class UserMinimalResponseDto {
     name: string;
 
     @Expose()
+    birthDate: Date;
+
+    @Expose()
     urlImage: string;
 
     @Expose()

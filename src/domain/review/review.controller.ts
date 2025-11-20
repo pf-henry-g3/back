@@ -73,6 +73,23 @@ export class ReviewController {
     );
   }
 
+  @Get('getOrderByScore')
+  async getOrderByScore(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundReviews = await this.reviewService.getOrderByScore(pageNum, limitNum);
+
+    return commonResponse(
+      'Reviews encontradas',
+      foundReviews.tranformedReviews,
+      foundReviews.meta,
+    );
+  }
+
   @Get(':userRole')
   @ApiQuery({
     name: 'page',

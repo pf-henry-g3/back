@@ -9,11 +9,13 @@ import { User } from 'src/domain/user/entities/user.entity';
 import { Band } from 'src/domain/band/entities/band.entity';
 import { Vacancy } from 'src/domain/vacancy/entities/vacancy.entity';
 import { Pages } from 'src/common/enums/pages.enum';
+import { VacancyTypeFilter } from './filters/vacancy-type.filter';
+import { BaseFilter } from './filters/base.filter';
 
 @Injectable()
 export class SearchService {
   private strategies: Record<string, any>;
-  private filters: Record<string, any>;
+  private globalFilters: Record<string, any>;
 
   constructor(
     @InjectRepository(User) private usersRepo: Repository<User>,
@@ -26,15 +28,16 @@ export class SearchService {
       vacancy: new VacancySearchStrategy(this.vacanciesRepo),
     };
 
-    this.filters = {
+    // Instanciamos los filtros aquí
+    this.globalFilters = {
       genre: new GenreFilter(),
-      // en el futuro → country, instrument, status, etc.
+      vacancyType: new VacancyTypeFilter(),
     };
   }
 
   async globalSearch(
     query: string,
-    filters: Record<string, any>,
+    filtersInput: Record<string, any>,
     types?: string[],
     page = Pages.Pages,
     limit = Pages.Limit
@@ -48,16 +51,24 @@ export class SearchService {
         const strategy = this.strategies[type];
         if (!strategy) return [[], 0];
 
-        const hasGenreFilter = filters?.genre?.length > 0;
-        const genreNames = filters?.genre?.map((g: string) => g.toLowerCase()) || [];
+        // DEFINIMOS QUÉ FILTROS APLICAN A QUÉ ESTRATEGIA
+        // Esto te da control total. Por ejemplo, 'vacancyType' solo aplica a 'vacancy'.
+        let applicableFilters: BaseFilter<any>[] = [];
 
-        // usar el método específico de cada strategy
+        if (type === 'vacancy') {
+          applicableFilters = [this.globalFilters.genre, this.globalFilters.vacancyType];
+        } else if (type === 'band') {
+          applicableFilters = [this.globalFilters.genre];
+        } else {
+          applicableFilters = [this.globalFilters.genre];
+        }
+
         return strategy.executeSearch(
           searchPattern,
-          genreNames,
+          filtersInput,      // Pasamos todos los valores de los filtros
+          applicableFilters, // Pasamos las instancias de filtros válidos para esta entidad
           skip,
-          limit,
-          hasGenreFilter
+          limit
         );
       })
     );

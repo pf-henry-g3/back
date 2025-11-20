@@ -14,4 +14,4 @@ import { Vacancy } from '../vacancy/entities/vacancy.entity';
   controllers: [ApplicationController],
   providers: [ApplicationService],
 })
-export class ApplicationModule {}
+export class ApplicationModule { }

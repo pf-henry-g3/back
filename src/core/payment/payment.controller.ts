@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   //obtengo todos los pagos
   @Get()
@@ -19,13 +18,15 @@ export class PaymentController {
     return await this.paymentService.createDonacion(dto);
   }
 
- @Post('webhook')
-@HttpCode(200) 
-  async mpWebhook(@Body() body: any) {
+  @Post('webhook')
+  @HttpCode(200)
+  async mpWebhook(
+    @Body() body: any
+  ) {
     await this.paymentService.reciveWebhook(body);
     return { ok: true };
   }
 
 
-  
+
 }

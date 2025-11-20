@@ -33,41 +33,23 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
 
   async create(createVacancyDto: CreateVacancyDto, user: User) {
-    //Buscamos los generos de la DB que coincidan con los recibidos
-
     const genres = await this.genresRepository.find({
       where: createVacancyDto.genres.map(name => ({ name })),
     });
 
-    // Validar que existan todos
     if (genres.length !== createVacancyDto.genres.length) {
       throw new BadRequestException('Uno o más géneros no existen en la base de datos.');
     }
 
-    //Crear la nueva vacante
     const newVacancy = this.vacancyRepository.create({
       ...createVacancyDto,
       owner: { id: user.id },
       genres,
     })
 
-    const emailDto: TransactionalEmailDto = {
-      to: user.email,
-      name: user.name,
-      pageTitle: 'Creaste una vacante',
-      mainTitle: '¡Vacante registrada!',
-      mainMessage: '¡Gracias por anunciar que tenes una vacante, es hora de contectar con el talento que buscas!',
-      buttonText: 'Ver mis vacantes anunciadas',
-      actionUrl: `${process.env.FRONTEND_URL}/vacancy`,
+    const savedVacancy = await this.vacancyRepository.save(newVacancy);
 
-      appName: 'Syncro',
-      year: new Date().getFullYear(),
-      secondaryMessage: 'Si no registraste una vacante, podes ignorar este mensaje'
-    };
-
-    await this.mailerService.sendTransactionalEmail(emailDto);
-
-    return await this.vacancyRepository.save(newVacancy);
+    return savedVacancy;
   }
 
   async findAll(page: number = Pages.Pages, limit: number = Pages.Limit) {
@@ -117,6 +99,20 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     }
 
     return this.uploadImage(file, vacancyId);
+  }
+
+  async closeVacancie(vacancyId: string) {
+    const vacancy: Vacancy | null = await this.vacancyRepository.findOneBy({ id: vacancyId });
+
+    if (!vacancy) throw new NotFoundException('Vacante no encontrada');
+
+    vacancy.isOpen = false;
+
+    await this.vacancyRepository.save(vacancy);
+
+    return plainToInstance(VacancyResponseDto, vacancy, {
+      excludeExtraneousValues: true,
+    })
   }
 
   async softDelete(id: string) {

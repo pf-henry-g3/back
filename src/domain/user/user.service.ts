@@ -54,6 +54,9 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     @InjectRepository(Application)
     private readonly applicationRepo: Repository<Application>,
 
+    @InjectRepository(Review)
+    private readonly reviewsRepository: Repository<Review>,
+
     private readonly entityManage: EntityManager,
 
     private readonly mailerService: MailerService,
@@ -100,7 +103,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    const transformedUser = plainToInstance(UserPublicResponseDto, user, {
+    const transformedUser = plainToInstance(UserAdminResponseDto, user, {
       excludeExtraneousValues: true,
     });
 
@@ -209,6 +212,22 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     return plainToInstance(UserPublicResponseDto, user, {
       excludeExtraneousValues: true
     })
+  }
+
+  async updateRating(userId: string) {
+    const { avg } = await this.reviewsRepository
+      .createQueryBuilder("review")
+      .select("AVG(review.score)", "avg")
+      .where("review.receptor = :userId", { userId })
+      .getRawOne();
+
+    const newRating = avg ? parseFloat(avg) : 0;
+
+    const roundedRating = Number(newRating.toFixed(1));
+
+    await this.usersRepository.update(userId, {
+      averageRating: roundedRating
+    });
   }
 
   async softDelete(id: string) {

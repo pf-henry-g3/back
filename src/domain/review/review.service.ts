@@ -11,6 +11,7 @@ import { CreateBandDto } from '../band/dto/create-band.dto';
 import { plainToInstance } from 'class-transformer';
 import { ReviewResponseDto } from './dto/review-response.dto';
 import { Pages } from 'src/common/enums/pages.enum';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ReviewService extends AbstractFileUploadService<Review> { //Extiende al metodo abstracto de subida de archivos
@@ -21,6 +22,8 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     @InjectRepository(Review)
     private readonly reviewsRepository: Repository<Review>,
 
+    private readonly userService: UserService,
+
     fileUploadService: FileUploadService,
   ) { super(fileUploadService, reviewsRepository) }
 
@@ -30,6 +33,16 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     if (!userReciever) throw new NotFoundException('Usuario receptor no encontrado.');
     if (owner.id === userReciever.id) throw new BadRequestException('No podes dejar una review a vos mismo');
 
+    const existingReview = await this.reviewsRepository.findOne({
+      where: {
+        owner: { id: owner.id },
+        receptor: { id: userReciever.id }
+      },
+      select: ['id'],
+    });
+
+    if (existingReview) throw new BadRequestException('Ya hiciste una review a este usuario');
+
     const newReview: Review = this.reviewsRepository.create({
       ...createReviewDto,
       date: new Date(),
@@ -38,6 +51,8 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     });
 
     await this.reviewsRepository.save(newReview);
+
+    await this.userService.updateRating(newReview.receptor.id);
 
     const tranformedReview = plainToInstance(ReviewResponseDto, newReview, {
       excludeExtraneousValues: true,
@@ -112,6 +127,27 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
       },
       order: {
         date: 'DESC',
+      },
+    });
+
+    const tranformedReviews = plainToInstance(ReviewResponseDto, reviews, {
+      excludeExtraneousValues: true,
+    });
+
+    const meta = { total, page, limit };
+    return { tranformedReviews, meta };
+  }
+
+  async getOrderByScore(page: number = Pages.Pages, limit: number = Pages.Limit) {
+    const [reviews, total] = await this.reviewsRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      relations: {
+        owner: true,
+        receptor: true,
+      },
+      order: {
+        score: 'DESC',
       },
     });
 
