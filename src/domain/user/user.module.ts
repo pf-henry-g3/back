@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { User } from './entities/user.entity';
@@ -11,14 +11,12 @@ import { AritstMusicalInstrument } from '../musical-instrument/entities/artist-m
 import { Band } from '../band/entities/band.entity';
 import { BandMember } from '../band/entities/bandMember.entity';
 import { MusicalInstrument } from '../musical-instrument/entities/musical-instrument.entity';
-import { AdminModule } from '../admin/admin.module';
 import { Application } from '../application/entities/application.entity';
 import { Review } from '../review/entities/review.entity';
 
 
 @Module({
   imports: [
-    AdminModule,
     TypeOrmModule.forFeature([User, Genre, Role, AritstMusicalInstrument, Band, BandMember, MusicalInstrument, Application, Review]),
     FileUploadModule,
   ],
