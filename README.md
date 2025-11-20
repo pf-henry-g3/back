@@ -6,6 +6,7 @@ Back
 ## Descripción  
 Backend de una plataforma desarrollada como proyecto final de Soy Henry - Carrera Full Stack, consiste en un medio para conectar musicos con otros musicos o bandas para realizar trabajos en conjunto.
 
+📑[Documentacion](https://deepwiki.com/pf-henry-g3/back)
 ---
 
 ## Tecnologías usadas
@@ -44,4 +45,5 @@ npm run start
 - 💼 [**Agostina Gaggioli**](https://www.linkedin.com/in/agostina-gaggioli-4495ba234/)
 - 💼 [**Carlos Mogollon**](https://www.linkedin.com/in/carlosmogollon-it/)
 - 💼 [**Santiago Rivero**](https://www.linkedin.com/in/santriv06/)
+
 
