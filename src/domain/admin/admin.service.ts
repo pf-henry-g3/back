@@ -31,12 +31,16 @@ export class AdminService {
     const repository = this.entityManager.getRepository(entityClass);
     const skip = (page - 1) * limit;
 
+    // Debug para ver si es demora de la db
+    const start = Date.now();
+
     const [data, total] = await repository.findAndCount({
       ...options,
       skip,
       take: limit,
       withDeleted,
     });
+    console.log("DB TIME:", Date.now() - start);
 
     if (!data.length && !withDeleted) {
       throw new NotFoundException(`Entidad no encontrados.`)
