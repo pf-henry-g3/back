@@ -145,7 +145,7 @@ export class UserController {
             message: 'La imagen debe ser maximo de 200kb'
           }),
           new FileTypeValidator({
-            fileType: /(jpg|jpge|png|webp)$/,
+            fileType: /(jpg|jpge|jpeg|png|webp)$/,
           }),
         ]
       }),
