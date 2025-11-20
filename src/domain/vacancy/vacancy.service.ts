@@ -13,6 +13,8 @@ import { plainToInstance } from 'class-transformer';
 import { VacancyResponseDto } from './dto/vacancy-response.dto';
 import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
 import { MailerService } from 'src/core/mailer/mailer.service';
+import { Application } from '../application/entities/application.entity';
+import { ApplicationResponseDto } from '../application/dto/application-response.dto';
 
 @Injectable()
 export class VacancyService extends AbstractFileUploadService<Vacancy> {
@@ -25,6 +27,9 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
 
     @InjectRepository(Genre)
     private readonly genresRepository: Repository<Genre>,
+
+    @InjectRepository(Application)
+    private readonly applicationsRepository: Repository<Application>,
 
     private readonly mailerService: MailerService,
 
@@ -74,6 +79,25 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     return { transformedVacancies, meta };
   }
 
+  async getAllApplications(id: string, page: number = Pages.Pages, limit: number = Pages.Limit) {
+    const applications = await this.applicationsRepository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      where: {
+        vacancyId: { id },
+      },
+      relations: {
+        applicantId: true,
+      }
+    });
+
+    if (!applications) throw new NotFoundException('No hay postulaciones para esa vacante');
+
+    return plainToInstance(ApplicationResponseDto, applications, {
+      excludeExtraneousValues: true,
+    })
+  }
+
   async findOne(id: string) {
     let foundVacancy = await this.vacancyRepository.findOne({
       where: { id: id },
@@ -113,6 +137,51 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
     await this.vacancyRepository.save(vacancy);
 
     return plainToInstance(VacancyResponseDto, vacancy, {
+      excludeExtraneousValues: true,
+    })
+  }
+
+  async acceptPostulant(vacancyId: string, applicantId: string) {
+    const application: Application | null = await this.applicationsRepository.findOne({
+      where: {
+        vacancyId: { id: vacancyId },
+        applicantId: { id: applicantId },
+      },
+      relations: {
+        vacancyId: true,
+        applicantId: true,
+      }
+    });
+
+    if (!application) throw new NotFoundException('Postulacion no encontrada');
+
+    application.status = 'ACCEPTED';
+
+    await this.applicationsRepository.save(application);
+
+    try {
+      const verifyLink = `${process.env.FRONTEND_URL}/dashboard/profile}`;
+
+      const emailDto: TransactionalEmailDto = {
+        to: application.applicantId.email,
+        name: application.applicantId.name,
+        pageTitle: 'Aceptaron tu postulacion!',
+        mainTitle: '¡Tu postulacion fue aceptada!',
+        mainMessage: `Gracias por postularte a ${application.vacancyId.name}`,
+        buttonText: 'Ver mis postulaciones',
+        actionUrl: verifyLink,
+
+        appName: 'Syncro',
+        year: new Date().getFullYear(),
+        secondaryMessage: 'Si no reconoces esta accion, podés ignorar este correo.'
+      };
+
+      await this.mailerService.sendTransactionalEmail(emailDto);
+    } catch (error) {
+      console.log('Error al enviar correo de notificacion')
+    };
+
+    return plainToInstance(VacancyResponseDto, application.vacancyId, {
       excludeExtraneousValues: true,
     })
   }
