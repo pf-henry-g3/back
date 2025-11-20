@@ -9,12 +9,13 @@ import { Role } from '../role/entities/role.entity';
 import { FileUploadModule } from '../../core/file-upload/file-upload.module';
 import { UserModule } from '../user/user.module';
 import { AdminModule } from '../admin/admin.module';
+import { Application } from '../application/entities/application.entity';
 
 @Module({
   imports: [
     UserModule,
     AdminModule,
-    TypeOrmModule.forFeature([Vacancy, User, Genre, Role]),
+    TypeOrmModule.forFeature([Vacancy, User, Genre, Role, Application]),
     FileUploadModule,
   ],
   controllers: [VacancyController],

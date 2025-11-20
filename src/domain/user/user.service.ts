@@ -22,6 +22,7 @@ import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dt
 import { MailerService } from 'src/core/mailer/mailer.service';
 import { Application } from '../application/entities/application.entity';
 import { Review } from '../review/entities/review.entity';
+import { VacancyResponseDto } from '../vacancy/dto/vacancy-response.dto';
 
 
 type UserRelationName = 'roles' | 'genres';
@@ -213,6 +214,22 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     return plainToInstance(UserPublicResponseDto, user, {
       excludeExtraneousValues: true
+    })
+  }
+
+  async getAllVacancies(id: string) {
+    const user: User | null = await this.usersRepository.findOne({
+      where: { id },
+      relations: {
+        vacancies: true,
+      }
+    });
+
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    if (user.vacancies.length === 0) throw new BadRequestException('usuario sin vacantes publciadas');
+
+    return plainToInstance(VacancyResponseDto, user.vacancies, {
+      excludeExtraneousValues: true,
     })
   }
 
