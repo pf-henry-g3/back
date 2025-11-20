@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../user/entities/user.entity';
 import { Pages } from 'src/common/enums/pages.enum';
 import { EntityManager, EntityTarget, FindOneOptions, ObjectLiteral } from 'typeorm';
@@ -7,8 +7,7 @@ import { plainToInstance } from 'class-transformer';
 import { UserAdminResponseDto } from './dto/user-response-admin.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { MailerService as MailerLibrary } from '@nestjs-modules/mailer';
-import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
-import { MailerService } from 'src/core/mailer/mailer.service';
+import { Role as UserRole } from '../../common/enums/roles.enum';
 
 interface HistoricalRelationConfig {
   entity: EntityTarget<any>;
@@ -21,7 +20,6 @@ export class AdminService {
   constructor(
     private readonly entityManager: EntityManager,
     private readonly mailerLibrary: MailerLibrary,
-    private readonly mailerService: MailerService,
   ) { }
   async findEntites<T extends ObjectLiteral>(
     entityClass: EntityTarget<T>,
@@ -198,6 +196,29 @@ export class AdminService {
     if (!user) throw new NotFoundException('Usuario no encontrado.');
 
     const updatedRoles = [...user.roles, foundRole];
+    user.roles = updatedRoles;
+
+    await usersRepository.save(user);
+
+    return plainToInstance(UserAdminResponseDto, user, {
+      excludeExtraneousValues: true,
+    })
+  }
+
+  async removeAdmin(adminId: string) {
+    const usersRepository = this.entityManager.getRepository(User);
+
+    const user: User | null = await usersRepository.findOne({
+      where: { id: adminId },
+      relations: { roles: true }
+    });
+
+    if (!user) throw new NotFoundException('Usuario no encontrado.');
+
+    const updatedRoles = user.roles.filter((r) => r.name !== UserRole.Admin);
+
+    if (updatedRoles.length === user.roles.length) throw new BadRequestException('El usuario no es admin')
+
     user.roles = updatedRoles;
 
     await usersRepository.save(user);

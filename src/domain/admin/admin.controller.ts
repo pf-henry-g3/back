@@ -266,6 +266,29 @@ export class AdminController {
     )
   }
 
+  @Patch('removeAdmin/:id')
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'ID del admin a remover',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Actualizacion exitosa con retorno de datos',
+  })
+  async removeAdmin(
+    @Param('id') id: string,
+  ) {
+    const removedAdmin = await this.adminService.removeAdmin(id);
+
+    return commonResponse(
+      'Admin destituido',
+      removedAdmin,
+    )
+  }
+
   @Patch('ban/:id')
   @ApiParam({
     name: 'id',
