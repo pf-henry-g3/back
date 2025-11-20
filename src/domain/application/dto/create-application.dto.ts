@@ -10,14 +10,6 @@ export class CreateApplicationDto {
     @IsNotEmpty()
     vacancyId: string;
 
-    @ApiProperty({
-        example: 'uuid-del-usuario',
-        description: 'ID del usuario que se está postulando',
-    })
-    @IsUUID()
-    @IsNotEmpty()
-    applicantId: string;
-
     @ApiPropertyOptional({
         example: 'Estoy interesado en participar del evento.',
         description: 'Descripción opcional de la postulación',
