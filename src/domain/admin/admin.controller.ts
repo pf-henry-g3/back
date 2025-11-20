@@ -253,8 +253,6 @@ export class AdminController {
     status: 201,
     description: 'Actualizacion exitosa con retorno de datos',
   })
-  @Roles(Role.SuperAdmin)
-  @UseGuards(RolesGuard)
   @HttpCode(200)
   async newAdmin(
     @Param('id') id: string,
@@ -393,8 +391,6 @@ export class AdminController {
     status: 204,
     description: 'Recurso eliminado de forma logica sin retorno de datos',
   })
-  @Roles(Role.SuperAdmin)
-  @UseGuards(RolesGuard)
   @HttpCode(204)
   hardDelete(
     @Param('entityType') entityType: EntityName,
