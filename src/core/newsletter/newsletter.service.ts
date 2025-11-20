@@ -13,7 +13,7 @@ export class NewsletterService {
         private readonly userService: UserService,
     ) { }
 
-    @Cron('*/10 * * * *', { name: 'testNewsletter' })
+    @Cron(CronExpression.EVERY_WEEK, { name: 'weeklyNewsletter', timeZone: 'America/Argentina/Buenos_Aires')
     async handleCron() {
         this.logger.log('Iniciando envio de novedades de la semana...');
 
