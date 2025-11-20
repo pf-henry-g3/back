@@ -19,7 +19,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userVerificationService: UserVerificationService,
-  
+
   ) { }
 
   @Get()
@@ -110,7 +110,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
@@ -122,7 +122,7 @@ export class UserController {
             message: 'La imagen debe ser maximo de 200kb'
           }),
           new FileTypeValidator({
-            fileType: /(jpg|jpge|png|webp)$/,
+            fileType: /(jpg|jpge|jpeg|png|webp)$/,
           }),
         ]
       }),
@@ -316,8 +316,8 @@ export class UserController {
 
 
   @Get('/user/:userId')
-async findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-  return this.userService.getApplications(userId);
-}
+  async findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+    return this.userService.getApplications(userId);
+  }
 
 }
