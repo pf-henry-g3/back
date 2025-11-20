@@ -35,6 +35,34 @@ export class VacancyController {
     )
   }
 
+  @Post('acceptApplicant/:id/:applicantId')
+  @ApiParam({
+    name: 'id',
+    description: 'ID de la vacante',
+  })
+  @ApiParam({
+    name: 'applicantId',
+    description: 'ID del aplicante',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso actualizado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, VacancyOwnerGuard())
+  @HttpCode(204)
+  async acceptPostulant(
+    @Param('id') id: string,
+    @Param('applicantId') applicantId: string,
+  ) {
+
+    return commonResponse(
+      'Postulacion aceptada',
+      await this.vacancyService.acceptPostulant(id, applicantId)
+    )
+  }
+
+
   @Get()
   @ApiQuery({
     name: 'page',
@@ -66,6 +94,46 @@ export class VacancyController {
       'Vacantes encontradas.',
       foundVacancies.transformedVacancies,
       foundVacancies.meta,
+    )
+  }
+
+  @Get('getAllApplications/:id')
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página actual para paginación',
+    example: '1',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Cantidad de resultados por página',
+    example: '10',
+  })
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id de la vacante a buscar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Busqueda exitosa con retorno de datos.',
+  })
+  @HttpCode(200)
+  async getAllApplications(
+    @Param('id') id: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? +page : undefined;
+    const limitNum = limit ? +limit : undefined;
+
+    const foundApplications = await this.vacancyService.getAllApplications(id, pageNum, limitNum);
+
+    return commonResponse(
+      'Postulaciones encontradas.',
+      foundApplications.transformedApplications,
+      foundApplications.meta,
     )
   }
 
