@@ -221,7 +221,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     const user: User | null = await this.usersRepository.findOne({
       where: { id },
       relations: {
-        vacancies: true,
+        vacancies: { applications: true, genres: true },
       }
     });
 
