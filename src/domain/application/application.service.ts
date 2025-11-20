@@ -1,47 +1,48 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Application } from './entities/application.entity';
-import { Vacancy } from '../vacancy/entities/vacancy.entity';
 import { User } from '../user/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Vacancy } from '../vacancy/entities/vacancy.entity';
+import { Application } from './entities/application.entity';
 
 @Injectable()
 export class ApplicationService {
   constructor(
-    @InjectRepository(Application)
-    private readonly applicationRepo: Repository<Application>,
+
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
 
     @InjectRepository(Vacancy)
     private readonly vacancyRepository: Repository<Vacancy>,
+     @InjectRepository(Application)
+    private readonly apliRepository: Repository<Application>,
 
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
-  ) {}
- async  create(createApplicationDto: CreateApplicationDto) {
-    const { vacancyId, applicantId, applicationDescription } = createApplicationDto;
+  ) { }
 
-   
+  async create(createApplicationDto: CreateApplicationDto) {
+  const { vacancyId, applicantId, applicationDescription } = createApplicationDto;
+
+    
     const vacancy = await this.vacancyRepository.findOne({
       where: { id: vacancyId },
     });
 
     if (!vacancy) {
-      throw new BadRequestException('vancante no enontrada');
+      throw new BadRequestException('Vacante no encontrada');
     }
 
-   
-    const applicant = await this.userRepo.findOne({
+    const applicant = await this.usersRepository.findOne({
       where: { id: applicantId },
     });
 
     if (!applicant) {
-      throw new BadRequestException('user no encontrado');
+      throw new BadRequestException('postulacion no encontrada');
     }
 
-    
-    const existingApplication = await this.applicationRepo.findOne({
+
+    const existingApplication = await this.apliRepository.findOne({
       where: {
         vacancyId: { id: vacancyId },
         applicantId: { id: applicantId },
@@ -50,19 +51,17 @@ export class ApplicationService {
 
     if (existingApplication) {
       throw new BadRequestException(
-        'usuario ya esta postulado',
+        'el usuario ya aplico',
       );
     }
-
-    const application = this.applicationRepo.create({
+    const application = this.apliRepository.create({
       vacancyId: vacancy,
       applicantId: applicant,
       applicationDescription,
-      applicationDate: new Date(),    
+      applicationDate: new Date(),  
     });
 
-   
-    return await this.applicationRepo.save(application);
+    return await this.apliRepository.save(application);
   }
 
   findAll() {
@@ -80,4 +79,22 @@ export class ApplicationService {
   remove(id: number) {
     return `This action removes a #${id} application`;
   }
+
+  async findByUser(userId: string) {
+  const applications = await this.apliRepository.find({
+    where: {
+      applicantId: {
+        id: userId,
+      },
+    },
+    relations: {
+      vacancyId: true,
+    },
+    order: {
+      applicationDate: 'DESC',
+    },
+  });
+
+  return applications;
+}
 }

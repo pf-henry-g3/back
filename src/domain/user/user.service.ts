@@ -20,7 +20,7 @@ import { MusicalInstrument } from '../musical-instrument/entities/musical-instru
 import { AddInstrumentsDto } from './dto/add-instruments.dto';
 import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
 import { MailerService } from 'src/core/mailer/mailer.service';
-import { Review } from '../review/entities/review.entity';
+import { Application } from '../application/entities/application.entity';
 
 
 type UserRelationName = 'roles' | 'genres';
@@ -51,6 +51,8 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     @InjectRepository(BandMember)
     private readonly bandMembersRepository: Repository<BandMember>,
+    @InjectRepository(Application)
+    private readonly applicationRepo: Repository<Application>,
 
     @InjectRepository(Review)
     private readonly reviewsRepository: Repository<Review>,
@@ -508,5 +510,19 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
     }
 
     console.log('🎉 Precarga de usuarios completada.');
+  }
+   async getApplications(userId: string) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.applicationRepo.find({
+      where: {
+        applicantId: { id: userId },
+      },
+      relations: { vacancyId: true },
+      order: { applicationDate: 'DESC' },
+    });
   }
 }
