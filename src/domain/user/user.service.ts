@@ -21,6 +21,7 @@ import { AddInstrumentsDto } from './dto/add-instruments.dto';
 import { TransactionalEmailDto } from 'src/core/mailer/dto/transactional-mail.dto';
 import { MailerService } from 'src/core/mailer/mailer.service';
 import { Application } from '../application/entities/application.entity';
+import { Review } from '../review/entities/review.entity';
 
 
 type UserRelationName = 'roles' | 'genres';
@@ -74,6 +75,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
         memberships: { band: true },
         leaderOf: true,
         musicalInstruments: { instrument: true },
+        applicationsAsApplicant: true,
       },
     });
 
@@ -511,7 +513,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
 
     console.log('🎉 Precarga de usuarios completada.');
   }
-   async getApplications(userId: string) {
+  async getApplications(userId: string) {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');

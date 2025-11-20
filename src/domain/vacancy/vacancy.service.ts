@@ -58,7 +58,8 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       take: limit,
       relations: {
         owner: true,
-        genres: true
+        genres: true,
+        applications: { applicantId: true },
       }
     });
 
@@ -79,6 +80,7 @@ export class VacancyService extends AbstractFileUploadService<Vacancy> {
       relations: {
         owner: true,
         genres: true,
+        applications: { applicantId: true },
       }
     });
 

@@ -110,7 +110,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
@@ -250,7 +250,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
   @HttpCode(200)
   async update(
     @Param('id') id: string,

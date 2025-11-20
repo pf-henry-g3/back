@@ -79,8 +79,6 @@ export class VacancyController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
-  //@ApiBearerAuth()
-  //@UseGuards(AuthGuard)
   @HttpCode(200)
   async findOne(
     @Param('id') id: string
@@ -102,7 +100,7 @@ export class VacancyController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, VacancyOwnerGuard())
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadVacancyPhoto(
