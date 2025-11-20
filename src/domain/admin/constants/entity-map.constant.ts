@@ -40,7 +40,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.BAND]: {
         entity: Band,
         responseDto: BandAdminResponseDto,
-        defaultRelations: ['leader', 'bandMembers'],
+        defaultRelations: ['leader', 'bandMembers', 'genres'],
         historyRelations: {
             bandMembers: { entity: BandMember, relationField: 'band', responseDto: BandMemberAdminResponseDto },
             genres: { entity: Genre, relationField: 'bands', isManyToMany: true, responseDto: GenreAdminResponseDto },
@@ -55,7 +55,7 @@ export const ADMIN_ENTITY_MAP = {
     [EntityName.VACANCY]: {
         entity: Vacancy,
         responseDto: VacancyAdminResponseDto,
-        defaultRelations: ['owner'],
+        defaultRelations: ['owner', 'genres'],
         historyRelations: {
             genres: { entity: Genre, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
             instruments: { entity: MusicalInstrument, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },

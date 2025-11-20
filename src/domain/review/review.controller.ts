@@ -113,6 +113,8 @@ export class ReviewController {
     status: 200,
     description: 'Busqueda exitosa con retorno de datos.',
   })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   async findAll(
     @Req() req,

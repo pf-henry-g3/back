@@ -67,14 +67,21 @@ export class ReviewService extends AbstractFileUploadService<Review> { //Extiend
     page: number = Pages.Pages,
     limit: number = Pages.Limit,
   ) {
-    const [reviews, total] = await this.reviewsRepository.find({
+
+    if (!user || !user.id) {
+      throw new Error("El objeto de usuario no está cargado correctamente o le falta el ID.");
+    }
+    const [reviews, total] = await this.reviewsRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
-      where: { [role]: user },
+      where: { [role]: { id: user.id } },
       relations: {
         owner: true,
         receptor: true,
       },
+      order: {
+        date: 'DESC'
+      }
     });
 
     const tranformedReviews = plainToInstance(ReviewResponseDto, reviews, {
