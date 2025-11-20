@@ -3,6 +3,7 @@ import { BandMinimalResponseDto } from 'src/common/dto/band-minimal-response.dto
 import { GenreResponseDto } from 'src/common/dto/genre-response.dto';
 import { RoleResponseDto } from 'src/common/dto/role-response.dto';
 import { Role } from 'src/common/enums/roles.enum';
+import { ApplicationResponseDto } from 'src/domain/application/dto/application-response.dto';
 import { BandMemberResponseDto } from 'src/domain/band/dto/bandMember-response.dto';
 import { ArtistInstrumentResponseDto } from 'src/domain/musical-instrument/dto/artist-instrument-response.dto';
 import { VacancyResponseDto } from 'src/domain/vacancy/dto/vacancy-response.dto';
@@ -67,4 +68,8 @@ export class UserResponseDto {
     @Expose()
     @Type(() => ArtistInstrumentResponseDto)
     musicalInstruments: ArtistInstrumentResponseDto[];
+
+    @Expose()
+    @Type(() => ApplicationResponseDto)
+    applicationsAsApplicant: ApplicationResponseDto[];
 }

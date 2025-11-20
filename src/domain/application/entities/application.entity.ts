@@ -1,11 +1,11 @@
 import { User } from "src/domain/user/entities/user.entity";
 import { Vacancy } from "src/domain/vacancy/entities/vacancy.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Application {
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => Vacancy, (vacancy) => vacancy.applications, {
     nullable: false,
@@ -29,4 +29,9 @@ export class Application {
 
   @Column({ length: 50, default: 'PENDING' })
   status: string;
+
+  @DeleteDateColumn({
+    nullable: true,
+  })
+  deletedAt: Date | null;
 }

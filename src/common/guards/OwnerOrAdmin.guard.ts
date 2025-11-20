@@ -52,7 +52,6 @@ export function OwnerOrAdminGuard<T extends ObjectLiteral>(
             const roles = user.roles.map(r => r.name);
             const isAdmin =
                 roles.includes(Role.Admin) || roles.includes(Role.SuperAdmin);
-            console.log(roles)
             const isOwner = owner.id === user.id;
 
             if (!isAdmin && !isOwner)

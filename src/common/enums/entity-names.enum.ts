@@ -8,9 +8,9 @@ export enum EntityName {
     GENRE = 'genres',
     INSTRUMENT = 'instruments',
     ARTISTINSTRUMENT = 'artistInstruments',
+    APPLICATION = 'applications',
     // EVENT = 'events',
     // MEDIA = 'media',
     // SOCIALLINK = 'socialLinks',
     // NOTIFICATION = 'notifications',
-    // APPLICATION = 'applications',
 }

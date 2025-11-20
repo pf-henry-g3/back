@@ -72,6 +72,7 @@ export class UserService extends AbstractFileUploadService<User> { //Extiende al
         memberships: { band: true },
         leaderOf: true,
         musicalInstruments: { instrument: true },
+        applicationsAsApplicant: true,
       },
     });
 

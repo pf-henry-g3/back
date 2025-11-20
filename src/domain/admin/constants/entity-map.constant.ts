@@ -20,6 +20,8 @@ import { ArtistInstrumentAdminResponseDto } from "../dto/artist-instrument-respo
 import { UserMinimalResponseDto } from "src/common/dto/user-minimal-response.dto";
 import { BandMinimalResponseDto } from "src/common/dto/band-minimal-response.dto";
 import { VacancyMinimalResponseDto } from "src/common/dto/vacancy-minimal-response.dto";
+import { Application } from "src/domain/application/entities/application.entity";
+import { ApplicationAdminResponseDto } from "../dto/application-response-admin.dto";
 
 export const ADMIN_ENTITY_MAP = {
     [EntityName.USER]: {
@@ -35,6 +37,7 @@ export const ADMIN_ENTITY_MAP = {
             musicalInstruments: { entity: AritstMusicalInstrument, relationField: 'user', responseDto: ArtistInstrumentAdminResponseDto },
             genres: { entity: Genre, relationField: 'users', isManyToMany: true, responseDto: GenreAdminResponseDto },
             roles: { entity: Role, relationField: 'users', isManyToMany: true, responseDto: RoleAdminResponseDto },
+            applications: { entity: Application, relationField: 'applicantId', responseDto: ApplicationAdminResponseDto }
         },
     },
     [EntityName.BAND]: {
@@ -59,6 +62,7 @@ export const ADMIN_ENTITY_MAP = {
         historyRelations: {
             genres: { entity: Genre, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
             instruments: { entity: MusicalInstrument, relationField: 'vacancies', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
+            applications: { entity: Application, relationField: 'vacancyId', responseDto: ApplicationAdminResponseDto }
         },
     },
     [EntityName.INSTRUMENT]: {
@@ -100,4 +104,15 @@ export const ADMIN_ENTITY_MAP = {
             vacancies: { entity: Vacancy, relationField: 'genres', isManyToMany: true, responseDto: VacancyMinimalResponseDto },
         },
     },
+    [EntityName.APPLICATION]: {
+        entity: Application,
+        responseDto: ApplicationAdminResponseDto,
+        defaultRelations: ['applicantId', 'vacancyId'],
+        historyRelations: {
+            users: { entity: User, relationField: 'applicationsAsApplicant', responseDto: UserMinimalResponseDto },
+            vacancies: { entity: Vacancy, relationField: 'applications', responseDto: VacancyMinimalResponseDto },
+        },
+    },
+
+
 }

@@ -1,6 +1,7 @@
 import { Expose, Type } from "class-transformer"
 import { GenreResponseDto } from "src/common/dto/genre-response.dto"
 import { UserMinimalResponseDto } from "src/common/dto/user-minimal-response.dto"
+import { ApplicationResponseDto } from "src/domain/application/dto/application-response.dto"
 
 export class VacancyResponseDto {
 
@@ -26,4 +27,8 @@ export class VacancyResponseDto {
     @Expose()
     @Type(() => UserMinimalResponseDto)
     owner: UserMinimalResponseDto;
+
+    @Expose()
+    @Type(() => ApplicationResponseDto)
+    applications: ApplicationResponseDto;
 }

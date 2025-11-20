@@ -153,7 +153,7 @@ export class AdminController {
   @ApiParam({
     name: 'relationName',
     required: true,
-    description: 'nombre de la relacion: users[leaderOf, memberships, vacancies, musicalInstruments, roles, genres] bands[bandMembers, genres] vacancies[genres, musicalInstruments] instruments[artistMusicalInstrument, vacancies] roles[users] genres[users, bands, vacancies]',
+    description: 'nombre de la relacion: users[leaderOf, memberships, vacancies, musicalInstruments, roles, genres, applications] bands[bandMembers, genres] vacancies[genres, musicalInstruments, applications] instruments[artistMusicalInstrument, vacancies] roles[users] genres[users, bands, vacancies] applications[users, vacancies]',
     example: 'genres'
   })
   @ApiQuery({
@@ -244,8 +244,6 @@ export class AdminController {
 
   //protegido con superAdmin
   @Patch('newAdmin/:id')
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
   @ApiParam({
     name: 'id',
     required: true,
@@ -255,6 +253,9 @@ export class AdminController {
     status: 201,
     description: 'Actualizacion exitosa con retorno de datos',
   })
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
+  @HttpCode(200)
   async newAdmin(
     @Param('id') id: string,
   ) {
@@ -267,8 +268,6 @@ export class AdminController {
   }
 
   @Patch('removeAdmin/:id')
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
   @ApiParam({
     name: 'id',
     required: true,
@@ -278,6 +277,9 @@ export class AdminController {
     status: 201,
     description: 'Actualizacion exitosa con retorno de datos',
   })
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
+  @HttpCode(200)
   async removeAdmin(
     @Param('id') id: string,
   ) {
@@ -364,8 +366,6 @@ export class AdminController {
 
   //protegido con superAdmin
   @Delete('hard-delete/:entityType/:id')
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
   @ApiParam({
     name: 'entityType',
     required: true,
@@ -381,6 +381,8 @@ export class AdminController {
     status: 204,
     description: 'Recurso eliminado de forma logica sin retorno de datos',
   })
+  // @Roles(Role.SuperAdmin)
+  // @UseGuards(RolesGuard)
   @HttpCode(204)
   hardDelete(
     @Param('entityType') entityType: EntityName,
