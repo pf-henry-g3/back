@@ -12,14 +12,14 @@ import { Band } from '../band/entities/band.entity';
 import { BandMember } from '../band/entities/bandMember.entity';
 import { MusicalInstrument } from '../musical-instrument/entities/musical-instrument.entity';
 import { AdminModule } from '../admin/admin.module';
-import { ApplicationModule } from '../application/application.module';
 import { Application } from '../application/entities/application.entity';
+import { Review } from '../review/entities/review.entity';
 
 
 @Module({
   imports: [
     AdminModule,
-    TypeOrmModule.forFeature([User, Genre, Role, AritstMusicalInstrument, Band, BandMember, MusicalInstrument,Application]),
+    TypeOrmModule.forFeature([User, Genre, Role, AritstMusicalInstrument, Band, BandMember, MusicalInstrument, Application, Review]),
     FileUploadModule,
   ],
   controllers: [UserController],
