@@ -14,7 +14,7 @@ export class NewsletterService {
     ) { }
 
     //@Cron(CronExpression.EVERY_WEEK, { name: 'weeklyNewsletter', timeZone: 'America/Argentina/Buenos_Aires' }) //Funcionalidad
-    @Cron('*/10 * * * *', { name: 'testNewsletter' }) //Para muestra en demo
+    //@Cron('*/10 * * * *', { name: 'testNewsletter' }) //Para muestra en demo
     async handleCron() {
         this.logger.log('Iniciando envio de novedades de la semana...');
 
