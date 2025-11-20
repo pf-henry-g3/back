@@ -315,7 +315,7 @@ export class UserController {
   }
 
 
-  @Get('/user/:id')
+  @Get('/getApplications/:id')
   @ApiParam({
     name: 'id',
     required: true,
