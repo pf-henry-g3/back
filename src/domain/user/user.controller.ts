@@ -133,7 +133,7 @@ export class UserController {
     description: 'Recurso actualizado con retorno de datos',
   })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @UseGuards(AuthGuard)
   @HttpCode(200)
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePhoto(
