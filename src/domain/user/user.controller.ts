@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UploadedFile, UseInterceptors, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards, HttpCode, Req, NotFoundException, ParseUUIDPipe } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -12,12 +12,14 @@ import { commonResponse } from 'src/common/utils/common-response.constant';
 import { SelfIdOrAdminGuard } from 'src/common/guards/SelfIdOrAdmin.guard';
 import { User } from './entities/user.entity';
 import { AddInstrumentsDto } from './dto/add-instruments.dto';
+import { ApplicationService } from '../application/application.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userVerificationService: UserVerificationService,
+  
   ) { }
 
   @Get()
@@ -311,4 +313,11 @@ export class UserController {
   ) {
     return this.userService.softDelete(id);
   }
+
+
+  @Get('/user/:userId')
+async findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
+  return this.userService.getApplications(userId);
+}
+
 }

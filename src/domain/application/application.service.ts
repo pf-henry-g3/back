@@ -79,4 +79,22 @@ export class ApplicationService {
   remove(id: number) {
     return `This action removes a #${id} application`;
   }
+
+  async findByUser(userId: string) {
+  const applications = await this.apliRepository.find({
+    where: {
+      applicantId: {
+        id: userId,
+      },
+    },
+    relations: {
+      vacancyId: true,
+    },
+    order: {
+      applicationDate: 'DESC',
+    },
+  });
+
+  return applications;
+}
 }
