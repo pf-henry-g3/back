@@ -291,6 +291,18 @@ export class AdminController {
     )
   }
 
+  @Patch('newSuperAdmin/:id')
+  async newSuperAdmin(
+    @Param('id') id: string,
+  ) {
+    const newSuperAdmin = await this.adminService.newAdmin(id, Role.SuperAdmin);
+
+    return commonResponse(
+      'Nuevo admin agregado',
+      newSuperAdmin,
+    )
+  }
+
   @Patch('ban/:id')
   @ApiParam({
     name: 'id',
