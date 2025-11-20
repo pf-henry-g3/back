@@ -19,7 +19,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly userVerificationService: UserVerificationService,
-  
+
   ) { }
 
   @Get()
@@ -315,9 +315,21 @@ export class UserController {
   }
 
 
-  @Get('/user/:userId')
-async findByUser(@Param('userId', ParseUUIDPipe) userId: string) {
-  return this.userService.getApplications(userId);
-}
+  @Get('/getApplications/:id')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'id del usuario a consultar',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Recurso encontrado con retorno de datos',
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, SelfIdOrAdminGuard)
+  @HttpCode(200)
+  async findByUser(@Param('id', ParseUUIDPipe) userId: string) {
+    return this.userService.getApplications(userId);
+  }
 
 }
