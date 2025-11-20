@@ -12,9 +12,9 @@ import { AuthGuard } from 'src/common/guards/Auth.guard';
 import { RolesGuard } from 'src/common/guards/Role.guard';
 import { Roles } from 'src/common/decorators/role.decorator';
 
-// @ApiBearerAuth()
-// @Roles(Role.Admin, Role.SuperAdmin)
-// @UseGuards(AuthGuard, RolesGuard)
+@ApiBearerAuth()
+@Roles(Role.Admin, Role.SuperAdmin)
+@UseGuards(AuthGuard, RolesGuard)
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) { }
@@ -253,8 +253,8 @@ export class AdminController {
     status: 201,
     description: 'Actualizacion exitosa con retorno de datos',
   })
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RolesGuard)
   @HttpCode(200)
   async newAdmin(
     @Param('id') id: string,
@@ -277,8 +277,8 @@ export class AdminController {
     status: 201,
     description: 'Actualizacion exitosa con retorno de datos',
   })
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RolesGuard)
   @HttpCode(200)
   async removeAdmin(
     @Param('id') id: string,
@@ -288,6 +288,18 @@ export class AdminController {
     return commonResponse(
       'Admin destituido',
       removedAdmin,
+    )
+  }
+
+  @Patch('newSuperAdmin/:id')
+  async newSuperAdmin(
+    @Param('id') id: string,
+  ) {
+    const newSuperAdmin = await this.adminService.newAdmin(id, Role.SuperAdmin);
+
+    return commonResponse(
+      'Nuevo admin agregado',
+      newSuperAdmin,
     )
   }
 
@@ -381,8 +393,8 @@ export class AdminController {
     status: 204,
     description: 'Recurso eliminado de forma logica sin retorno de datos',
   })
-  // @Roles(Role.SuperAdmin)
-  // @UseGuards(RolesGuard)
+  @Roles(Role.SuperAdmin)
+  @UseGuards(RolesGuard)
   @HttpCode(204)
   hardDelete(
     @Param('entityType') entityType: EntityName,
